@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { auth, googleProvider, appleProvider } from "../firebase/firebase";
+import { auth, googleProvider } from "../firebase/firebase";
 import { useNavigate } from "react-router-dom";
 import { writeUserData } from "../firebase/firebase";
 import {
@@ -22,13 +22,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const signup = async (
-    email,
-    password,
-    displayName,
-    userType,
-    contactNumber = null
-  ) => {
+  const signup = async (email, password, displayName, contactNumber = null) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -39,7 +33,6 @@ export const AuthProvider = ({ children }) => {
       // Update the user's profile with their name
       await updateProfile(userCredential.user, {
         displayName: displayName,
-        userType: userType,
         contactNumber: contactNumber,
       });
 
@@ -66,7 +59,7 @@ export const AuthProvider = ({ children }) => {
         password
       );
 
-      navigate("/profile");
+      navigate(`/`);
       return userCredential.user;
     } catch (error) {
       throw error;
@@ -85,34 +78,18 @@ export const AuthProvider = ({ children }) => {
   const signInWithGoogle = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
-
       // Write user data to the database
       await writeUserData(
         result.user.uid,
         result.user.displayName,
+        result.user.displayName.split(" ")[0],
+        result.user.displayName.split(" ")[1],
         result.user.email,
         null
       );
-      navigate("/profile");
-      return result.user;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const signInWithApple = async () => {
-    try {
-      const result = await signInWithPopup(auth, appleProvider);
-
-      // Write user data to the database
-      await writeUserData(
-        result.user.uid,
-        result.user.displayName,
-        result.user.email,
-        null
-      );
-
-      navigate("/profile");
+      // Set the current user before navigation
+      setCurrentUser(result.user);
+      navigate("/", { replace: true });
       return result.user;
     } catch (error) {
       throw error;
@@ -134,7 +111,6 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     signInWithGoogle,
-    signInWithApple,
     loading,
   };
 

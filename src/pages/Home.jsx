@@ -1,11 +1,15 @@
-import Hero from "../components/Hero";
-import Feature from "../components/Feature";
+import Hero from "../components/Landing/Hero";
+import Feature from "../components/Landing/Feature";
+import Feature2 from "../components/Landing/Feature2";
 
-export default function Home() {
+const Home = () => {
   return (
-    <>
+    <div>
       <Hero />
       <Feature />
-    </>
+      <Feature2 />
+    </div>
   );
-}
+};
+
+export default Home;

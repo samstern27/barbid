@@ -4,6 +4,7 @@ import Alert from "../UI components/Alert";
 import "../index.css";
 import { auth } from "../firebase/firebase";
 import { writeUserData } from "../firebase/firebase";
+import { NavLink } from "react-router-dom";
 
 const SignUp = () => {
   const firstNameRef = useRef(null);
@@ -12,11 +13,9 @@ const SignUp = () => {
   const numberRef = useRef(null);
   const passwordRef = useRef(null);
   const cpasswordRef = useRef(null);
-  const profileRef = useRef(null);
-  const { signup, signInWithGoogle, signInWithApple, currentUser } = useAuth();
+  const { signup, signInWithGoogle, currentUser } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [userType, setUserType] = useState("jobseeker");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,13 +26,14 @@ const SignUp = () => {
     try {
       setError("");
       setLoading(true);
-      const displayName = `${firstNameRef.current.value} ${lastNameRef.current.value}`;
+      const username = `${firstNameRef.current.value} ${lastNameRef.current.value}`;
 
       await signup(
         emailRef.current.value,
         passwordRef.current.value,
-        displayName,
-        profileRef.current.value,
+        username,
+        firstNameRef.current.value,
+        lastNameRef.current.value,
         numberRef.current.value
       );
     } catch (error) {
@@ -55,21 +55,9 @@ const SignUp = () => {
     }
   };
 
-  const handleAppleSignIn = async () => {
-    try {
-      setError("");
-      setLoading(true);
-      const user = await signInWithApple();
-    } catch (error) {
-      setError(error.message || "Failed to sign in with Apple");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div>
-      <div className="text-center bg-gradient-to-r from-blue-800 to-blue-400 min-h-[180px] sm:p-6 p-4">
+      <div className="text-center bg-gradient-to-r from-red-500 to-red-400 min-h-[180px] sm:p-6 p-4">
         <h4 className="sm:text-3xl text-2xl text-white font-medium mt-3">
           Create your free account
         </h4>
@@ -81,41 +69,7 @@ const SignUp = () => {
           className="max-w-4xl mx-auto bg-white [box-shadow:0_2px_13px_-6px_rgba(0,0,0,0.4)] sm:p-8 p-4 rounded-md"
         >
           {/* User type switch */}
-          <div className="mb-5 text-center">
-            <span className="text-slate-800 text-base font-medium">
-              Please select your role:
-            </span>
-          </div>
-          <div className="mb-8 flex items-center justify-center gap-8">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                ref={profileRef}
-                type="radio"
-                name="userType"
-                value="jobseeker"
-                checked={userType === "jobseeker"}
-                onChange={() => setUserType("jobseeker")}
-                className="accent-blue-600"
-              />
-              <span className="text-slate-800 text-sm font-medium">
-                Looking for a job
-              </span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                ref={profileRef}
-                type="radio"
-                name="userType"
-                value="employer"
-                checked={userType === "employer"}
-                onChange={() => setUserType("employer")}
-                className="accent-blue-600"
-              />
-              <span className="text-slate-800 text-sm font-medium">
-                Employer
-              </span>
-            </label>
-          </div>
+
           <div className="grid sm:grid-cols-2 gap-8">
             <div>
               <label
@@ -128,7 +82,7 @@ const SignUp = () => {
                 id="name"
                 name="name"
                 type="text"
-                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-blue-600 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-red-400 outline-0 transition-all"
                 placeholder="Enter name"
                 required
                 ref={firstNameRef}
@@ -145,7 +99,7 @@ const SignUp = () => {
                 id="lname"
                 name="lname"
                 type="text"
-                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-blue-600 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-red-400 outline-0 transition-all"
                 placeholder="Enter last name"
                 required
                 ref={lastNameRef}
@@ -162,7 +116,7 @@ const SignUp = () => {
                 id="email"
                 name="email"
                 type="email"
-                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-blue-600 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-red-400 outline-0 transition-all"
                 placeholder="Enter email"
                 required
                 ref={emailRef}
@@ -179,7 +133,7 @@ const SignUp = () => {
                 id="number"
                 name="number"
                 type="tel"
-                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-blue-600 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-red-400 outline-0 transition-all"
                 placeholder="Enter mobile number"
                 ref={numberRef}
               />
@@ -195,7 +149,7 @@ const SignUp = () => {
                 id="password"
                 name="password"
                 type="password"
-                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-blue-600 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-red-400 outline-0 transition-all"
                 placeholder="Enter password"
                 required
                 ref={passwordRef}
@@ -212,7 +166,7 @@ const SignUp = () => {
                 id="cpassword"
                 name="cpassword"
                 type="password"
-                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-blue-600 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-red-400 outline-0 transition-all"
                 placeholder="Enter confirm password"
                 required
                 ref={cpasswordRef}
@@ -223,7 +177,7 @@ const SignUp = () => {
             <button
               type="submit"
               disabled={loading}
-              className="py-2.5 px-5 text-sm font-medium tracking-wider rounded-md cursor-pointer text-white bg-blue-600 hover:bg-blue-700 focus:outline-0 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="py-2.5 px-5 text-sm font-medium tracking-wider rounded-md cursor-pointer text-white bg-red-400 hover:bg-red-500 focus:outline-0 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Creating account..." : "Sign up"}
             </button>
@@ -231,7 +185,7 @@ const SignUp = () => {
           <div className="my-6 flex items-center before:mt-0.5 before:flex-1 before:border-t before:border-neutral-300 after:mt-0.5 after:flex-1 after:border-t after:border-neutral-300">
             <p className="mx-4 text-center text-slate-500">Or</p>
           </div>
-          <div className="grid sm:grid-cols-2 gap-6">
+          <div className="grid sm:grid-cols-1 gap-6">
             <button
               type="button"
               onClick={handleGoogleSignIn}
@@ -278,37 +232,17 @@ const SignUp = () => {
               </svg>
               Continue with Google
             </button>
-            <button
-              type="button"
-              onClick={handleAppleSignIn}
-              disabled={loading}
-              className="w-full px-4 py-2.5 flex items-center justify-center rounded-md text-white text-sm font-medium tracking-wider cursor-pointer border-0 outline-0 bg-slate-800 hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="22px"
-                fill="#fff"
-                className="inline shrink-0 mr-4"
-                viewBox="0 0 22.773 22.773"
-              >
-                <path
-                  d="M15.769 0h.162c.13 1.606-.483 2.806-1.228 3.675-.731.863-1.732 1.7-3.351 1.573-.108-1.583.506-2.694 1.25-3.561C13.292.879 14.557.16 15.769 0zm4.901 16.716v.045c-.455 1.378-1.104 2.559-1.896 3.655-.723.995-1.609 2.334-3.191 2.334-1.367 0-2.275-.879-3.676-.903-1.482-.024-2.297.735-3.652.926h-.462c-.995-.144-1.798-.932-2.383-1.642-1.725-2.098-3.058-4.808-3.306-8.276v-1.019c.105-2.482 1.311-4.5 2.914-5.478.846-.52 2.009-.963 3.304-.765.555.086 1.122.276 1.619.464.471.181 1.06.502 1.618.485.378-.011.754-.208 1.135-.347 1.116-.403 2.21-.865 3.652-.648 1.733.262 2.963 1.032 3.723 2.22-1.466.933-2.625 2.339-2.427 4.74.176 2.181 1.444 3.457 3.028 4.209z"
-                  data-original="#000000"
-                />
-              </svg>
-              Continue with Apple
-            </button>
           </div>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-slate-600">
               Already have an account?{" "}
-              <a
-                href="/login"
-                className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              <NavLink
+                to="/login"
+                className="text-red-400 hover:text-red-500 font-medium transition-colors"
               >
                 Log in
-              </a>
+              </NavLink>
             </p>
           </div>
           {error && <Alert type="danger" message={error} />}

@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, OAuthProvider } from "firebase/auth";
 import { getDatabase, ref, set } from "firebase/database";
+import profilePicture from "../assets/user.png";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -18,22 +19,26 @@ export const auth = getAuth(app);
 // Write user data to the database
 export const writeUserData = async (
   userId,
-  name,
+  username,
+  firstName,
+  lastName,
   email,
   mobileNumber = null
 ) => {
   const db = getDatabase();
   const reference = ref(db, "users/" + userId);
   await set(reference, {
-    username: name,
+    username: username,
+    firstName: firstName,
+    lastName: lastName,
     email: email,
     mobile: mobileNumber,
     lastLogin: new Date().toISOString(),
+    profilePicture: profilePicture,
   });
 };
 
 // Initialize providers
 export const googleProvider = new GoogleAuthProvider();
-export const appleProvider = new OAuthProvider("apple.com");
 
 export default app;
