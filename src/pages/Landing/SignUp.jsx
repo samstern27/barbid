@@ -1,9 +1,9 @@
 import React, { useRef, useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import Alert from "../UI components/Alert";
-import "../index.css";
-import { auth } from "../firebase/firebase";
-import { writeUserData } from "../firebase/firebase";
+import { useAuth } from "../../contexts/AuthContext";
+import Alert from "../../UI components/Alert";
+import "../../index.css";
+import { auth } from "../../firebase/firebase";
+import { writeUserData } from "../../firebase/firebase";
 import { NavLink } from "react-router-dom";
 
 const SignUp = () => {
@@ -26,15 +26,13 @@ const SignUp = () => {
     try {
       setError("");
       setLoading(true);
-      const username = `${firstNameRef.current.value} ${lastNameRef.current.value}`;
+      const displayName = `${firstNameRef.current.value} ${lastNameRef.current.value}`;
 
       await signup(
         emailRef.current.value,
         passwordRef.current.value,
-        username,
-        firstNameRef.current.value,
-        lastNameRef.current.value,
-        numberRef.current.value
+        displayName,
+        numberRef.current.value || null
       );
     } catch (error) {
       setError(error.message || "Failed to create account");
@@ -55,9 +53,21 @@ const SignUp = () => {
     }
   };
 
+  const handleAppleSignIn = async () => {
+    try {
+      setError("");
+      setLoading(true);
+      const user = await signInWithApple();
+    } catch (error) {
+      setError(error.message || "Failed to sign in with Apple");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
-      <div className="text-center bg-gradient-to-r from-red-500 to-red-400 min-h-[180px] sm:p-6 p-4">
+      <div className="text-center bg-gradient-to-r from-red-400 to-red-400 min-h-[180px] sm:p-6 p-4">
         <h4 className="sm:text-3xl text-2xl text-white font-medium mt-3">
           Create your free account
         </h4>
@@ -149,7 +159,7 @@ const SignUp = () => {
                 id="password"
                 name="password"
                 type="password"
-                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-red-400 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-red"
                 placeholder="Enter password"
                 required
                 ref={passwordRef}

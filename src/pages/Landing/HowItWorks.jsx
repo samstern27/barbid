@@ -1,8 +1,8 @@
-import pintPour from "../assets/images/pint-pour.jpg";
-import cocktailBartender from "../assets/images/cocktail-bartender.jpg";
-import coffeeStaff from "../assets/images/staff-holding-handle.jpg";
-import waiterTable from "../assets/images/waiter-at-table.jpg";
-import "../index.css";
+import pintPour from "../../assets/images/pint-pour.jpg";
+import cocktailBartender from "../../assets/images/cocktail-bartender.jpg";
+import coffeeStaff from "../../assets/images/staff-holding-handle.jpg";
+import waiterTable from "../../assets/images/waiter-at-table.jpg";
+import "../../index.css";
 
 const HowItWorks = () => {
   return (

@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import loginBarImage from "../assets/images/bar-glow.jpg";
-import pintPour from "../assets/images/pint-pour-3.jpg";
+import { useAuth } from "../../contexts/AuthContext";
+import loginBarImage from "../../assets/images/bar-glow.jpg";
+import pintPour from "../../assets/images/pint-pour-3.jpg";
 import { NavLink, useNavigate } from "react-router-dom";
 
 const Login = () => {

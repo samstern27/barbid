@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, OAuthProvider } from "firebase/auth";
-import { getDatabase, ref, set } from "firebase/database";
+import { getDatabase, ref, set, update } from "firebase/database";
+import { getStorage, ref as storageRef, uploadBytes } from "firebase/storage";
 import profilePicture from "../assets/user.png";
 
 const firebaseConfig = {
@@ -14,6 +15,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+export const storage = getStorage(app);
 export const auth = getAuth(app);
 
 // Write user data to the database
@@ -26,8 +28,14 @@ export const writeUserData = async (
   mobileNumber = null
 ) => {
   const db = getDatabase();
-  const reference = ref(db, "users/" + userId);
-  await set(reference, {
+
+  // Write username mapping first
+  const usernameRef = ref(db, "usernames/" + username);
+  await set(usernameRef, userId);
+
+  // Then write user data
+  const userRef = ref(db, "users/" + userId);
+  await set(userRef, {
     username: username,
     firstName: firstName,
     lastName: lastName,

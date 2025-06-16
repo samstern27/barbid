@@ -3,13 +3,12 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 // Landing Pages
 import LandingLayout from "./components/Landing/LandingLayout";
-import Home from "./pages/Home";
-import HowItWorks from "./pages/HowItWorks";
-
-import Contact from "./pages/Contact";
-import Login from "./pages/Login";
-import SignUp from "./pages/SignUp";
-import FAQ from "./pages/FAQ";
+import Home from "./pages/Landing/Home";
+import HowItWorks from "./pages/Landing/HowItWorks";
+import Contact from "./pages/Landing/Contact";
+import Login from "./pages/Landing/Login";
+import SignUp from "./pages/Landing/SignUp";
+import FAQ from "./pages/Landing/FAQ";
 
 // User Pages
 import UserLayout from "./components/User/UserLayout";

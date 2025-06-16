@@ -37,18 +37,18 @@ const Feature2 = () => {
               <h2 className="text-base/7 font-semibold text-white">
                 Hire faster
               </h2>
-              <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">
+              <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-white sm:text-5xl">
                 A smarter way to fill your rota gaps
               </p>
-              <p className="mt-6 text-lg/8 text-black">
+              <p className="mt-6 text-lg/8 text-white">
                 Stop stressing over last-minute cancellations or patchy
                 staffing. Barbid makes it easy to find reliable bar staff who
                 are ready to jump in — fast.
               </p>
-              <dl className="mt-10 max-w-xl space-y-8 text-base/7 text-black lg:max-w-none">
+              <dl className="mt-10 max-w-xl space-y-8 text-base/7 text-white lg:max-w-none">
                 {features.map((feature) => (
                   <div key={feature.name} className="relative pl-9">
-                    <dt className="inline font-semibold text-gray-900">
+                    <dt className="inline font-semibold text-white">
                       <feature.icon
                         aria-hidden="true"
                         className="absolute top-1 left-1 size-5 text-white"

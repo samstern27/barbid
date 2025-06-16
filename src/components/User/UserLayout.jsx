@@ -43,6 +43,7 @@ export default function UserLayout() {
     onValue(reference, (snapshot) => {
       const data = snapshot.val();
       setUserData(data);
+      console.log(data);
     });
   }, [currentUser]);
   const navigation = [
@@ -355,7 +356,7 @@ export default function UserLayout() {
                     <img
                       alt={userData?.username}
                       src={userData?.profilePicture}
-                      className="size-8 rounded-full bg-white"
+                      className="size-8 rounded-full bg-white object-cover"
                     />
                     <span className="hidden lg:flex lg:items-center">
                       <span
@@ -376,7 +377,7 @@ export default function UserLayout() {
                   >
                     <MenuItem>
                       <NavLink
-                        to={"/profile/" + currentUser?.uid}
+                        to={"/profile/" + userData?.username}
                         aria-label="Your profile"
                         className="block px-3 py-1 text-sm/6 text-gray-900 data-focus:bg-red-50 data-focus:outline-hidden"
                       >
