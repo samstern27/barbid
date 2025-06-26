@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "../../contexts/AuthContext";
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getDatabase, ref, onValue } from "firebase/database";
 import {
@@ -36,6 +36,11 @@ export default function UserLayout() {
   const { currentUser, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userData, setUserData] = useState(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   useEffect(() => {
     const db = getDatabase();
@@ -43,7 +48,6 @@ export default function UserLayout() {
     onValue(reference, (snapshot) => {
       const data = snapshot.val();
       setUserData(data);
-      console.log(data);
     });
   }, [currentUser]);
   const navigation = [
@@ -81,14 +85,6 @@ export default function UserLayout() {
 
   return (
     <>
-      {/*
-        This example requires updating your template:
-
-        ```
-        <html class="h-full bg-white">
-        <body class="h-full">
-        ```
-      */}
       <div>
         <Dialog
           open={sidebarOpen}
@@ -97,7 +93,7 @@ export default function UserLayout() {
         >
           <DialogBackdrop
             transition
-            className="fixed inset-0 bg-gray-900/80 transition-opacity duration-300 ease-linear data-closed:opacity-0"
+            className="fixed inset-0 bg-gray-900/50 transition-opacity duration-300 ease-linear data-closed:opacity-0"
           />
 
           <div className="fixed inset-0 flex">
@@ -123,7 +119,7 @@ export default function UserLayout() {
               </TransitionChild>
 
               {/* Mobile Sidebar */}
-              <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-4 ring-1 ring-white/10">
+              <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-950 px-6 pb-4 ring-1 ring-white/10">
                 <div className="flex h-16 shrink-0 items-center">
                   <h1 className="text-2xl font-medium text-red-400 tracking-widest">
                     barbid
@@ -214,7 +210,7 @@ export default function UserLayout() {
 
         {/* Desktop Sidebar */}
         <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-4">
+          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-950 px-6 pb-4">
             <div className="flex h-16 shrink-0 items-center">
               <span className="sr-only">barbid</span>
               <h1 className="text-2xl font-medium text-red-400 tracking-widest">
@@ -354,8 +350,8 @@ export default function UserLayout() {
                   <MenuButton className="-m-1.5 flex items-center p-1.5 focus:outline-red-400">
                     <span className="sr-only">Open user menu</span>
                     <img
-                      alt={userData?.username}
-                      src={userData?.profilePicture}
+                      alt={userData?.profile?.username}
+                      src={userData?.profile?.profilePicture}
                       className="size-8 rounded-full bg-white object-cover"
                     />
                     <span className="hidden lg:flex lg:items-center">
@@ -363,7 +359,7 @@ export default function UserLayout() {
                         aria-hidden="true"
                         className="ml-4 text-sm/6 font-semibold text-gray-900"
                       >
-                        {userData?.username}
+                        {userData?.profile?.username}
                       </span>
                       <ChevronDownIcon
                         aria-hidden="true"
@@ -377,7 +373,7 @@ export default function UserLayout() {
                   >
                     <MenuItem>
                       <NavLink
-                        to={"/profile/" + userData?.username}
+                        to={"/profile/" + userData?.profile?.username}
                         aria-label="Your profile"
                         className="block px-3 py-1 text-sm/6 text-gray-900 data-focus:bg-red-50 data-focus:outline-hidden"
                       >
@@ -399,8 +395,8 @@ export default function UserLayout() {
             </div>
           </div>
 
-          <main className="py-10">
-            <div className="px-4 sm:px-6 lg:px-8">
+          <main className="py-0">
+            <div className="px-0 sm:px-0 lg:px-0">
               <Outlet />
             </div>
           </main>

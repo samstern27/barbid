@@ -9,9 +9,12 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
+  fetchSignInMethodsForEmail,
+  linkWithPopup,
 } from "firebase/auth";
 import { generateUsername } from "../utils/usernameCheck";
 import { usernameCheck } from "../utils/usernameCheck";
+import { getDatabase, ref, get } from "firebase/database";
 
 const AuthContext = createContext();
 
@@ -102,56 +105,48 @@ export const AuthProvider = ({ children }) => {
   const signInWithGoogle = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
+      const db = getDatabase();
+      const userRef = ref(db, "users/" + result.user.uid);
+      const snapshot = await get(userRef);
 
-      // Log the Google user data
-      console.log("Google User Data:", {
-        displayName: result.user.displayName,
-        email: result.user.email,
-        firstName: result.user.displayName?.split(" ")[0],
-        lastName: result.user.displayName?.split(" ")[1] || "",
-      });
-
-      // Generate a URL-safe username
-      let username = generateUsername(result.user.displayName);
-      console.log("Generated base username:", username);
-
-      let counter = 1;
-      let isAvailable = false;
-
-      // Keep trying until we find an available username
-      while (!isAvailable) {
-        try {
-          isAvailable = !(await usernameCheck(username));
-          if (!isAvailable) {
-            username = `${generateUsername(result.user.displayName)}${counter}`;
-            console.log("Trying username:", username);
-            counter++;
+      if (!snapshot.exists()) {
+        // Only create username and write user data if user is new
+        let username = generateUsername(result.user.displayName);
+        let counter = 1;
+        let isAvailable = false;
+        while (!isAvailable) {
+          try {
+            isAvailable = !(await usernameCheck(username));
+            if (!isAvailable) {
+              username = `${generateUsername(
+                result.user.displayName
+              )}${counter}`;
+              counter++;
+            }
+          } catch (error) {
+            console.error("Error checking username:", error);
+            isAvailable = true;
           }
-        } catch (error) {
-          console.error("Error checking username:", error);
-          // If there's an error checking the username, assume it's available
-          isAvailable = true;
         }
+        await writeUserData(
+          result.user.uid,
+          username,
+          result.user.displayName?.split(" ")[0] || "",
+          result.user.displayName?.split(" ")[1] || "",
+          result.user.email,
+          null
+        );
       }
-
-      console.log("Final username to be used:", username);
-
-      // Write user data to the database
-      await writeUserData(
-        result.user.uid,
-        username,
-        result.user.displayName?.split(" ")[0] || "",
-        result.user.displayName?.split(" ")[1] || "",
-        result.user.email,
-        null
-      );
-
-      // Set the current user before navigation
       setCurrentUser(result.user);
       navigate("/", { replace: true });
       return result.user;
     } catch (error) {
       console.error("Google sign-in error:", error);
+      if (error.message.includes("already exists")) {
+        throw new Error(
+          "This email is already registered. Please sign in with your original method."
+        );
+      }
       throw error;
     }
   };

@@ -2,10 +2,23 @@
 import userPhoto from "../../assets/user.png";
 import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import { useAuth } from "../../contexts/AuthContext";
-import { getDatabase, ref, onValue, update, set } from "firebase/database";
+import {
+  getDatabase,
+  ref,
+  onValue,
+  update,
+  set,
+  get,
+  remove,
+} from "firebase/database";
+import { deleteAllUserData } from "../../firebase/firebase";
 import { useState, useEffect } from "react";
-import { generateUsername } from "../../utils/usernameCheck";
-import { usernameCheck } from "../../utils/usernameCheck";
+import { useNavigate } from "react-router-dom";
+import {
+  generateUsername,
+  usernameCheck,
+  validateUsername,
+} from "../../utils/usernameCheck";
 import {
   uploadFileToStorage,
   deleteFileByUrl,
@@ -13,6 +26,13 @@ import {
 } from "../../services/storageService";
 import { getFileNameFromStoragePath } from "../../utils/fileHelpers";
 import UploadAlert from "../../components/User/UserSettings/UploadAlert";
+import {
+  Dialog,
+  DialogBackdrop,
+  DialogPanel,
+  DialogTitle,
+} from "@headlessui/react";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 import {
   Label,
@@ -52,7 +72,34 @@ const occupations = [
   { id: 26, name: "Other" },
   { id: 27, name: "Unemployed" },
 ];
+
+const themes = [
+  { id: 1, color: "amber", name: "Amber" },
+  { id: 2, color: "blue", name: "Blue" },
+  { id: 3, color: "cyan", name: "Cyan" },
+  { id: 4, color: "emerald", name: "Emerald" },
+  { id: 5, color: "fuchsia", name: "Fuchsia" },
+  { id: 6, color: "gray", name: "Gray" },
+  { id: 7, color: "green", name: "Green" },
+  { id: 8, color: "indigo", name: "Indigo" },
+  { id: 9, color: "lime", name: "Lime" },
+  { id: 10, color: "neutral", name: "Neutral" },
+  { id: 11, color: "orange", name: "Orange" },
+  { id: 12, color: "pink", name: "Pink" },
+  { id: 13, color: "purple", name: "Purple" },
+  { id: 14, color: "red", name: "Red" },
+  { id: 15, color: "rose", name: "Rose" },
+  { id: 16, color: "sky", name: "Sky" },
+  { id: 17, color: "slate", name: "Slate" },
+  { id: 18, color: "stone", name: "Stone" },
+  { id: 19, color: "teal", name: "Teal" },
+  { id: 20, color: "violet", name: "Violet" },
+  { id: 21, color: "yellow", name: "Yellow" },
+  { id: 22, color: "zinc", name: "Zinc" },
+];
+
 export default function UserSettings() {
+  const navigate = useNavigate();
   // Get the current user from AuthContext
   const { currentUser } = useAuth();
   // State for loading, error, and success messages
@@ -62,14 +109,23 @@ export default function UserSettings() {
   // Store the original data for reset functionality
   const [originalData, setOriginalData] = useState(null);
   const [selectedOccupation, setSelectedOccupation] = useState(null);
+  const [selectedTheme, setSelectedTheme] = useState(themes[0]);
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
   // Form state for all user fields
-  const [formData, setFormData] = useState({
+  const [profileFormData, setProfileFormData] = useState({
     username: "",
-    about: "",
-    profilePicture: "",
-    coverPhoto: "",
     firstName: "",
     lastName: "",
+    about: "",
+    occupation: "",
+    skills: [],
+    profilePicture: "",
+    avatar: "",
+    theme: "",
+    coverPhoto: "",
+  });
+
+  const [personalFormData, setPersonalFormData] = useState({
     email: "",
     mobile: "",
     country: "United Kingdom",
@@ -77,9 +133,11 @@ export default function UserSettings() {
     city: "",
     county: "",
     postalCode: "",
+  });
+
+  const [notificationsFormData, setNotificationsFormData] = useState({
     jobAlertsTurnedOn: true,
     applicationAlertsTurnedOn: true,
-    skills: [],
   });
 
   // Add state for new skill input
@@ -87,52 +145,77 @@ export default function UserSettings() {
 
   // Load user data from the database when the component mounts or user changes
   useEffect(() => {
+    if (!currentUser) return;
     const db = getDatabase();
-    const reference = ref(db, "users/" + currentUser?.uid);
-    // Listen for changes to the user's data
-    onValue(reference, (snapshot) => {
+    const profileRef = ref(db, "users/" + currentUser.uid + "/profile");
+    const personalRef = ref(db, "users/" + currentUser.uid + "/personal");
+    const notificationsRef = ref(
+      db,
+      "users/" + currentUser.uid + "/notifications"
+    );
+
+    // Load profile
+    get(profileRef).then((snapshot) => {
       const data = snapshot.val();
       if (data) {
-        // Merge loaded data with default form state
-        const formattedData = {
-          ...formData,
-          ...data,
-          // Ensure boolean values are properly set
-          jobAlertsTurnedOn: data.jobAlertsTurnedOn ?? true,
-          applicationAlertsTurnedOn: data.applicationAlertsTurnedOn ?? true,
-        };
-        setFormData(formattedData);
-        setOriginalData(formattedData);
-        // Set the selected occupation if it exists in the data
+        setProfileFormData((prev) => ({ ...prev, ...data }));
+        setOriginalData(data);
         if (data.occupation) {
           const matchingOccupation = occupations.find(
             (occ) => occ.name === data.occupation
           );
           setSelectedOccupation(matchingOccupation || null);
         }
+        // Set selectedTheme based on the theme value from the database
+        if (data.theme) {
+          const matchingTheme = themes.find((t) => t.color === data.theme);
+          setSelectedTheme(matchingTheme || themes[0]);
+        }
       }
+    });
+    // Load personal
+    get(personalRef).then((snapshot) => {
+      const data = snapshot.val();
+      if (data) setPersonalFormData((prev) => ({ ...prev, ...data }));
+    });
+    // Load notifications
+    get(notificationsRef).then((snapshot) => {
+      const data = snapshot.val();
+      if (data) setNotificationsFormData((prev) => ({ ...prev, ...data }));
     });
   }, [currentUser]);
 
-  // Handle changes to form inputs (including file inputs)
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    // For file inputs, store the File object
+  // Handle changes to profile form inputs
+  const handleProfileChange = (e) => {
+    const { name, value, type, checked, files } = e.target;
     if (name === "profilePicture" || name === "coverPhoto") {
-      setFormData((prev) => ({ ...prev, [name]: e.target.files[0] }));
+      setProfileFormData((prev) => ({ ...prev, [name]: files[0] }));
     } else {
-      setFormData((prev) => ({
+      setProfileFormData((prev) => ({
         ...prev,
         [name]: type === "checkbox" ? checked : value,
       }));
     }
   };
+  // Handle changes to personal form inputs
+  const handlePersonalChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setPersonalFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+  // Handle changes to notifications form inputs
+  const handleNotificationsChange = (e) => {
+    const { name, checked } = e.target;
+    setNotificationsFormData((prev) => ({ ...prev, [name]: checked }));
+  };
 
   // Handle adding a new skill
   const handleAddSkill = (e) => {
     e.preventDefault();
-    if (newSkill.trim() && !formData.skills.includes(newSkill.trim())) {
-      setFormData((prev) => ({
+    if (newSkill.trim() && !profileFormData.skills.includes(newSkill.trim())) {
+      setProfileFormData((prev) => ({
         ...prev,
         skills: [...prev.skills, newSkill.trim()],
       }));
@@ -142,7 +225,7 @@ export default function UserSettings() {
 
   // Handle removing a skill
   const handleRemoveSkill = (skillToRemove) => {
-    setFormData((prev) => ({
+    setProfileFormData((prev) => ({
       ...prev,
       skills: prev.skills.filter((skill) => skill !== skillToRemove),
     }));
@@ -164,79 +247,77 @@ export default function UserSettings() {
     setSuccess("");
 
     try {
-      const db = getDatabase();
-      const userRef = ref(db, "users/" + currentUser.uid);
-      let usernameChanged = formData.username !== originalData.username;
-      let newProfilePictureURL = formData.profilePicture;
-      let newCoverPhotoURL = formData.coverPhoto;
+      // Username validation using utils
+      const validation = validateUsername(profileFormData.username);
+      if (!validation.valid) {
+        setError(validation.error);
+        setLoading(false);
+        return;
+      }
 
-      // --- USERNAME CHANGE LOGIC ---
+      const db = getDatabase();
+      const userProfileRef = ref(db, "users/" + currentUser.uid + "/profile");
+
+      // Check if username has changed
+      const profileSnapshot = await get(userProfileRef);
+      const currentProfile = profileSnapshot.val();
+      const usernameChanged =
+        currentProfile?.username !== profileFormData.username;
+
+      // If username changed, check if new username is available
       if (usernameChanged) {
-        const isTaken = await usernameCheck(formData.username);
-        if (isTaken) {
-          setError("That username is already taken. Please choose another.");
+        const isUsernameTaken = await usernameCheck(profileFormData.username);
+        if (isUsernameTaken) {
+          setError("This username is already taken");
           setLoading(false);
           return;
         }
-        if (originalData.username) {
-          const oldUsernameRef = ref(db, "usernames/" + originalData.username);
-          await set(oldUsernameRef, null);
-        }
-        const newUsernameRef = ref(db, "usernames/" + formData.username);
-        await set(newUsernameRef, currentUser.uid);
+
+        // Update username mapping
+        const oldUsernameRef = ref(db, `usernames/${currentProfile.username}`);
+        const newUsernameRef = ref(db, `usernames/${profileFormData.username}`);
+
+        // Remove old username mapping and add new one
+        await Promise.all([
+          remove(oldUsernameRef),
+          set(newUsernameRef, currentUser.uid),
+        ]);
       }
 
+      let newProfilePictureURL = profileFormData.profilePicture;
+      let newCoverPhotoURL = profileFormData.coverPhoto;
+
       // --- PROFILE PICTURE UPLOAD/UPDATE LOGIC ---
-      if (formData.profilePicture && formData.profilePicture instanceof File) {
-        if (
-          originalData.profilePicture &&
-          typeof originalData.profilePicture === "string" &&
-          originalData.profilePicture.startsWith("https://")
-        ) {
-          await deleteFileByUrl(originalData.profilePicture);
-        }
+      if (
+        profileFormData.profilePicture &&
+        profileFormData.profilePicture instanceof File
+      ) {
         newProfilePictureURL = await uploadFileToStorage(
-          `users/${currentUser.uid}/profile/${formData.profilePicture.name}`,
-          formData.profilePicture
+          `users/${currentUser.uid}/profile/${profileFormData.profilePicture.name}`,
+          profileFormData.profilePicture
         );
       }
 
       // --- COVER PHOTO UPLOAD/UPDATE LOGIC ---
-      if (formData.coverPhoto && formData.coverPhoto instanceof File) {
-        if (
-          originalData.coverPhoto &&
-          typeof originalData.coverPhoto === "string" &&
-          originalData.coverPhoto.startsWith("https://")
-        ) {
-          await deleteFileByUrl(originalData.coverPhoto);
-        }
+      if (
+        profileFormData.coverPhoto &&
+        profileFormData.coverPhoto instanceof File
+      ) {
         newCoverPhotoURL = await uploadFileToStorage(
-          `users/${currentUser.uid}/cover/${formData.coverPhoto.name}`,
-          formData.coverPhoto
+          `users/${currentUser.uid}/cover/${profileFormData.coverPhoto.name}`,
+          profileFormData.coverPhoto
         );
       }
 
-      // --- UPDATE USER DATA IN DATABASE ---
-      await update(userRef, {
-        username: formData.username,
-        about: formData.about,
+      await update(userProfileRef, {
+        ...profileFormData,
+        occupation: selectedOccupation?.name || profileFormData.occupation,
         profilePicture: newProfilePictureURL,
         coverPhoto: newCoverPhotoURL,
-        occupation: selectedOccupation?.name || null,
-        skills: formData.skills,
-        mobile: formData.mobile,
+        theme: selectedTheme.color,
         lastUpdated: new Date().toISOString(),
       });
-      setOriginalData({
-        ...originalData,
-        username: formData.username,
-        about: formData.about,
-        profilePicture: newProfilePictureURL,
-        coverPhoto: newCoverPhotoURL,
-        occupation: selectedOccupation?.name || null,
-        skills: formData.skills,
-        mobile: formData.mobile,
-      });
+
       setSuccess("Profile settings updated successfully!");
     } catch (error) {
       setError(error.message || "Failed to update profile settings");
@@ -245,17 +326,65 @@ export default function UserSettings() {
     }
   };
 
+  // Handle personal section submission
+  const handlePersonalSubmit = async () => {
+    setLoading(true);
+    setError("");
+    setSuccess("");
+    try {
+      const db = getDatabase();
+      const userPersonalRef = ref(db, "users/" + currentUser.uid + "/personal");
+      await update(userPersonalRef, {
+        ...personalFormData,
+        lastUpdated: new Date().toISOString(),
+      });
+      setSuccess("Personal information updated successfully!");
+    } catch (error) {
+      setError(error.message || "Failed to update personal information");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle notifications section submission
+  const handleNotificationsSubmit = async () => {
+    setLoading(true);
+    setError("");
+    setSuccess("");
+    try {
+      const db = getDatabase();
+      const userNotificationsRef = ref(
+        db,
+        "users/" + currentUser.uid + "/notifications"
+      );
+      await update(userNotificationsRef, {
+        ...notificationsFormData,
+        lastUpdated: new Date().toISOString(),
+      });
+      setSuccess("Notification settings updated successfully!");
+    } catch (error) {
+      setError(error.message || "Failed to update notification settings");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Reset profile section
   const handleProfileReset = () => {
     if (originalData) {
-      setFormData({
-        ...formData,
+      setProfileFormData({
+        ...profileFormData,
         ...originalData,
         username: originalData.username,
         about: originalData.about,
         profilePicture: originalData.profilePicture,
         coverPhoto: originalData.coverPhoto,
+        occupation: originalData.occupation,
         skills: originalData.skills,
+        avatar: originalData.avatar,
+        theme: originalData.theme,
+        firstName: originalData.firstName,
+        lastName: originalData.lastName,
       });
       // Reset the selected occupation
       if (originalData.occupation) {
@@ -272,7 +401,12 @@ export default function UserSettings() {
   };
 
   return (
-    <div className="divide-y divide-gray-900/10">
+    <div className=" my-10 mx-10">
+      <div className="min-w-0 flex-1">
+        <h2 className="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight mb-10">
+          Settings
+        </h2>
+      </div>
       <div className="grid grid-cols-1 gap-x-8 gap-y-8 py-10 md:grid-cols-3">
         <div className="px-4 sm:px-0">
           <h2 className="text-base/7 font-semibold text-gray-900">Profile</h2>
@@ -294,7 +428,10 @@ export default function UserSettings() {
                   htmlFor="username"
                   className="block text-sm/6 font-medium text-gray-900"
                 >
-                  Username
+                  Username{" "}
+                  <span className="text-xs text-gray-500">
+                    (we recommend using a nickname!)
+                  </span>
                 </label>
                 <div className="mt-2">
                   <div className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
@@ -305,9 +442,9 @@ export default function UserSettings() {
                       id="username"
                       name="username"
                       type="text"
-                      value={formData.username}
-                      onChange={handleChange}
-                      className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+                      value={profileFormData.username}
+                      onChange={handleProfileChange}
+                      className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6 appearance-none"
                     />
                   </div>
                 </div>
@@ -326,9 +463,9 @@ export default function UserSettings() {
                     id="about"
                     name="about"
                     rows={3}
-                    value={formData.about}
-                    onChange={handleChange}
-                    className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                    value={profileFormData.about}
+                    onChange={handleProfileChange}
+                    className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
                   />
                 </div>
                 <p className="mt-3 text-sm/6 text-gray-600">
@@ -346,7 +483,7 @@ export default function UserSettings() {
                     Occupation
                   </Label>
                   <div className="relative mt-2">
-                    <ListboxButton className="grid w-full cursor-default grid-cols-1 rounded-md bg-white py-1.5 pr-2 pl-3 text-left text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                    <ListboxButton className="grid w-full cursor-default grid-cols-1 rounded-md bg-white py-1.5 pr-2 pl-3 text-left text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none">
                       <span className="col-start-1 row-start-1 truncate pr-6">
                         {selectedOccupation?.name}
                       </span>
@@ -396,7 +533,7 @@ export default function UserSettings() {
                       onChange={(e) => setNewSkill(e.target.value)}
                       onKeyPress={handleKeyPress}
                       placeholder="Add a skill"
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
                     />
                     <button
                       type="button"
@@ -407,7 +544,7 @@ export default function UserSettings() {
                     </button>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {formData.skills.map((skill) => (
+                    {profileFormData.skills.map((skill) => (
                       <span
                         key={skill}
                         className="inline-flex items-center gap-x-0.5 rounded-md bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800"
@@ -439,17 +576,53 @@ export default function UserSettings() {
               {/* Profile picture upload and preview */}
               <div className="col-span-full">
                 <label
+                  htmlFor="avatar"
+                  className="block text-sm/6 font-medium text-gray-900"
+                >
+                  Avatar
+                </label>
+                <div className="mt-2 flex items-center gap-x-3">
+                  <img
+                    src={profileFormData.avatar}
+                    aria-hidden="true"
+                    className="size-12 rounded-full text-gray-300 object-cover"
+                  />
+                  <button
+                    type="button"
+                    className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
+                    onClick={() => {
+                      const randomSeed = Math.random()
+                        .toString(36)
+                        .substring(2, 15);
+                      const randomAvatar = `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${randomSeed}`;
+                      setProfileFormData((prev) => ({
+                        ...prev,
+                        avatar: randomAvatar,
+                      }));
+                    }}
+                  >
+                    Generate avatar
+                  </button>
+                </div>
+              </div>
+
+              {/* Profile picture upload and preview */}
+              <div className="col-span-full">
+                <label
                   htmlFor="profile-picture"
                   className="block text-sm/6 font-medium text-gray-900"
                 >
-                  Profile picture
+                  Profile picture{" "}
+                  <span className="text-xs text-gray-500">
+                    (will only be visable to past employers)
+                  </span>
                 </label>
                 <div className="mt-2 flex items-center gap-x-3">
                   <img
                     src={
-                      formData.profilePicture instanceof File
-                        ? URL.createObjectURL(formData.profilePicture)
-                        : formData.profilePicture || userPhoto
+                      profileFormData.profilePicture instanceof File
+                        ? URL.createObjectURL(profileFormData.profilePicture)
+                        : profileFormData.profilePicture || userPhoto
                     }
                     aria-hidden="true"
                     className="size-12 rounded-full text-gray-300 object-cover"
@@ -460,7 +633,7 @@ export default function UserSettings() {
                     name="profilePicture"
                     type="file"
                     style={{ display: "none" }}
-                    onChange={handleChange}
+                    onChange={handleProfileChange}
                   />
                   {/* Custom button to trigger file input */}
                   <button
@@ -474,7 +647,7 @@ export default function UserSettings() {
                   </button>
                   {/* Show the file name or current photo name */}
                   <span className="text-sm font-medium text-gray-900">
-                    {getFileNameFromStoragePath(formData.profilePicture)}
+                    {getFileNameFromStoragePath(profileFormData.profilePicture)}
                   </span>
                 </div>
               </div>
@@ -491,33 +664,79 @@ export default function UserSettings() {
                   <div className="text-center">
                     <img
                       src={
-                        formData.coverPhoto instanceof File
-                          ? URL.createObjectURL(formData.coverPhoto)
-                          : formData.coverPhoto || userPhoto
+                        profileFormData.coverPhoto instanceof File
+                          ? URL.createObjectURL(profileFormData.coverPhoto)
+                          : profileFormData.coverPhoto || userPhoto
                       }
                       aria-hidden="true"
-                      className="mx-auto size-12 text-gray-300 object-cover"
+                      className="mx-auto h-32 w-full max-w-md rounded-lg object-cover text-gray-300"
                     />
                     <div className="mt-4 flex text-sm/6 text-gray-600">
-                      <label
-                        htmlFor="coverPhotoInput"
+                      <button
+                        type="button"
+                        onClick={() => {
+                          // Generate a random seed for a unique but consistent cover photo
+                          const randomSeed = Math.random()
+                            .toString(36)
+                            .substring(2, 15);
+                          const randomCoverPhoto = `https://picsum.photos/seed/${randomSeed}/1200/300`;
+                          setProfileFormData((prev) => ({
+                            ...prev,
+                            coverPhoto: randomCoverPhoto,
+                          }));
+                        }}
                         className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:outline-hidden hover:text-indigo-500"
                       >
-                        <span>Upload a file</span>
-                        <input
-                          id="coverPhotoInput"
-                          name="coverPhoto"
-                          type="file"
-                          onChange={handleChange}
-                          className="sr-only"
-                        />
-                      </label>
-                      <span className="pl-1" id="coverPhotoFileName">
-                        {getFileNameFromStoragePath(formData.coverPhoto)}
-                      </span>
+                        <span className="text-center">
+                          Generate cover photo
+                        </span>
+                      </button>
                     </div>
                   </div>
                 </div>
+              </div>
+              {/* Theme */}
+              <div className="sm:col-span-4">
+                <Listbox value={selectedTheme} onChange={setSelectedTheme}>
+                  <Label className="block text-sm/6 font-medium text-gray-900">
+                    Profile Theme
+                  </Label>
+                  <div className="relative mt-2">
+                    <ListboxButton className="grid w-full cursor-default grid-cols-1 rounded-md bg-white py-1.5 pr-2 pl-3 text-left text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none">
+                      <span className="col-start-1 row-start-1 truncate pr-6">
+                        {selectedTheme?.color
+                          ? selectedTheme.color.charAt(0).toUpperCase() +
+                            selectedTheme.color.slice(1)
+                          : ""}
+                      </span>
+                      <ChevronUpDownIcon
+                        aria-hidden="true"
+                        className="col-start-1 row-start-1 size-5 self-center justify-self-end text-gray-500 sm:size-4"
+                      />
+                    </ListboxButton>
+
+                    <ListboxOptions
+                      transition
+                      className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-hidden data-leave:transition data-leave:duration-100 data-leave:ease-in data-closed:data-leave:opacity-0 sm:text-sm"
+                    >
+                      {themes.map((theme) => (
+                        <ListboxOption
+                          key={theme.color}
+                          value={theme}
+                          className="group relative cursor-default py-2 pr-9 pl-3 text-gray-900 select-none data-focus:bg-indigo-600 data-focus:text-white data-focus:outline-hidden"
+                        >
+                          <span className="block truncate font-normal group-data-selected:font-semibold">
+                            {theme.color.charAt(0).toUpperCase() +
+                              theme.color.slice(1)}
+                          </span>
+                          <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 group-not-data-selected:hidden group-data-focus:text-white">
+                            <CheckIcon aria-hidden="true" className="size-5" />
+                          </span>
+                        </ListboxOption>
+                      ))}
+                    </ListboxOptions>
+                  </div>
+                </Listbox>
               </div>
             </div>
           </div>
@@ -550,7 +769,8 @@ export default function UserSettings() {
           </h2>
           <p className="mt-1 text-sm/6 text-gray-600">
             This information is private and used for your account and
-            communication.
+            communication. Your first and last name will only be visable to
+            employers you have worked for.
           </p>
         </div>
         <div className="bg-white shadow-xs ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
@@ -569,9 +789,9 @@ export default function UserSettings() {
                   name="firstName"
                   id="firstName"
                   autoComplete="given-name"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  value={profileFormData.firstName}
+                  onChange={handlePersonalChange}
+                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
                 />
               </div>
             </div>
@@ -589,9 +809,9 @@ export default function UserSettings() {
                   name="lastName"
                   id="lastName"
                   autoComplete="family-name"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  value={profileFormData.lastName}
+                  onChange={handlePersonalChange}
+                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
                 />
               </div>
             </div>
@@ -605,7 +825,7 @@ export default function UserSettings() {
               </label>
               <div className="mt-2">
                 <div className="block w-full rounded-md bg-gray-50 px-3 py-1.5 text-base text-gray-900 sm:text-sm/6">
-                  {formData.email}
+                  {personalFormData.email}
                 </div>
                 <p className="mt-2 text-sm text-gray-500">
                   Your email address cannot be changed.
@@ -626,9 +846,9 @@ export default function UserSettings() {
                   name="mobile"
                   id="mobile"
                   autoComplete="tel"
-                  value={formData.mobile}
-                  onChange={handleChange}
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  value={personalFormData.mobile}
+                  onChange={handlePersonalChange}
+                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
                 />
               </div>
             </div>
@@ -641,19 +861,36 @@ export default function UserSettings() {
                 Country
               </label>
               <div className="mt-2">
-                <select
-                  id="country"
-                  name="country"
-                  autoComplete="country-name"
-                  value={formData.country}
-                  onChange={handleChange}
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600 sm:max-w-xs sm:text-sm/6"
-                >
-                  <option>United Kingdom</option>
-                  <option>United States</option>
-                  <option>Canada</option>
-                  <option>Australia</option>
-                </select>
+                <div className="relative">
+                  <select
+                    id="country"
+                    name="country"
+                    autoComplete="country-name"
+                    value={personalFormData.country}
+                    onChange={handlePersonalChange}
+                    className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600 sm:max-w-xs sm:text-sm/6 appearance-none"
+                  >
+                    <option>United Kingdom</option>
+                    <option>United States</option>
+                    <option>Canada</option>
+                    <option>Australia</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                    <svg
+                      className="h-4 w-4 text-gray-400"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                    >
+                      <path
+                        d="M7 8l3 3 3-3"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+                </div>
               </div>
             </div>
             {/* Street Address */}
@@ -670,9 +907,9 @@ export default function UserSettings() {
                   name="streetAddress"
                   id="streetAddress"
                   autoComplete="street-address"
-                  value={formData.streetAddress}
-                  onChange={handleChange}
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  value={personalFormData.streetAddress}
+                  onChange={handlePersonalChange}
+                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
                 />
               </div>
             </div>
@@ -690,9 +927,9 @@ export default function UserSettings() {
                   name="city"
                   id="city"
                   autoComplete="address-level2"
-                  value={formData.city}
-                  onChange={handleChange}
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  value={personalFormData.city}
+                  onChange={handlePersonalChange}
+                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
                 />
               </div>
             </div>
@@ -710,9 +947,9 @@ export default function UserSettings() {
                   name="county"
                   id="county"
                   autoComplete="address-level1"
-                  value={formData.county}
-                  onChange={handleChange}
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  value={personalFormData.county}
+                  onChange={handlePersonalChange}
+                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
                 />
               </div>
             </div>
@@ -730,69 +967,11 @@ export default function UserSettings() {
                   name="postalCode"
                   id="postalCode"
                   autoComplete="postal-code"
-                  value={formData.postalCode}
-                  onChange={handleChange}
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  value={personalFormData.postalCode}
+                  onChange={handlePersonalChange}
+                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
                 />
               </div>
-            </div>
-            {/* Email Notifications */}
-            <div className="col-span-full">
-              <fieldset>
-                <legend className="text-sm/6 font-semibold text-gray-900">
-                  Email Notifications
-                </legend>
-                <div className="mt-6 space-y-6">
-                  <div className="flex gap-3">
-                    <div className="flex h-6 shrink-0 items-center">
-                      <input
-                        id="jobAlertsTurnedOn"
-                        name="jobAlertsTurnedOn"
-                        type="checkbox"
-                        checked={formData.jobAlertsTurnedOn}
-                        onChange={handleChange}
-                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                      />
-                    </div>
-                    <div className="text-sm/6">
-                      <label
-                        htmlFor="jobAlertsTurnedOn"
-                        className="font-medium text-gray-900"
-                      >
-                        Job Alerts
-                      </label>
-                      <p className="text-gray-500">
-                        Get notified about new job opportunities within your
-                        area.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <div className="flex h-6 shrink-0 items-center">
-                      <input
-                        id="applicationAlertsTurnedOn"
-                        name="applicationAlertsTurnedOn"
-                        type="checkbox"
-                        checked={formData.applicationAlertsTurnedOn}
-                        onChange={handleChange}
-                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                      />
-                    </div>
-                    <div className="text-sm/6">
-                      <label
-                        htmlFor="applicationAlertsTurnedOn"
-                        className="font-medium text-gray-900"
-                      >
-                        Application Alerts
-                      </label>
-                      <p className="text-gray-500">
-                        Get notified about your business's applications.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </fieldset>
             </div>
           </div>
 
@@ -802,8 +981,8 @@ export default function UserSettings() {
               type="button"
               onClick={() => {
                 if (originalData) {
-                  setFormData({
-                    ...formData,
+                  setPersonalFormData({
+                    ...personalFormData,
                     firstName: originalData.firstName,
                     lastName: originalData.lastName,
                     email: originalData.email,
@@ -815,7 +994,6 @@ export default function UserSettings() {
                     jobAlertsTurnedOn: originalData.jobAlertsTurnedOn,
                     applicationAlertsTurnedOn:
                       originalData.applicationAlertsTurnedOn,
-                    skills: originalData.skills,
                   });
                   setSuccess("");
                   setError("");
@@ -827,56 +1005,7 @@ export default function UserSettings() {
             </button>
             <button
               type="button"
-              onClick={async () => {
-                setLoading(true);
-                setError("");
-                setSuccess("");
-
-                try {
-                  const db = getDatabase();
-                  const userRef = ref(db, "users/" + currentUser.uid);
-
-                  await update(userRef, {
-                    firstName: formData.firstName,
-                    lastName: formData.lastName,
-                    email: formData.email,
-                    country: formData.country,
-                    streetAddress: formData.streetAddress,
-                    city: formData.city,
-                    county: formData.county,
-                    postalCode: formData.postalCode,
-                    jobAlertsTurnedOn: formData.jobAlertsTurnedOn,
-                    applicationAlertsTurnedOn:
-                      formData.applicationAlertsTurnedOn,
-                    skills: formData.skills,
-                    mobile: formData.mobile,
-                    lastUpdated: new Date().toISOString(),
-                  });
-                  setOriginalData({
-                    ...originalData,
-                    firstName: formData.firstName,
-                    lastName: formData.lastName,
-                    email: formData.email,
-                    country: formData.country,
-                    streetAddress: formData.streetAddress,
-                    city: formData.city,
-                    county: formData.county,
-                    postalCode: formData.postalCode,
-                    jobAlertsTurnedOn: formData.jobAlertsTurnedOn,
-                    applicationAlertsTurnedOn:
-                      formData.applicationAlertsTurnedOn,
-                    skills: formData.skills,
-                    mobile: formData.mobile,
-                  });
-                  setSuccess("Personal information updated successfully!");
-                } catch (error) {
-                  setError(
-                    error.message || "Failed to update personal information"
-                  );
-                } finally {
-                  setLoading(false);
-                }
-              }}
+              onClick={handlePersonalSubmit}
               disabled={loading}
               className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
             >
@@ -884,6 +1013,195 @@ export default function UserSettings() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Notifications Section */}
+      <div className="grid grid-cols-1 gap-x-8 gap-y-8 py-10 md:grid-cols-3">
+        <div className="px-4 sm:px-0">
+          <h2 className="text-base/7 font-semibold text-gray-900">
+            Notification Settings
+          </h2>
+          <p className="mt-1 text-sm/6 text-gray-600">
+            Manage your notification preferences.
+          </p>
+        </div>
+        <div className="bg-white shadow-xs ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
+          <div className="px-4 py-6 sm:p-8 grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+            {/* Job Alerts */}
+            <div className="col-span-full">
+              <fieldset>
+                <legend className="text-sm/6 font-semibold text-gray-900">
+                  Job Alerts
+                </legend>
+                <div className="mt-6 space-y-6">
+                  <div className="flex gap-3">
+                    <div className="flex h-6 shrink-0 items-center">
+                      <input
+                        id="jobAlertsTurnedOn"
+                        name="jobAlertsTurnedOn"
+                        type="checkbox"
+                        checked={notificationsFormData.jobAlertsTurnedOn}
+                        onChange={handleNotificationsChange}
+                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                      />
+                    </div>
+                    <div className="text-sm/6">
+                      <label
+                        htmlFor="jobAlertsTurnedOn"
+                        className="font-medium text-gray-900"
+                      >
+                        Get notified about new job opportunities within your
+                        field of work and location.
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+            {/* Application Alerts */}
+            <div className="col-span-full">
+              <fieldset>
+                <legend className="text-sm/6 font-semibold text-gray-900">
+                  Application Alerts
+                </legend>
+                <div className="mt-6 space-y-6">
+                  <div className="flex gap-3">
+                    <div className="flex h-6 shrink-0 items-center">
+                      <input
+                        id="applicationAlertsTurnedOn"
+                        name="applicationAlertsTurnedOn"
+                        type="checkbox"
+                        checked={
+                          notificationsFormData.applicationAlertsTurnedOn
+                        }
+                        onChange={handleNotificationsChange}
+                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                      />
+                    </div>
+                    <div className="text-sm/6">
+                      <label
+                        htmlFor="applicationAlertsTurnedOn"
+                        className="font-medium text-gray-900"
+                      >
+                        Get notified when people apply to your job postings.
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+
+          {/* Notifications section action buttons */}
+          <div className="flex items-center justify-end gap-x-6 border-t border-gray-900/10 px-4 py-4 sm:px-8">
+            <button
+              type="button"
+              onClick={handleNotificationsSubmit}
+              disabled={loading}
+              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+            >
+              {loading ? "Saving..." : "Save Notification Settings"}
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="bg-white mt-5 mb-5">
+        <div className="py-0 sm:p-0">
+          <div className="sm:flex sm:items-start sm:justify-between">
+            <div>
+              <h3 className="text-base font-semibold text-gray-900">
+                Delete Account
+              </h3>
+              <div className="mt-2 max-w-xl text-sm text-gray-500">
+                <p>
+                  Permanently delete your account and personal data. We reserve
+                  the right to keep records of shifts you have worked through
+                  Barbid for a limited time. This action is irreversible.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end mt-5 sm:mt-0 sm:ml-6 sm:block">
+              <button
+                type="button"
+                onClick={() => setShowDeleteAccountModal(true)}
+                className="inline-flex items-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+              >
+                Delete Account
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <Dialog
+          open={showDeleteAccountModal}
+          onClose={setShowDeleteAccountModal}
+          className="relative z-10"
+        >
+          <DialogBackdrop
+            transition
+            className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+          />
+
+          <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+              <DialogPanel
+                transition
+                className="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg sm:p-6 data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+              >
+                <div className="sm:flex sm:items-start">
+                  <div className="mx-auto flex size-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:size-10">
+                    <ExclamationTriangleIcon
+                      aria-hidden="true"
+                      className="size-6 text-red-600"
+                    />
+                  </div>
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                    <DialogTitle
+                      as="h3"
+                      className="text-base font-semibold text-gray-900"
+                    >
+                      Delete account
+                    </DialogTitle>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        Are you sure you want to delete your account? All of
+                        your personal data will be permanently removed from our
+                        servers forever. We reserve the right to keep records of
+                        shifts you have worked through Barbid for a limited
+                        time. This action cannot be undone.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setShowDeleteAccountModal(false);
+                      await deleteAllUserData(
+                        currentUser.uid,
+                        profileFormData.username
+                      );
+                      navigate("/", { replace: true });
+                    }}
+                    className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto"
+                  >
+                    Delete Account
+                  </button>
+                  <button
+                    type="button"
+                    data-autofocus
+                    onClick={() => setShowDeleteAccountModal(false)}
+                    className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </DialogPanel>
+            </div>
+          </div>
+        </Dialog>
       </div>
 
       {/* Error and success messages using UploadAlert */}
