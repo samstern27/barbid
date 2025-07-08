@@ -396,7 +396,7 @@ export default function UserLayout() {
           </div>
 
           <main className="py-0">
-            <div className="px-0 sm:px-0 lg:px-0">
+            <div className="px-0 sm:px-0 lg:px-0 min-h-screen">
               <Outlet />
             </div>
           </main>

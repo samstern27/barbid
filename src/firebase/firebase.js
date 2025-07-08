@@ -31,7 +31,8 @@ export const writeUserData = async (
   firstName,
   lastName,
   email,
-  mobileNumber = null
+  mobileNumber = null,
+  dateOfBirth
 ) => {
   const db = getDatabase();
 
@@ -56,6 +57,14 @@ export const writeUserData = async (
     avatar: `https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${randomSeed}`,
     profilePicture: profilePicture,
     coverPhoto: randomCoverPhoto,
+    reviews: [
+      {
+        rating: 5,
+        comment: "This is a test review",
+        date: new Date().toISOString(),
+        user: userId,
+      },
+    ],
     lastLogin: new Date().toISOString(),
   });
 
@@ -64,6 +73,7 @@ export const writeUserData = async (
   await set(userPersonalRef, {
     email: email,
     mobile: mobileNumber,
+    dateOfBirth: dateOfBirth,
     country: "United Kingdom",
     streetAddress: "",
     city: "",

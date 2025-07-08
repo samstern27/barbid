@@ -13,6 +13,7 @@ const SignUp = () => {
   const numberRef = useRef(null);
   const passwordRef = useRef(null);
   const cpasswordRef = useRef(null);
+  const dateOfBirthRef = useRef(null);
   const { signup, signInWithGoogle, currentUser } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,6 +22,27 @@ const SignUp = () => {
     e.preventDefault();
     if (passwordRef.current.value !== cpasswordRef.current.value) {
       return setError("Passwords do not match");
+    }
+
+    // Check age before proceeding
+    const dateOfBirth = dateOfBirthRef.current.value;
+    if (dateOfBirth) {
+      const birthDate = new Date(dateOfBirth);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
+        age--;
+      }
+
+      if (age < 18) {
+        setError("You must be 18 or older to create an account");
+        return;
+      }
     }
 
     try {
@@ -32,7 +54,8 @@ const SignUp = () => {
         emailRef.current.value,
         passwordRef.current.value,
         displayName,
-        numberRef.current.value || null
+        numberRef.current.value || null,
+        dateOfBirthRef.current.value || null
       );
     } catch (error) {
       setError(error.message || "Failed to create account");
@@ -180,6 +203,22 @@ const SignUp = () => {
                 placeholder="Enter confirm password"
                 required
                 ref={cpasswordRef}
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="dateOfBirth"
+                className="text-slate-800 text-sm font-medium mb-2 block"
+              >
+                Date of Birth *
+              </label>
+              <input
+                id="dateOfBirth"
+                name="dateOfBirth"
+                type="date"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-red-400 outline-0 transition-all"
+                required
+                ref={dateOfBirthRef}
               />
             </div>
           </div>

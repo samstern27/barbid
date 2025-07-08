@@ -27,7 +27,13 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const signup = async (email, password, displayName, contactNumber = null) => {
+  const signup = async (
+    email,
+    password,
+    displayName,
+    contactNumber = null,
+    dateOfBirth = null
+  ) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -66,7 +72,8 @@ export const AuthProvider = ({ children }) => {
         displayName.split(" ")[0], // firstName
         displayName.split(" ")[1] || "", // lastName
         email,
-        contactNumber
+        contactNumber,
+        dateOfBirth
       );
 
       // Set the current user before navigation
