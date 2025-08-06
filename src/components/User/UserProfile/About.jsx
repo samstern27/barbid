@@ -5,81 +5,58 @@ const About = ({ profile }) => {
     profile.about || `${profile.username} has not added an about section`;
   const theme = profile.theme || "gray";
   const themeClasses = {
-    amber: ["bg-amber-600", "bg-amber-100", "text-amber-700", "#d97706"],
-    blue: ["bg-blue-600", "bg-blue-100", "text-blue-700", "#3b82f6"],
-    cyan: ["bg-cyan-600", "bg-cyan-100", "text-cyan-700", "#06b6d4"],
+    amber: ["bg-amber-800", "bg-amber-100", "text-amber-700", "#d97706"],
+    blue: ["bg-blue-800", "bg-blue-100", "text-blue-700", "#3b82f6"],
+    cyan: ["bg-cyan-800", "bg-cyan-100", "text-cyan-700", "#06b6d4"],
     emerald: [
-      "bg-emerald-600",
+      "bg-emerald-800",
       "bg-emerald-100",
       "text-emerald-700",
       "#10b981",
     ],
     fuchsia: [
-      "bg-fuchsia-600",
+      "bg-fuchsia-800",
       "bg-fuchsia-100",
       "text-fuchsia-700",
       "#d946ef",
     ],
-    gray: ["bg-gray-600", "bg-gray-100", "text-gray-700", "#6b7280"],
-    green: ["bg-green-600", "bg-green-100", "text-green-700", "#22c55e"],
-    indigo: ["bg-indigo-600", "bg-indigo-100", "text-indigo-700", "#6366f1"],
-    lime: ["bg-lime-600", "bg-lime-100", "text-lime-700", "#84cc16"],
+    gray: ["bg-gray-800", "bg-gray-100", "text-gray-700", "#6b7280"],
+    green: ["bg-green-800", "bg-green-100", "text-green-700", "#22c55e"],
+    indigo: ["bg-indigo-800", "bg-indigo-100", "text-indigo-700", "#6366f1"],
+    lime: ["bg-lime-800", "bg-lime-100", "text-lime-700", "#84cc16"],
     neutral: [
-      "bg-neutral-600",
+      "bg-neutral-800",
       "bg-neutral-100",
       "text-neutral-700",
       "#737373",
     ],
-    orange: ["bg-orange-600", "bg-orange-100", "text-orange-700", "#f97316"],
-    pink: ["bg-pink-600", "bg-pink-100", "text-pink-700", "#ec4899"],
-    purple: ["bg-purple-600", "bg-purple-100", "text-purple-700", "#a855f7"],
-    red: ["bg-red-600", "bg-red-100", "text-red-700", "#ef4444"],
-    rose: ["bg-rose-600", "bg-rose-100", "text-rose-700", "#f43f5e"],
-    sky: ["bg-sky-600", "bg-sky-100", "text-sky-700", "#0ea5e9"],
-    slate: ["bg-slate-600", "bg-slate-100", "text-slate-700", "#64748b"],
-    stone: ["bg-stone-600", "bg-stone-100", "text-stone-700", "#78716c"],
-    teal: ["bg-teal-600", "bg-teal-100", "text-teal-700", "#14b8a6"],
-    violet: ["bg-violet-600", "bg-violet-100", "text-violet-700", "#8b5cf6"],
-    yellow: ["bg-yellow-600", "bg-yellow-100", "text-yellow-700", "#eab308"],
-    zinc: ["bg-zinc-600", "bg-zinc-100", "text-zinc-700", "#71717a"],
+    orange: ["bg-orange-800", "bg-orange-100", "text-orange-800", "#f97316"],
+    pink: ["bg-pink-800", "bg-pink-100", "text-pink-800", "#ec4899"],
+    purple: ["bg-purple-800", "bg-purple-100", "text-purple-800", "#a855f7"],
+    red: ["bg-red-800", "bg-red-100", "text-red-800", "#ef4444"],
+    rose: ["bg-rose-800", "bg-rose-100", "text-rose-800", "#f43f5e"],
+    sky: ["bg-sky-800", "bg-sky-100", "text-sky-800", "#0ea5e9"],
+    slate: ["bg-slate-800", "bg-slate-100", "text-slate-800", "#64748b"],
+    stone: ["bg-stone-800", "bg-stone-100", "text-stone-800", "#78716c"],
+    teal: ["bg-teal-800", "bg-teal-100", "text-teal-800", "#14b8a6"],
+    violet: ["bg-violet-800", "bg-violet-100", "text-violet-800", "#8b5cf6"],
+    yellow: ["bg-yellow-800", "bg-yellow-100", "text-yellow-800", "#eab308"],
+    zinc: ["bg-zinc-800", "bg-zinc-100", "text-zinc-800", "#71717a"],
   };
   return (
     <div
-      className={`my-10 flex flex-col text-center gap-4 sm:p-6 lg:text-left lg:p-8 flex-1 items-center relative -ml-4`}
+      className={`rounded-lg shadow-xl mt-10 mx-10 px-10 pt-10 pb-0 flex flex-col text-center gap-4 sm:p-6 lg:p-8 flex-1 items-start relative`}
+      style={{ backgroundColor: "rgba(255,255,255,0.2)" }}
     >
       <div className="relative">
         <h3
-          className={`text-3xl font-light ${themeClasses[theme][2]} mx-auto lg:mx-0 text-center lg:text-left relative z-10 -ml- lg:-ml-4`}
+          className={`text-base font-semibold text-white border-b border-gray-200 pb-5 lg:mx-0 text-left relative z-10 `}
         >
           About me
         </h3>
-        <svg
-          fill={themeClasses[theme][3]}
-          viewBox="0 0 162 128"
-          aria-hidden="true"
-          className="absolute top-0 left-0 z-0 h-15 sm:h-25 sm:-top-5 sm:-left-5 opacity-20 "
-        >
-          <path
-            d="M65.5697 118.507L65.8918 118.89C68.9503 116.314 71.367 113.253 73.1386 109.71C74.9162 106.155 75.8027 102.28 75.8027 98.0919C75.8027 94.237 75.16 90.6155 73.8708 87.2314C72.5851 83.8565 70.8137 80.9533 68.553 78.5292C66.4529 76.1079 63.9476 74.2482 61.0407 72.9536C58.2795 71.4949 55.276 70.767 52.0386 70.767C48.9935 70.767 46.4686 71.1668 44.4872 71.9924L44.4799 71.9955L44.4726 71.9988C42.7101 72.7999 41.1035 73.6831 39.6544 74.6492C38.2407 75.5916 36.8279 76.455 35.4159 77.2394L35.4047 77.2457L35.3938 77.2525C34.2318 77.9787 32.6713 78.3634 30.6736 78.3634C29.0405 78.3634 27.5131 77.2868 26.1274 74.8257C24.7483 72.2185 24.0519 69.2166 24.0519 65.8071C24.0519 60.0311 25.3782 54.4081 28.0373 48.9335C30.703 43.4454 34.3114 38.345 38.8667 33.6325C43.5812 28.761 49.0045 24.5159 55.1389 20.8979C60.1667 18.0071 65.4966 15.6179 71.1291 13.7305C73.8626 12.8145 75.8027 10.2968 75.8027 7.38572C75.8027 3.6497 72.6341 0.62247 68.8814 1.1527C61.1635 2.2432 53.7398 4.41426 46.6119 7.66522C37.5369 11.6459 29.5729 17.0612 22.7236 23.9105C16.0322 30.6019 10.618 38.4859 6.47981 47.558L6.47976 47.558L6.47682 47.5647C2.4901 56.6544 0.5 66.6148 0.5 77.4391C0.5 84.2996 1.61702 90.7679 3.85425 96.8404L3.8558 96.8445C6.08991 102.749 9.12394 108.02 12.959 112.654L12.959 112.654L12.9646 112.661C16.8027 117.138 21.2829 120.739 26.4034 123.459L26.4033 123.459L26.4144 123.465C31.5505 126.033 37.0873 127.316 43.0178 127.316C47.5035 127.316 51.6783 126.595 55.5376 125.148L55.5376 125.148L55.5477 125.144C59.5516 123.542 63.0052 121.456 65.9019 118.881L65.5697 118.507Z"
-            id="b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb"
-          />
-          <use x={86} href="#b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb" />
-        </svg>
-        <svg
-          fill={themeClasses[theme][3]}
-          viewBox="0 0 162 128"
-          transform="scale(-1,-1)"
-          aria-hidden="true"
-          className="absolute bottom-0 right-0 z-0 h-15 sm:h-25 sm:-bottom-5 sm:-right-5 opacity-20 "
-        >
-          <path
-            d="M65.5697 118.507L65.8918 118.89C68.9503 116.314 71.367 113.253 73.1386 109.71C74.9162 106.155 75.8027 102.28 75.8027 98.0919C75.8027 94.237 75.16 90.6155 73.8708 87.2314C72.5851 83.8565 70.8137 80.9533 68.553 78.5292C66.4529 76.1079 63.9476 74.2482 61.0407 72.9536C58.2795 71.4949 55.276 70.767 52.0386 70.767C48.9935 70.767 46.4686 71.1668 44.4872 71.9924L44.4799 71.9955L44.4726 71.9988C42.7101 72.7999 41.1035 73.6831 39.6544 74.6492C38.2407 75.5916 36.8279 76.455 35.4159 77.2394L35.4047 77.2457L35.3938 77.2525C34.2318 77.9787 32.6713 78.3634 30.6736 78.3634C29.0405 78.3634 27.5131 77.2868 26.1274 74.8257C24.7483 72.2185 24.0519 69.2166 24.0519 65.8071C24.0519 60.0311 25.3782 54.4081 28.0373 48.9335C30.703 43.4454 34.3114 38.345 38.8667 33.6325C43.5812 28.761 49.0045 24.5159 55.1389 20.8979C60.1667 18.0071 65.4966 15.6179 71.1291 13.7305C73.8626 12.8145 75.8027 10.2968 75.8027 7.38572C75.8027 3.6497 72.6341 0.62247 68.8814 1.1527C61.1635 2.2432 53.7398 4.41426 46.6119 7.66522C37.5369 11.6459 29.5729 17.0612 22.7236 23.9105C16.0322 30.6019 10.618 38.4859 6.47981 47.558L6.47976 47.558L6.47682 47.5647C2.4901 56.6544 0.5 66.6148 0.5 77.4391C0.5 84.2996 1.61702 90.7679 3.85425 96.8404L3.8558 96.8445C6.08991 102.749 9.12394 108.02 12.959 112.654L12.959 112.654L12.9646 112.661C16.8027 117.138 21.2829 120.739 26.4034 123.459L26.4033 123.459L26.4144 123.465C31.5505 126.033 37.0873 127.316 43.0178 127.316C47.5035 127.316 51.6783 126.595 55.5376 125.148L55.5376 125.148L55.5477 125.144C59.5516 123.542 63.0052 121.456 65.9019 118.881L65.5697 118.507Z"
-            id="b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb"
-          />
-          <use x={86} href="#b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb" />
-        </svg>
+
         <p
-          className={`text-md max-w-xl font-medium sm:text-base mx-auto p-4 lg:mx-0 ${themeClasses[theme][2]} relative z-10 italic`}
+          className={`text-base max-w-5xl font-normal sm:text-base mx-auto py-5 lg:mx-0 text-white relative z-10 italic text-left`}
         >
           {aboutText}
         </p>

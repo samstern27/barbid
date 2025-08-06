@@ -1,5 +1,7 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { BusinessProvider } from "./contexts/BusinessContext";
+import { LocationProvider } from "./contexts/LocationContext";
 
 // Landing Pages
 import LandingLayout from "./components/Landing/LandingLayout";
@@ -15,11 +17,21 @@ import UserLayout from "./components/User/UserLayout";
 import UserHome from "./pages/User/UserHome";
 import UserProfile from "./pages/User/UserProfile";
 import UserJobs from "./pages/User/UserJobs";
-import UserFindWork from "./pages/User/UserFindWork";
-import UserMyBusiness from "./pages/User/UserMyBusiness";
+import FindWork from "./pages/User/FindWork/FindWork";
+import FindWorkJobDetail from "./pages/User/FindWork/FindWorkJobDetail";
+import MyBusiness from "./pages/User/MyBusiness/MyBusiness";
+import MyBusinessOverview from "./pages/User/MyBusiness/MyBusinessOverview";
+import MyBusinessDetailLayout from "./components/User/MyBusiness/MyBusinessDetailLayout";
+import MyBusinessJobListings from "./pages/User/MyBusiness/MyBusinessJobListings";
+import MyBusinessPastCandidates from "./pages/User/MyBusiness/MyBusinessPastCandidates";
+import MyBusinessReviews from "./pages/User/MyBusiness/MyBusinessReviews";
+import MyBusinessSettings from "./pages/User/MyBusiness/MyBusinessSettings";
 import UserRoles from "./pages/User/UserRoles";
 import UserReviews from "./pages/User/UserReviews";
 import UserSettings from "./pages/User/UserSettings";
+import ViewJob from "./components/User/MyBusiness/ViewJob";
+import MyBusinessJobListingsApplicants from "./pages/User/MyBusiness/MyBusinessJobListingsApplicants";
+import MyBusinessJobListingsApplicantsDetail from "./pages/User/MyBusiness/MyBusinessJobListingsApplicantsDetail";
 
 import "./index.css";
 
@@ -32,15 +44,36 @@ function AppRoutes() {
   }
 
   if (currentUser) {
-    // LOGGED IN ROUTES (no /user prefix)
+    // LOGGED IN ROUTES
     return (
       <Routes>
         <Route path="/" element={<UserLayout />}>
           <Route index element={<UserHome />} />
           <Route path="profile/:id" element={<UserProfile />} />
           <Route path="jobs" element={<UserJobs />} />
-          <Route path="find-work" element={<UserFindWork />} />
-          <Route path="my-business" element={<UserMyBusiness />} />
+          <Route path="find-work" element={<FindWork />} />
+          <Route path="find-work/:jobId" element={<FindWorkJobDetail />} />
+          <Route path="my-business" element={<MyBusiness />} />
+          <Route path="my-business/:id" element={<MyBusinessDetailLayout />}>
+            <Route index element={<Navigate to="overview" replace />} />
+            <Route path="overview" element={<MyBusinessOverview />} />
+            <Route path="job-listings" element={<MyBusinessJobListings />} />
+            <Route path="job-listings/:jobId" element={<ViewJob />} />
+            <Route
+              path="job-listings/:jobId/applicants"
+              element={<MyBusinessJobListingsApplicants />}
+            />
+            <Route
+              path="job-listings/:jobId/applicants/:applicantUsername"
+              element={<MyBusinessJobListingsApplicantsDetail />}
+            />
+            <Route
+              path="past-candidates"
+              element={<MyBusinessPastCandidates />}
+            />
+            <Route path="reviews" element={<MyBusinessReviews />} />
+            <Route path="settings" element={<MyBusinessSettings />} />
+          </Route>
           <Route path="roles" element={<UserRoles />} />
           <Route path="reviews" element={<UserReviews />} />
           <Route path="settings" element={<UserSettings />} />
@@ -48,7 +81,7 @@ function AppRoutes() {
       </Routes>
     );
   } else {
-    // LOGGED OUT ROUTES (marketing/landing)
+    // LOGGED OUT ROUTES
     return (
       <Routes>
         <Route path="/" element={<LandingLayout />}>
@@ -69,7 +102,11 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <LocationProvider>
+          <BusinessProvider>
+            <AppRoutes />
+          </BusinessProvider>
+        </LocationProvider>
       </AuthProvider>
     </BrowserRouter>
   );

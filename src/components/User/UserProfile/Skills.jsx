@@ -7,35 +7,35 @@ const Skills = ({ profile }) => {
   const theme = profile.theme || "gray";
 
   const themeClasses = {
-    amber: ["bg-amber-800", "text-amber-100", "text-amber-800"],
-    blue: ["bg-blue-800", "text-blue-100", "text-blue-800"],
-    cyan: ["bg-cyan-800", "text-cyan-100", "text-cyan-800"],
-    emerald: ["bg-emerald-800", "text-emerald-100", "text-emerald-800"],
-    fuchsia: ["bg-fuchsia-800", "text-fuchsia-100", "text-fuchsia-800"],
-    gray: ["bg-gray-800", "text-gray-100", "text-gray-800"],
-    green: ["bg-green-800", "text-green-100", "text-green-800"],
-    indigo: ["bg-indigo-800", "text-indigo-100", "text-indigo-800"],
-    lime: ["bg-lime-800", "text-lime-100", "text-lime-800"],
-    neutral: ["bg-neutral-800", "text-neutral-100", "text-neutral-800"],
-    orange: ["bg-orange-800", "text-orange-100", "text-orange-800"],
-    pink: ["bg-pink-800", "text-pink-100", "text-pink-800"],
-    purple: ["bg-purple-800", "text-purple-100", "text-purple-800"],
-    red: ["bg-red-800", "text-red-100", "text-red-800"],
-    rose: ["bg-rose-800", "text-rose-100", "text-rose-800"],
-    sky: ["bg-sky-800", "text-sky-100", "text-sky-800"],
-    slate: ["bg-slate-800", "text-slate-100", "text-slate-800"],
-    stone: ["bg-stone-800", "text-stone-100", "text-stone-800"],
-    teal: ["bg-teal-800", "text-teal-100", "text-teal-800"],
-    violet: ["bg-violet-800", "text-violet-100", "text-violet-800"],
-    yellow: ["bg-yellow-800", "text-yellow-100", "text-yellow-800"],
-    zinc: ["bg-zinc-800", "text-zinc-100", "text-zinc-800"],
+    amber: ["bg-amber-200", "text-amber-100", "text-amber-800"],
+    blue: ["bg-blue-200", "text-blue-100", "text-blue-800"],
+    cyan: ["bg-cyan-200", "text-cyan-100", "text-cyan-800"],
+    emerald: ["bg-emerald-200", "text-emerald-100", "text-emerald-800"],
+    fuchsia: ["bg-fuchsia-200", "text-fuchsia-100", "text-fuchsia-800"],
+    gray: ["bg-gray-200", "text-gray-100", "text-gray-800"],
+    green: ["bg-green-200", "text-green-100", "text-green-800"],
+    indigo: ["bg-indigo-200", "text-indigo-100", "text-indigo-800"],
+    lime: ["bg-lime-200", "text-lime-100", "text-lime-800"],
+    neutral: ["bg-neutral-200", "text-neutral-100", "text-neutral-800"],
+    orange: ["bg-orange-200", "text-orange-100", "text-orange-800"],
+    pink: ["bg-pink-200", "text-pink-100", "text-pink-800"],
+    purple: ["bg-purple-200", "text-purple-100", "text-purple-800"],
+    red: ["bg-red-200", "text-red-100", "text-red-800"],
+    rose: ["bg-rose-200", "text-rose-100", "text-rose-800"],
+    sky: ["bg-sky-200", "text-sky-100", "text-sky-800"],
+    slate: ["bg-slate-200", "text-slate-100", "text-slate-800"],
+    stone: ["bg-stone-200", "text-stone-100", "text-stone-800"],
+    teal: ["bg-teal-200", "text-teal-100", "text-teal-800"],
+    violet: ["bg-violet-200", "text-violet-100", "text-violet-800"],
+    yellow: ["bg-yellow-200", "text-yellow-100", "text-yellow-800"],
+    zinc: ["bg-zinc-200", "text-zinc-100", "text-zinc-800"],
   };
 
   const skillList = skills.map((skill, idx) => {
     return (
       <span
         key={skill + idx}
-        className={`inline-flex items-center gap-x-1.5 rounded-md px-2 py-1 text-xs font-medium ${themeClasses[theme][0]} ${themeClasses[theme][1]}`}
+        className={`inline-flex items-start gap-x-1.5 rounded-md px-2 py-1 text-xs font-medium bg-white ${themeClasses[theme][2]}`}
       >
         {skill}
       </span>
@@ -43,14 +43,14 @@ const Skills = ({ profile }) => {
   });
   return (
     <div
-      className={`px-4 pb-10 flex flex-col text-center gap-4 sm:px-6 lg:text-left lg:px-8 flex-1 items-center lg:items-start max-w-2xl mx-auto lg:mx-0 lg:-ml-8 ${themeClasses[theme][1]}`}
+      className={` mt-10 mx-10 pb-10 px-10 pt-10  flex-col text-center gap-4 sm:p-6 lg:p-8 flex-1 items-start max-w-5xl`}
     >
       <h3
-        className={`text-3xl font-light ${themeClasses[theme][2]} mx-auto lg:mx-0 text-center lg:text-left`}
+        className={`text-base font-semibold border-b border-gray-200 pb-5 lg:mx-0 text-left text-white`}
       >
         Skills
       </h3>
-      <div className="mt-4 flex flex-row flex-wrap gap-4 justify-center lg:justify-start lg:ml-7">
+      <div className="mt-7 flex flex-row flex-wrap gap-3 justify-start">
         {skillList}
       </div>
     </div>

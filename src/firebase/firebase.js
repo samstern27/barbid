@@ -51,6 +51,7 @@ export const writeUserData = async (
     firstName: firstName,
     lastName: lastName,
     about: "",
+    oneLine: "",
     occupation: "",
     skills: [],
     theme: "blue",

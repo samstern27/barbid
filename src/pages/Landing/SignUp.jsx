@@ -29,15 +29,14 @@ const SignUp = () => {
     if (dateOfBirth) {
       const birthDate = new Date(dateOfBirth);
       const today = new Date();
-      const age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-
-      if (
-        monthDiff < 0 ||
-        (monthDiff === 0 && today.getDate() < birthDate.getDate())
-      ) {
-        age--;
-      }
+      const age =
+        today.getFullYear() -
+        birthDate.getFullYear() -
+        (today.getMonth() < birthDate.getMonth() ||
+        (today.getMonth() === birthDate.getMonth() &&
+          today.getDate() < birthDate.getDate())
+          ? 1
+          : 0);
 
       if (age < 18) {
         setError("You must be 18 or older to create an account");
