@@ -52,6 +52,11 @@ function AppRoutes() {
           <Route index element={<UserHome />} />
           <Route path="profile/:id" element={<UserProfile />} />
           <Route path="jobs" element={<UserJobs />} />
+          <Route path="roles" element={<UserRoles />} />
+          <Route path="reviews" element={<UserReviews />} />
+          <Route path="settings" element={<UserSettings />} />
+
+          {/* FindWork Routes */}
           <Route
             path="find-work"
             element={
@@ -68,6 +73,8 @@ function AppRoutes() {
               </JobProvider>
             }
           />
+
+          {/* MyBusiness Routes */}
           <Route
             path="my-business"
             element={
@@ -84,8 +91,17 @@ function AppRoutes() {
               </BusinessProvider>
             }
           >
+            {/* Main Business Pages */}
             <Route index element={<Navigate to="overview" replace />} />
             <Route path="overview" element={<MyBusinessOverview />} />
+            <Route path="reviews" element={<MyBusinessReviews />} />
+            <Route path="settings" element={<MyBusinessSettings />} />
+            <Route
+              path="past-candidates"
+              element={<MyBusinessPastCandidates />}
+            />
+
+            {/* Job Management Routes */}
             <Route path="job-listings" element={<MyBusinessJobListings />} />
             <Route path="job-listings/:jobId" element={<ViewJob />} />
             <Route
@@ -96,16 +112,7 @@ function AppRoutes() {
               path="job-listings/:jobId/applicants/:applicantUsername"
               element={<MyBusinessJobListingsApplicantsDetail />}
             />
-            <Route
-              path="past-candidates"
-              element={<MyBusinessPastCandidates />}
-            />
-            <Route path="reviews" element={<MyBusinessReviews />} />
-            <Route path="settings" element={<MyBusinessSettings />} />
           </Route>
-          <Route path="roles" element={<UserRoles />} />
-          <Route path="reviews" element={<UserReviews />} />
-          <Route path="settings" element={<UserSettings />} />
         </Route>
       </Routes>
     );
