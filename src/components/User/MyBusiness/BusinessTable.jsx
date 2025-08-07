@@ -1,20 +1,10 @@
-import { useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
 export default function BusinessTable({ businesses }) {
-  const navigate = useNavigate();
-
-  // Handle the data structure - businesses should be an object with business IDs as keys
-  const businessList =
-    businesses && typeof businesses === "object" && !Array.isArray(businesses)
-      ? Object.entries(businesses)
-          .map(([id, business]) => ({ ...business, id }))
-          .filter((business) => business && business.name)
-      : [];
-
   return (
     <div className="w-full animate-[fadeIn_1.2s_ease-in-out]">
       <div className="mt-10 ring-1 ring-gray-300 sm:rounded-lg">
@@ -58,7 +48,7 @@ export default function BusinessTable({ businesses }) {
             </tr>
           </thead>
           <tbody>
-            {businessList.map((business, businessIdx) => (
+            {businesses.map((business, businessIdx) => (
               <tr key={business.id || business.businessId || businessIdx}>
                 <td
                   className={classNames(
@@ -79,15 +69,6 @@ export default function BusinessTable({ businesses }) {
                       {business.phone} / {business.type}
                     </span>
                     <span className="hidden sm:inline"> · </span>
-                    <span
-                      className={
-                        business.privacy === "public"
-                          ? "text-green-500"
-                          : "text-red-500"
-                      }
-                    >
-                      {business.privacy}
-                    </span>
                   </div>
                   {businessIdx !== 0 ? (
                     <div className="absolute -top-px right-0 left-6 h-px bg-gray-200" />
@@ -148,16 +129,17 @@ export default function BusinessTable({ businesses }) {
                     "relative py-3.5 pr-4 pl-3 text-right text-sm font-medium sm:pr-6"
                   )}
                 >
-                  <button
-                    type="button"
-                    disabled={business.isCurrent}
+                  <NavLink
+                    to={`/my-business/${business.id}`}
                     className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white"
-                    onClick={() =>
-                      navigate(`/my-business/${business.businessId}`)
-                    }
+                    onClick={(e) => {
+                      if (business.isCurrent) {
+                        e.preventDefault();
+                      }
+                    }}
                   >
                     View<span className="sr-only">, {business.name}</span>
-                  </button>
+                  </NavLink>
                   {businessIdx !== 0 ? (
                     <div className="absolute -top-px right-6 left-0 h-px bg-gray-200" />
                   ) : null}

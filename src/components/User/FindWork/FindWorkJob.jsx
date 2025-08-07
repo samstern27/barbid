@@ -1,30 +1,26 @@
 import {
-  BriefcaseIcon,
   CalendarIcon,
-  CheckIcon,
-  ChevronDownIcon,
   CurrencyPoundIcon,
   ClockIcon,
-  LinkIcon,
   MapPinIcon,
-  PencilIcon,
   EyeIcon,
 } from "@heroicons/react/20/solid";
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { getDatabase, ref } from "firebase/database";
-import { getDistance } from "../../../utils/getDistance.js";
+import { Menu, MenuButton } from "@headlessui/react";
+import getDistance from "../../../utils/getDistance";
 import { LocationContext } from "../../../contexts/LocationContext";
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 
-export default function FindWorkJob({ job }) {
+const FindWorkJob = ({ job }) => {
+  // Calculate distance from user's location
   const { coords } = useContext(LocationContext);
-
-  const distance = getDistance(
-    job.location.lat,
-    job.location.lng,
-    coords.lat,
-    coords.lng
-  );
+  const distance = useMemo(() => {
+    return getDistance(
+      job.location.lat,
+      job.location.lng,
+      coords.lat,
+      coords.lng
+    );
+  }, [job.location.lat, job.location.lng, coords.lat, coords.lng]);
   return (
     <div className="lg:flex lg:items-center lg:justify-between ">
       <div className="min-w-0 flex-1 flex-row">
@@ -100,4 +96,6 @@ export default function FindWorkJob({ job }) {
       </div>
     </div>
   );
-}
+};
+
+export default FindWorkJob;

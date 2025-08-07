@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import CreateJob from "../../../components/User/MyBusiness/CreateJob";
 import { useBusiness } from "../../../contexts/BusinessContext";
+import { useAuth } from "../../../contexts/AuthContext";
 import { EyeIcon } from "@heroicons/react/24/outline";
 import { NavLink } from "react-router-dom";
 import Loader from "../../../components/UI/Loader";
@@ -8,14 +10,16 @@ import Loader from "../../../components/UI/Loader";
 export default function MyBusinessJobListings() {
   const [loading, setLoading] = useState(true);
   const [createJobOpen, setCreateJobOpen] = useState(false);
-
+  const { businessId } = useParams();
+  const { currentUser } = useAuth();
   const { selectedBusiness } = useBusiness();
 
   useEffect(() => {
-    if (selectedBusiness) {
+    // Set loading to false when we have either selectedBusiness or when we're sure it's loading
+    if (selectedBusiness || !businessId) {
       setLoading(false);
     }
-  }, [selectedBusiness]);
+  }, [selectedBusiness, businessId]);
 
   return (
     <div className="animate-[fadeIn_0.6s_ease-in-out]">

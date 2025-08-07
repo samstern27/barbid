@@ -1,13 +1,15 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import Breadcrumb from "../../../components/UI/Breadcrumb";
 import FindWorkDivider from "../../../components/User/FindWork/FindWorkDivider";
 import FindWorkHeading from "../../../components/User/FindWork/FindWorkHeading";
-import { LocationContext } from "../../../contexts/LocationContext";
 import SortBar from "../../../components/User/FindWork/SortBar";
+import Loader from "../../../components/UI/Loader";
+import { useJob } from "../../../contexts/JobContext";
 
 const FindWork = () => {
-  const { coords, error, loading } = useContext(LocationContext);
-  const [sortMethod, setSortMethod] = useState("newest");
+  const { publicJobs, loading } = useJob();
+
+  const [sortMethod, setSortMethod] = useState("closest");
   const [filters, setFilters] = useState({
     "job-position": [],
     distance: [],
@@ -22,7 +24,13 @@ const FindWork = () => {
       <Breadcrumb pages={pages} />
       <FindWorkHeading />
       <SortBar onSortChange={setSortMethod} onFilterChange={setFilters} />
-      <FindWorkDivider sortMethod={sortMethod} filters={filters} />
+      {loading ? (
+        <div className="flex flex-1 flex-col justify-center items-center min-h-[60vh]">
+          <Loader size="2xl" text="Loading jobs..." />
+        </div>
+      ) : (
+        <FindWorkDivider sortMethod={sortMethod} filters={filters} />
+      )}
     </div>
   );
 };

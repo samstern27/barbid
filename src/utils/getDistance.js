@@ -1,4 +1,4 @@
-export function getDistance(lat1, lon1, lat2, lon2) {
+const getDistance = (lat1, lon1, lat2, lon2) => {
   const toRad = (value) => (value * Math.PI) / 180;
   const R = 6371; // Radius of the Earth in km
   const dLat = toRad(lat2 - lat1);
@@ -12,4 +12,6 @@ export function getDistance(lat1, lon1, lat2, lon2) {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c;
   return Number(distance.toFixed(1));
-}
+};
+
+export default getDistance;

@@ -1,18 +1,15 @@
 import FindWorkJob from "./FindWorkJob";
 import { NavLink } from "react-router-dom";
-import { useBusiness } from "../../../contexts/BusinessContext";
+import { useJob } from "../../../contexts/JobContext";
 import { LocationContext } from "../../../contexts/LocationContext";
 import Loader from "../../UI/Loader";
 import { useState, useEffect, useContext } from "react";
-import { getDistance } from "../../../utils/getDistance";
+import getDistance from "../../../utils/getDistance";
 
-export default function FindWorkDivider({
-  sortMethod = "newest",
-  filters = {},
-}) {
+const FindWorkDivider = ({ sortMethod = "newest", filters = {} }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showNoJobs, setShowNoJobs] = useState(false);
-  const { publicJobs } = useBusiness();
+  const { publicJobs } = useJob();
   const { coords } = useContext(LocationContext);
 
   // Sort and filter jobs based on the selected method and filters
@@ -153,7 +150,7 @@ export default function FindWorkDivider({
             key={job.id}
             className="overflow-hidden rounded-md bg-white px-6 py-4 shadow-sm hover:bg-gray-50 hover:cursor-pointer hover:shadow-md transition-all duration-300"
           >
-            <NavLink to={`/find-work/${job.id}`}>
+            <NavLink to={`/find-work/${job.id}`} state={{ job: job }}>
               <FindWorkJob job={job} />
             </NavLink>
           </li>
@@ -161,4 +158,6 @@ export default function FindWorkDivider({
       </ul>
     );
   }
-}
+};
+
+export default FindWorkDivider;

@@ -1,115 +1,119 @@
-import { useParams } from "react-router-dom";
+import { ArrowLeftIcon } from "@heroicons/react/20/solid";
+import { useNavigate, NavLink, useParams } from "react-router-dom";
 import Breadcrumb from "../../../components/UI/Breadcrumb";
-import { getDistance } from "../../../utils/getDistance.js";
-import { LocationContext } from "../../../contexts/LocationContext";
-import { useContext } from "react";
-import { useBusiness } from "../../../contexts/BusinessContext";
+import { useJob } from "../../../contexts/JobContext";
+
+const pages = [
+  { name: "Find Work", href: "/find-work", current: false },
+  { name: "Job Details", href: "#", current: true },
+];
 
 export default function FindWorkJobDetail() {
+  const navigate = useNavigate();
+  const { publicJobs } = useJob();
   const { jobId } = useParams();
-  const { publicJobs } = useBusiness();
-  const { coords } = useContext(LocationContext);
+  const job = publicJobs.find((job) => job.id === jobId);
 
-  const job = publicJobs?.find((job) => job.id === jobId);
-
-  // Calculate distance only if job and coords exist
-  const distance =
-    job && coords?.lat && coords?.lng && job.location?.lat && job.location?.lng
-      ? getDistance(job.location.lat, job.location.lng, coords.lat, coords.lng)
-      : null;
-
-  const pages = [
-    { name: "Find Work", href: "/find-work" },
-    { name: "Job Detail", href: "#", current: true },
-  ];
-
-  // Show loading state if publicJobs is not loaded yet
-  if (!publicJobs) {
-    return (
-      <div className="flex flex-col m-10 gap-4">
-        <Breadcrumb pages={pages} />
-        <div className="flex flex-col gap-4">
-          <h1 className="text-2xl font-bold">Loading...</h1>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error state if job is not found
   if (!job) {
     return (
-      <div className="flex flex-col m-10 gap-4">
-        <Breadcrumb pages={pages} />
-        <div className="flex flex-col gap-4">
-          <h1 className="text-2xl font-bold">Job Not Found</h1>
-          <p className="text-gray-600">
-            The job you're looking for doesn't exist or has been removed.
-          </p>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-gray-500">Job not found or has been deleted.</p>
+          <button
+            onClick={() => navigate("/find-work")}
+            className="mt-2 text-indigo-600 hover:text-indigo-500"
+          >
+            Back to Find Work
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col m-10 gap-4">
+    <div className="flex flex-col m-10 gap-4 ">
       <Breadcrumb pages={pages} />
-      <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-bold">
-          {job.businessName} - {job.jobTitle}
-        </h1>
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h2 className="text-lg font-semibold mb-4">Job Details</h2>
-              <div className="space-y-3">
-                <div>
-                  <span className="font-medium">Position:</span> {job.jobTitle}
-                </div>
-                <div>
-                  <span className="font-medium">Business:</span>{" "}
-                  {job.businessName}
-                </div>
-                <div>
-                  <span className="font-medium">Pay Rate:</span> £{job.payRate}
-                  /hour
-                </div>
-                <div>
-                  <span className="font-medium">Shift:</span>{" "}
-                  {job.startOfShift.split("T")[0]} at{" "}
-                  {job.startOfShift.split("T")[1]} -{" "}
-                  {job.endOfShift.split("T")[1]}
-                </div>
-                {distance && (
-                  <div>
-                    <span className="font-medium">Distance:</span>{" "}
-                    {distance.toFixed(1)} km
-                  </div>
-                )}
-              </div>
+      <div className="animate-[fadeIn_1.2s_ease-in-out]">
+        <NavLink
+          to="/find-work"
+          className="inline-flex items-center gap-2 text-sm mb-6 font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200"
+        >
+          <ArrowLeftIcon className="w-4 h-4" />
+          Back to Find Work
+        </NavLink>
+        <div className="">
+          <h3 className="text-base/7 font-semibold text-gray-900">
+            Job Details
+          </h3>
+          <p className="mt-1 max-w-2xl text-sm/6 text-gray-500">
+            View job details and requirements.
+          </p>
+        </div>
+        <div className="mt-6 border-t border-gray-100">
+          <dl className="divide-y divide-gray-100">
+            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+              <dt className="text-sm/6 font-medium text-gray-900">Job Title</dt>
+              <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                <span className="grow">{job.jobTitle}</span>
+              </dd>
             </div>
-            <div>
-              <h2 className="text-lg font-semibold mb-4">Location</h2>
-              <div className="space-y-3">
-                <div>
-                  <span className="font-medium">Address:</span>{" "}
-                  {job.location.address}
-                </div>
-                <div>
-                  <span className="font-medium">City:</span> {job.location.city}
-                </div>
-                <div>
-                  <span className="font-medium">Postcode:</span>{" "}
-                  {job.location.postcode}
-                </div>
-              </div>
+            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+              <dt className="text-sm/6 font-medium text-gray-900">
+                Description
+              </dt>
+              <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                <span className="grow">{job.description}</span>
+              </dd>
             </div>
-          </div>
-          {job.description && (
-            <div className="mt-6">
-              <h2 className="text-lg font-semibold mb-4">Description</h2>
-              <p className="text-gray-700">{job.description}</p>
+            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+              <dt className="text-sm/6 font-medium text-gray-900">Pay Rate</dt>
+              <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                <span className="grow">£{job.payRate}/hr</span>
+              </dd>
             </div>
-          )}
+            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+              <dt className="text-sm/6 font-medium text-gray-900">
+                Start Time
+              </dt>
+              <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                <span className="grow">
+                  {new Date(job.startOfShift).toLocaleString()}
+                </span>
+              </dd>
+            </div>
+            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+              <dt className="text-sm/6 font-medium text-gray-900">End Time</dt>
+              <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                <span className="grow">
+                  {new Date(job.endOfShift).toLocaleString()}
+                </span>
+              </dd>
+            </div>
+            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+              <dt className="text-sm/6 font-medium text-gray-900">Status</dt>
+              <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                <span className="grow">
+                  <span
+                    className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
+                      job.status === "Open"
+                        ? "bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20"
+                        : "bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-600/20"
+                    }`}
+                  >
+                    {job.status}
+                  </span>
+                </span>
+              </dd>
+            </div>
+            <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+              <dt className="text-sm/6 font-medium text-gray-900">Created</dt>
+              <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                <span className="grow">
+                  {new Date(job.createdAt).toLocaleDateString()}
+                </span>
+              </dd>
+            </div>
+          </dl>
         </div>
       </div>
     </div>

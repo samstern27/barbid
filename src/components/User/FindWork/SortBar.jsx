@@ -29,7 +29,7 @@ const sortOptions = [
 export default function SortBar({ children, onSortChange, onFilterChange }) {
   const [open, setOpen] = useState(false);
   const [cities, setCities] = useState([]);
-  const [selectedSort, setSelectedSort] = useState("newest");
+  const [selectedSort, setSelectedSort] = useState("closest");
   const [selectedFilters, setSelectedFilters] = useState({
     "job-position": [],
     distance: [],

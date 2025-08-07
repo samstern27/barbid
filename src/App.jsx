@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { BusinessProvider } from "./contexts/BusinessContext";
+import { JobProvider } from "./contexts/JobContext";
 import { LocationProvider } from "./contexts/LocationContext";
 
 // Landing Pages
@@ -51,10 +52,38 @@ function AppRoutes() {
           <Route index element={<UserHome />} />
           <Route path="profile/:id" element={<UserProfile />} />
           <Route path="jobs" element={<UserJobs />} />
-          <Route path="find-work" element={<FindWork />} />
-          <Route path="find-work/:jobId" element={<FindWorkJobDetail />} />
-          <Route path="my-business" element={<MyBusiness />} />
-          <Route path="my-business/:id" element={<MyBusinessDetailLayout />}>
+          <Route
+            path="find-work"
+            element={
+              <JobProvider>
+                <FindWork />
+              </JobProvider>
+            }
+          />
+          <Route
+            path="find-work/:jobId"
+            element={
+              <JobProvider>
+                <FindWorkJobDetail />
+              </JobProvider>
+            }
+          />
+          <Route
+            path="my-business"
+            element={
+              <BusinessProvider>
+                <MyBusiness />
+              </BusinessProvider>
+            }
+          />
+          <Route
+            path="my-business/:businessId"
+            element={
+              <BusinessProvider>
+                <MyBusinessDetailLayout />
+              </BusinessProvider>
+            }
+          >
             <Route index element={<Navigate to="overview" replace />} />
             <Route path="overview" element={<MyBusinessOverview />} />
             <Route path="job-listings" element={<MyBusinessJobListings />} />
@@ -103,9 +132,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <LocationProvider>
-          <BusinessProvider>
-            <AppRoutes />
-          </BusinessProvider>
+          <AppRoutes />
         </LocationProvider>
       </AuthProvider>
     </BrowserRouter>

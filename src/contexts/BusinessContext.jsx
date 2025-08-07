@@ -29,7 +29,6 @@ export const BusinessProvider = ({ children }) => {
   const { currentUser } = useAuth();
   const [selectedBusiness, setSelectedBusiness] = useState(null);
   const [businesses, setBusinesses] = useState([]);
-  const [publicJobs, setPublicJobs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch all businesses for the current user
@@ -82,66 +81,36 @@ export const BusinessProvider = ({ children }) => {
   };
 
   // Select a business by ID
-  const selectBusinessById = (businessId) => {
-    const business = businesses.find((b) => b.id === businessId);
-    if (business) {
-      setSelectedBusiness(business);
-    }
-  };
+  const selectBusinessById = useCallback(
+    (businessId) => {
+      const business = businesses.find((b) => b.id === businessId);
+      if (business) {
+        setSelectedBusiness(business);
+      }
+    },
+    [businesses]
+  );
 
   // Clear selected business
   const clearSelectedBusiness = () => {
     setSelectedBusiness(null);
   };
 
-  // Fetch public jobs
-  const fetchPublicJobs = async () => {
-    try {
-      const db = getDatabase();
-      const publicJobsRef = ref(db, "public/jobs");
-
-      const snapshot = await get(publicJobsRef);
-      if (snapshot.exists()) {
-        const jobsData = snapshot.val();
-        const jobsArray = Object.keys(jobsData).map((id) => ({
-          id,
-          ...jobsData[id],
-        }));
-        setPublicJobs(jobsArray);
-      } else {
-        setPublicJobs([]);
-      }
-    } catch (error) {
-      console.error("Error fetching public jobs:", error);
-      setPublicJobs([]);
-    }
-  };
-
-  // Subscribe to public jobs updates
+  // Auto-select business based on URL if available
   useEffect(() => {
-    if (!currentUser?.uid) {
-      setPublicJobs([]);
-      return;
-    }
-
-    const db = getDatabase();
-    const publicJobsRef = ref(db, "public/jobs");
-
-    const unsubscribe = onValue(publicJobsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const jobsArray = Object.keys(data).map((id) => ({
-          id,
-          ...data[id],
-        }));
-        setPublicJobs(jobsArray);
-      } else {
-        setPublicJobs([]);
+    const pathname = window.location.pathname;
+    const businessMatch = pathname.match(/\/my-business\/([^\/]+)/);
+    if (businessMatch && businesses.length > 0) {
+      const businessId = businessMatch[1];
+      const business = businesses.find((b) => b.id === businessId);
+      if (
+        business &&
+        (!selectedBusiness || selectedBusiness.id !== businessId)
+      ) {
+        setSelectedBusiness(business);
       }
-    });
-
-    return () => unsubscribe();
-  }, [currentUser?.uid]);
+    }
+  }, [businesses, selectedBusiness]);
 
   // Update a job
   const updateJob = async (jobId, updatedJobData) => {
@@ -232,11 +201,9 @@ export const BusinessProvider = ({ children }) => {
     selectedBusiness,
     businesses,
     loading,
-    publicJobs,
     selectBusiness,
     selectBusinessById,
     clearSelectedBusiness,
-    fetchPublicJobs,
     updateJob,
     deleteJob,
   };

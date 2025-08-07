@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { getDatabase, ref, onValue } from "firebase/database";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useBusiness } from "../../../contexts/BusinessContext";
-import { useState, useEffect, createContext } from "react";
+import { useState, useEffect } from "react";
 import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import Loader from "../../UI/Loader";
 
@@ -12,56 +12,64 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-const businessContext = createContext();
-
 const MyBusinessDetailLayout = () => {
-  const { id } = useParams();
+  const { businessId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser } = useAuth();
-  const { selectBusinessById, selectedBusiness } = useBusiness();
+  const { selectBusinessById } = useBusiness();
 
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Fetch business data using businessId from params
   useEffect(() => {
-    // Select the business in the context when component loads
-    if (id) {
-      selectBusinessById(id);
+    if (!businessId || !currentUser?.uid) {
+      setLoading(false);
+      return;
     }
-  }, [id, selectBusinessById]);
 
-  useEffect(() => {
     const db = getDatabase();
     const businessRef = ref(
       db,
-      "users/" + currentUser?.uid + "/business/" + id
+      `users/${currentUser.uid}/business/${businessId}`
     );
-    onValue(businessRef, (snapshot) => {
-      setBusiness(snapshot.val());
+
+    const unsubscribe = onValue(businessRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const businessData = { id: businessId, ...snapshot.val() };
+        setBusiness(businessData);
+        // Update the BusinessContext with the current business
+        selectBusinessById(businessId);
+      } else {
+        // Business not found, redirect to my-business
+        navigate("/my-business");
+      }
       setLoading(false);
     });
-  }, [currentUser, id]);
+
+    return () => unsubscribe();
+  }, [businessId, currentUser?.uid, navigate, selectBusinessById]);
 
   const tabs = [
-    { name: "Overview", href: `/my-business/${id}/overview` },
+    { name: "Overview", href: `/my-business/${businessId}/overview` },
     {
       name: "Job Listings",
-      href: `/my-business/${id}/job-listings`,
+      href: `/my-business/${businessId}/job-listings`,
     },
     {
       name: "Past Candidates",
-      href: `/my-business/${id}/past-candidates`,
+      href: `/my-business/${businessId}/past-candidates`,
     },
-    { name: "Reviews", href: `/my-business/${id}/reviews` },
-    { name: "Settings", href: `/my-business/${id}/settings` },
+    { name: "Reviews", href: `/my-business/${businessId}/reviews` },
+    { name: "Settings", href: `/my-business/${businessId}/settings` },
   ];
 
   const pages = [
     { name: "Businesses", href: "/my-business", current: false },
     {
       name: business?.name,
-      href: `/my-business/${id}/overview`,
+      href: `/my-business/${businessId}/overview`,
       current: true,
     },
   ];

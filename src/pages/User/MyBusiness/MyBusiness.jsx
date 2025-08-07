@@ -15,17 +15,38 @@ const MyBusiness = () => {
   const [businesses, setBusinesses] = useState(null);
   const [loading, setLoading] = useState(true);
   const [createBusinessOpen, setCreateBusinessOpen] = useState(false);
+
+  // Fetch all businesses from Firebase
   useEffect(() => {
+    if (!currentUser?.uid) {
+      setLoading(false);
+      return;
+    }
+
     const db = getDatabase();
     const businessRef = ref(db, "users/" + currentUser?.uid + "/business");
     onValue(businessRef, (snapshot) => {
       const data = snapshot.val();
-      setBusinesses(data);
+      if (data) {
+        // Transform Firebase object structure to array with IDs
+        const businessArray = Object.entries(data)
+          .map(([id, business]) => ({
+            id,
+            businessId: id, // Keep both for compatibility
+            ...business,
+          }))
+          .filter((business) => business && business.name); // Filter out invalid businesses
+        setBusinesses(businessArray);
+      } else {
+        setBusinesses([]);
+      }
       setLoading(false);
     });
   }, [currentUser]);
 
+  // Pages for the breadcrumb
   const pages = [{ name: "Businesses", href: "#", current: true }];
+
   return (
     <div className="flex flex-col m-10 gap-4">
       <Breadcrumb pages={pages} />
@@ -42,7 +63,7 @@ const MyBusiness = () => {
             className="min-h-[60vh]"
           />
         </div>
-      ) : businesses ? (
+      ) : businesses && businesses.length > 0 ? (
         <div className="flex flex-1 flex-col justify-start items-center gap-4 min-h-[60vh]">
           <BusinessTable businesses={businesses} />
         </div>
