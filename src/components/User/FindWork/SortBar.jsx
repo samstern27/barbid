@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogBackdrop,
@@ -17,7 +17,7 @@ import {
 } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
-import { getDatabase, ref, onValue } from "firebase/database";
+import { useJob } from "../../../contexts/JobContext";
 
 const sortOptions = [
   { name: "Closest", value: "closest" },
@@ -26,9 +26,9 @@ const sortOptions = [
   { name: "Least Applied", value: "least-applied" },
 ];
 
-export default function SortBar({ children, onSortChange, onFilterChange }) {
+const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
+  const { publicJobs } = useJob();
   const [open, setOpen] = useState(false);
-  const [cities, setCities] = useState([]);
   const [selectedSort, setSelectedSort] = useState("closest");
   const [selectedFilters, setSelectedFilters] = useState({
     "job-position": [],
@@ -36,79 +36,74 @@ export default function SortBar({ children, onSortChange, onFilterChange }) {
     city: [],
   });
 
-  useEffect(() => {
-    const db = getDatabase();
-    const jobsRef = ref(db, "public/jobs");
-    onValue(jobsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const jobsArray = Object.keys(data);
-        const citiesArray = jobsArray.map((job) =>
-          data[job].location.city.toLowerCase()
-        );
-        const uniqueCities = [...new Set(citiesArray)];
-        setCities(uniqueCities);
-      }
-    });
-  }, []);
+  // Memoize cities calculation to avoid recalculating on every render
+  const cities = useMemo(() => {
+    const citiesArray = publicJobs.map((job) =>
+      job.location.city.toLowerCase()
+    );
+    return [...new Set(citiesArray)];
+  }, [publicJobs]);
 
-  // Create filters array with dynamic city options
-  const filters = [
-    {
-      id: "job-position",
-      name: "Job position",
-      options: [
-        { value: "Barista", label: "Barista" },
-        { value: "Bar Back", label: "Bar Back" },
-        { value: "Bar Manager", label: "Bar Manager" },
-        { value: "Bar Supervisor", label: "Bar Supervisor" },
-        { value: "Bartender", label: "Bartender" },
-        { value: "Busser", label: "Busser" },
-        { value: "Cafe Host", label: "Cafe Host" },
-        { value: "Cafe Manager", label: "Cafe Manager" },
-        { value: "Cafe Server", label: "Cafe Server" },
-        { value: "Cafe Supervisor", label: "Cafe Supervisor" },
-        { value: "Club Host", label: "Club Host" },
-        { value: "Club Manager", label: "Club Manager" },
-        { value: "Club Server", label: "Club Server" },
-        { value: "Club Supervisor", label: "Club Supervisor" },
-        { value: "Floor Manager", label: "Floor Manager" },
-        { value: "Food Runner", label: "Food Runner" },
-        { value: "Host/Hostess", label: "Host/Hostess" },
-        { value: "Restaurant Host", label: "Restaurant Host" },
-        { value: "Restaurant Manager", label: "Restaurant Manager" },
-        { value: "Restaurant Supervisor", label: "Restaurant Supervisor" },
-        { value: "Server", label: "Server" },
-        { value: "VIP Host", label: "VIP Host" },
-        { value: "VIP Manager", label: "VIP Manager" },
-        { value: "VIP Server", label: "VIP Server" },
-        { value: "Waiter/Waitress", label: "Waiter/Waitress" },
-        { value: "Other", label: "Other" },
-      ],
-    },
-    {
-      id: "distance",
-      name: "Distance",
-      options: [
-        { value: 0, label: "Any Distance" },
-        { value: 1, label: "Less than 1km" },
-        { value: 5, label: "1-5km" },
-        { value: 10, label: "5-10km" },
-        { value: 20, label: "10-20km" },
-        { value: 50, label: "20-50km" },
-        { value: 100, label: "50-100km" },
-        { value: 101, label: "100km+" },
-      ],
-    },
-    {
-      id: "city",
-      name: "City/Town",
-      options: cities.map((city) => ({
-        value: city,
-        label: city.charAt(0).toUpperCase() + city.slice(1), // Capitalize first letter
-      })),
-    },
-  ];
+  // Memoize filters array to avoid recreating on every render
+  const filters = useMemo(
+    () => [
+      {
+        id: "job-position",
+        name: "Job position",
+        options: [
+          { value: "Barista", label: "Barista" },
+          { value: "Bar Back", label: "Bar Back" },
+          { value: "Bar Manager", label: "Bar Manager" },
+          { value: "Bar Supervisor", label: "Bar Supervisor" },
+          { value: "Bartender", label: "Bartender" },
+          { value: "Busser", label: "Busser" },
+          { value: "Cafe Host", label: "Cafe Host" },
+          { value: "Cafe Manager", label: "Cafe Manager" },
+          { value: "Cafe Server", label: "Cafe Server" },
+          { value: "Cafe Supervisor", label: "Cafe Supervisor" },
+          { value: "Club Host", label: "Club Host" },
+          { value: "Club Manager", label: "Club Manager" },
+          { value: "Club Server", label: "Club Server" },
+          { value: "Club Supervisor", label: "Club Supervisor" },
+          { value: "Floor Manager", label: "Floor Manager" },
+          { value: "Food Runner", label: "Food Runner" },
+          { value: "Host/Hostess", label: "Host/Hostess" },
+          { value: "Restaurant Host", label: "Restaurant Host" },
+          { value: "Restaurant Manager", label: "Restaurant Manager" },
+          { value: "Restaurant Supervisor", label: "Restaurant Supervisor" },
+          { value: "Server", label: "Server" },
+          { value: "VIP Host", label: "VIP Host" },
+          { value: "VIP Manager", label: "VIP Manager" },
+          { value: "VIP Server", label: "VIP Server" },
+          { value: "Waiter/Waitress", label: "Waiter/Waitress" },
+          { value: "Other", label: "Other" },
+        ],
+      },
+      {
+        id: "distance",
+        name: "Distance",
+        options: [
+          { value: 0, label: "Any Distance" },
+          { value: 1, label: "Less than 1km" },
+          { value: 5, label: "Less than 5km" },
+          { value: 10, label: "Less than 10km" },
+          { value: 20, label: "Less than 20km" },
+          { value: 50, label: "Less than 50km" },
+          { value: 100, label: "Less than 100km" },
+          { value: 101, label: "100km+" },
+        ],
+      },
+      {
+        id: "city",
+        name: "City/Town",
+        options: cities.map((city) => ({
+          value: city,
+          label: city.charAt(0).toUpperCase() + city.slice(1), // Capitalize first letter
+        })),
+      },
+    ],
+    [cities]
+  );
 
   const handleFilterChange = (filterId, value, checked) => {
     setSelectedFilters((prev) => {
@@ -486,4 +481,6 @@ export default function SortBar({ children, onSortChange, onFilterChange }) {
       </section>
     </div>
   );
-}
+});
+
+export default SortBar;

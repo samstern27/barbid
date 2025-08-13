@@ -4,9 +4,10 @@ import FindWorkDivider from "../../../components/User/FindWork/FindWorkDivider";
 import FindWorkHeading from "../../../components/User/FindWork/FindWorkHeading";
 import SortBar from "../../../components/User/FindWork/SortBar";
 import Loader from "../../../components/UI/Loader";
-import { useJob } from "../../../contexts/JobContext";
+import { JobProvider, useJob } from "../../../contexts/JobContext";
+import { LocationProvider } from "../../../contexts/LocationContext";
 
-const FindWork = () => {
+const FindWorkContent = () => {
   const { publicJobs, loading } = useJob();
 
   const [sortMethod, setSortMethod] = useState("closest");
@@ -32,6 +33,16 @@ const FindWork = () => {
         <FindWorkDivider sortMethod={sortMethod} filters={filters} />
       )}
     </div>
+  );
+};
+
+const FindWork = () => {
+  return (
+    <LocationProvider>
+      <JobProvider>
+        <FindWorkContent />
+      </JobProvider>
+    </LocationProvider>
   );
 };
 

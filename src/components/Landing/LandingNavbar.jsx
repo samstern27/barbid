@@ -26,7 +26,7 @@ const LandingNavbar = () => {
           <div className="flex lg:flex-1">
             <a href="#" className="-m-1.5 p-1.5">
               <span className="sr-only">barbid</span>
-              <h1 className="text-2xl font-medium text-red-400 tracking-widest">
+              <h1 className="text-2xl font-medium text-indigo-600 tracking-widest">
                 barbid
               </h1>
             </a>
@@ -46,7 +46,7 @@ const LandingNavbar = () => {
               <NavLink
                 key={item.name}
                 to={item.href}
-                className="text-sm/6 font-light text-gray-900 hover:text-red-400"
+                className="text-sm/6 font-light text-gray-900 hover:text-indigo-600"
               >
                 {item.name}
               </NavLink>
@@ -56,7 +56,7 @@ const LandingNavbar = () => {
             <NavLink
               to="/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-sm/6 font-medium text-gray-900 hover:text-red-400"
+              className="text-sm/6 font-medium text-gray-900 hover:text-indigo-600"
             >
               Log in <span aria-hidden="true">&rarr;</span>
             </NavLink>
@@ -72,7 +72,7 @@ const LandingNavbar = () => {
             <div className="flex items-center justify-between">
               <a href="#" className="-m-1.5 p-1.5">
                 <span className="sr-only">BarBid</span>
-                <h1 className="text-2xl font-medium text-red-400 tracking-widest">
+                <h1 className="text-2xl font-medium text-indigo-600 tracking-widest">
                   barbid
                 </h1>
               </a>
@@ -93,7 +93,7 @@ const LandingNavbar = () => {
                       key={item.name}
                       to={item.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-light text-gray-900 hover:bg-gray-50 hover:text-red-400"
+                      className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-light text-gray-900 hover:bg-gray-50 hover:text-indigo-600"
                     >
                       {item.name}
                     </NavLink>
@@ -103,7 +103,7 @@ const LandingNavbar = () => {
                   <NavLink
                     to="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-medium text-gray-900 hover:bg-gray-50 hover:text-red-400"
+                    className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-medium text-gray-900 hover:bg-gray-50 hover:text-indigo-600"
                   >
                     Log in
                   </NavLink>

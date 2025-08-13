@@ -9,7 +9,9 @@ const HowItWorks = () => {
     <div className="overflow-hidden bg-white py-24 sm:py-32">
       <div className="mx-auto max-w-2xl px-6 lg:max-w-7xl lg:px-8">
         <div className="max-w-4xl">
-          <p className="text-base/7 font-semibold text-red-400">How It Works</p>
+          <p className="text-base/7 font-semibold text-indigo-600">
+            How It Works
+          </p>
           <h1 className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">
             Connecting talent with opportunity in hospitality
           </h1>
@@ -21,7 +23,7 @@ const HowItWorks = () => {
         </div>
         <section className="mt-20 grid grid-cols-1 lg:grid-cols-2 lg:gap-x-8 lg:gap-y-16">
           <div className="lg:pr-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-pretty text-red-400">
+            <h2 className="text-2xl font-semibold tracking-tight text-pretty text-indigo-600">
               Our mission
             </h2>
             <p className="mt-6 text-base/7 text-gray-600">
@@ -81,28 +83,32 @@ const HowItWorks = () => {
             <p className="text-base/7 font-semibold text-grey-500">
               UK Hospitality Industry
             </p>
-            <hr className="mt-6 border-t border-red-400" />
+            <hr className="mt-6 border-t border-indigo-600" />
             <dl className="mt-6 grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
-              <div className="flex flex-col gap-y-2 border-b border-dotted border-red-400 pb-4">
-                <dt className="text-sm/6 text-red-400">Industry Value</dt>
+              <div className="flex flex-col gap-y-2 border-b border-dotted border-indigo-600 pb-4">
+                <dt className="text-sm/6 text-indigo-600">Industry Value</dt>
                 <dd className="order-first text-6xl font-semibold tracking-tight">
                   £<span>60</span>B
                 </dd>
               </div>
-              <div className="flex flex-col gap-y-2 border-b border-dotted border-red-400 pb-4">
-                <dt className="text-sm/6 text-red-400">Hospitality Workers</dt>
+              <div className="flex flex-col gap-y-2 border-b border-dotted border-indigo-600 pb-4">
+                <dt className="text-sm/6 text-indigo-600">
+                  Hospitality Workers
+                </dt>
                 <dd className="order-first text-6xl font-semibold tracking-tight">
                   <span>3M</span>+
                 </dd>
               </div>
               <div className="flex flex-col gap-y-2 max-sm:border-b max-sm:border-dotted max-sm:border-gray-200 max-sm:pb-4">
-                <dt className="text-sm/6 text-red-400">Businesses</dt>
+                <dt className="text-sm/6 text-indigo-600">Businesses</dt>
                 <dd className="order-first text-6xl font-semibold tracking-tight">
                   <span>1.2</span>M
                 </dd>
               </div>
               <div className="flex flex-col gap-y-2">
-                <dt className="text-sm/6 text-red-400">Shifts Filled Daily</dt>
+                <dt className="text-sm/6 text-indigo-600">
+                  Shifts Filled Daily
+                </dt>
                 <dd className="order-first text-6xl font-semibold tracking-tight">
                   <span>100</span>K+
                 </dd>

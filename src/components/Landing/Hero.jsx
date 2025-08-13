@@ -3,7 +3,7 @@ import barGlow from "../../assets/images/bar-glow.jpg";
 
 const Hero = () => {
   return (
-    <div className="relative isolate overflow-hidden bg-red-400">
+    <div className="relative isolate overflow-hidden bg-indigo-800">
       <div className="px-6 py-24 sm:px-6 sm:py-32 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-4xl font-semibold tracking-tight text-balance text-white sm:text-5xl">
@@ -43,8 +43,9 @@ const Hero = () => {
         />
         <defs>
           <radialGradient id="8d958450-c69f-4251-94bc-4e091a323369">
-            <stop stopColor="#FFEB3B" />
-            <stop offset={1} stopColor="#FFE082" />
+            <stop stopColor="#ffffff" />
+            <stop offset={0.5} stopColor="#93c5fd" />
+            <stop offset={1} stopColor="#3B82F6" />
           </radialGradient>
         </defs>
       </svg>

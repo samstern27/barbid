@@ -63,7 +63,7 @@ const Contact = () => {
                 />
               </svg>
             </div>
-            <h2 className="text-4xl font-semibold tracking-tight text-pretty text-red-400 sm:text-5xl">
+            <h2 className="text-4xl font-semibold tracking-tight text-pretty text-indigo-600 sm:text-5xl">
               Let's chat
             </h2>
             <p className="mt-6 text-lg/8 text-gray-600">
@@ -77,7 +77,7 @@ const Contact = () => {
                   <span className="sr-only">Telephone</span>
                   <PhoneIcon
                     aria-hidden="true"
-                    className="h-7 w-6 text-red-400"
+                    className="h-7 w-6 text-indigo-600"
                   />
                 </dt>
                 <dd>
@@ -91,7 +91,7 @@ const Contact = () => {
                   <span className="sr-only">Email</span>
                   <EnvelopeIcon
                     aria-hidden="true"
-                    className="h-7 w-6 text-red-400"
+                    className="h-7 w-6 text-indigo-600"
                   />
                 </dt>
                 <dd>
@@ -127,7 +127,7 @@ const Contact = () => {
                     name="first-name"
                     type="text"
                     autoComplete="given-name"
-                    className="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-red-400"
+                    className="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
                   />
                 </div>
               </div>
@@ -144,7 +144,7 @@ const Contact = () => {
                     name="last-name"
                     type="text"
                     autoComplete="family-name"
-                    className="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-red-400"
+                    className="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
                   />
                 </div>
               </div>
@@ -162,7 +162,7 @@ const Contact = () => {
                     name="email"
                     type="email"
                     autoComplete="email"
-                    className="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-red-400"
+                    className="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
                   />
                 </div>
               </div>
@@ -179,7 +179,7 @@ const Contact = () => {
                     name="phone-number"
                     type="tel"
                     autoComplete="tel"
-                    className="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-red-400"
+                    className="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
                   />
                 </div>
               </div>
@@ -195,7 +195,7 @@ const Contact = () => {
                     id="message"
                     name="message"
                     rows={4}
-                    className="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-red-400"
+                    className="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
                     defaultValue={""}
                   />
                 </div>
@@ -204,7 +204,7 @@ const Contact = () => {
             <div className="mt-8 flex justify-end">
               <button
                 type="submit"
-                className="rounded-md bg-red-400 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-red-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400"
+                className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
                 Send message
               </button>

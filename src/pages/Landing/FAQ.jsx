@@ -59,7 +59,7 @@ const FAQ = () => {
       <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8 lg:py-40">
         <div className="mx-auto max-w-4xl">
           <h2 className="text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-            Your questions, <span className="text-red-400">answered</span>
+            Your questions, <span className="text-indigo-600">answered</span>
           </h2>
           <dl className="mt-16 divide-y divide-gray-400">
             {faqs.map((faq) => (
@@ -73,7 +73,7 @@ const FAQ = () => {
                     <span className="text-base/7 font-semibold">
                       {faq.question}
                     </span>
-                    <span className="ml-6 flex h-7 items-center text-red-400">
+                    <span className="ml-6 flex h-7 items-center text-indigo-600">
                       <PlusSmallIcon
                         aria-hidden="true"
                         className="size-6 group-data-open:hidden"

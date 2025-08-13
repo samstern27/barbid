@@ -22,7 +22,7 @@ const Loader = memo(
           ></div>
           {/* Spinning inner ring */}
           <div
-            className={`${sizeClasses[size]} absolute top-0 left-0 rounded-full border-4 border-transparent border-t-red-400 animate-spin`}
+            className={`${sizeClasses[size]} absolute top-0 left-0 rounded-full border-4 border-transparent border-t-indigo-600 animate-spin`}
           ></div>
         </div>
 

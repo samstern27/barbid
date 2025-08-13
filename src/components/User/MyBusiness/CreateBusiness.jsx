@@ -58,7 +58,7 @@ export default function CreateBusiness({
         city.includes(" ") ? city.split(" ").join("+") : city
       },+${
         postcode.includes(" ") ? postcode.split(" ").join("+") : postcode
-      }&key=${import.meta.env.VITE_GEOCODING_API_KEY}`;
+      }&key=${import.meta.env.VITE_GOOGLE_API_KEY}`;
 
       const res = await fetch(url);
       if (!res.ok) {

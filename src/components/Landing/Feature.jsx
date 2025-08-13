@@ -33,7 +33,7 @@ const Feature = () => {
         <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
           <div className="lg:pt-4 lg:pr-8">
             <div className="lg:max-w-lg">
-              <h2 className="text-base/7 font-semibold text-red-400">
+              <h2 className="text-base/7 font-semibold text-indigo-600">
                 Work on your terms
               </h2>
               <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">
@@ -49,7 +49,7 @@ const Feature = () => {
                     <dt className="inline font-semibold text-gray-900">
                       <feature.icon
                         aria-hidden="true"
-                        className="absolute top-1 left-1 size-5 text-red-400"
+                        className="absolute top-1 left-1 size-5 text-indigo-600"
                       />
                       {feature.name}
                     </dt>{" "}

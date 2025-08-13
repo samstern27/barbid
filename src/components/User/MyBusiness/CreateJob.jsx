@@ -52,6 +52,18 @@ export default function CreateJob({ createJobOpen, setCreateJobOpen }) {
       return;
     }
 
+    // Check if start time is at least 2 hours from now
+    const now = new Date();
+    const startTime = new Date(startOfShift);
+    const twoHoursFromNow = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+
+    if (startTime <= twoHoursFromNow) {
+      setError(
+        "Start of shift must be at least 2 hours from now to allow time for applications"
+      );
+      return;
+    }
+
     if (!payRate) {
       setError("Pay rate is required");
       return;
@@ -88,7 +100,7 @@ export default function CreateJob({ createJobOpen, setCreateJobOpen }) {
         payRate: payRate,
         description: description,
         status: "Open",
-        applicants: 0,
+        applicantCount: 0,
         location: {
           address: selectedBusiness.address,
           postcode: selectedBusiness.postcode,
@@ -99,6 +111,7 @@ export default function CreateJob({ createJobOpen, setCreateJobOpen }) {
         jobId: jobId,
         businessId: selectedBusiness.id,
         businessName: selectedBusiness.name,
+        businessOwnerId: userId,
         createdAt: new Date().toISOString(),
       };
 
@@ -134,6 +147,20 @@ export default function CreateJob({ createJobOpen, setCreateJobOpen }) {
       await update(businessRef, {
         jobListings: jobsCount,
       });
+
+      // Also update the public business reference if it exists
+      const publicBusinessRef = ref(
+        db,
+        `public/businesses/${selectedBusiness.id}`
+      );
+      try {
+        await update(publicBusinessRef, {
+          jobListings: jobsCount,
+        });
+      } catch (error) {
+        // Public business might not exist yet, that's okay
+        console.log("Public business reference not found, skipping update");
+      }
 
       setCreateJobOpen(false);
 

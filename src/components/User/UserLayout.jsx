@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "../../contexts/AuthContext";
+import { useNotification } from "../../contexts/NotificationContext";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getDatabase, ref, onValue } from "firebase/database";
@@ -27,6 +28,7 @@ import {
   StarIcon,
 } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import Notification from "../UI/Notification";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -34,10 +36,10 @@ function classNames(...classes) {
 
 export default function UserLayout() {
   const { currentUser, logout } = useAuth();
+  const { toggleNotificationPanel, unreadCount } = useNotification();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userData, setUserData] = useState(null);
   const location = useLocation();
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
@@ -121,7 +123,7 @@ export default function UserLayout() {
               {/* Mobile Sidebar */}
               <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-950 px-6 pb-4 ring-1 ring-white/10">
                 <div className="flex h-16 shrink-0 items-center">
-                  <h1 className="text-2xl font-medium text-red-400 tracking-widest">
+                  <h1 className="text-2xl font-medium text-indigo-600 tracking-widest">
                     barbid
                   </h1>
                 </div>
@@ -138,8 +140,8 @@ export default function UserLayout() {
                               className={({ isActive }) =>
                                 classNames(
                                   isActive
-                                    ? "bg-red-500 text-white"
-                                    : "text-gray-400 hover:bg-gray-800 hover:text-red-400",
+                                    ? "bg-indigo-600 text-white"
+                                    : "text-gray-400 hover:bg-gray-800 hover:text-indigo-600",
                                   "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
                                 )
                               }
@@ -166,8 +168,8 @@ export default function UserLayout() {
                               to={business.href}
                               className={classNames(
                                 business.current
-                                  ? "bg-red-500 text-white"
-                                  : "text-gray-400 hover:bg-gray-800 hover:text-red-400",
+                                  ? "bg-indigo-600 text-white"
+                                  : "text-gray-400 hover:bg-gray-800 hover:text-indigo-600",
                                 "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
                               )}
                             >
@@ -188,8 +190,8 @@ export default function UserLayout() {
                         className={({ isActive }) =>
                           classNames(
                             isActive
-                              ? "bg-red-500 text-white"
-                              : "text-gray-400 hover:bg-gray-800 hover:text-red-400",
+                              ? "bg-indigo-600 text-white"
+                              : "text-gray-400 hover:bg-gray-800 hover:text-indigo-600",
                             "group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
                           )
                         }
@@ -213,7 +215,7 @@ export default function UserLayout() {
           <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-950 px-6 pb-4">
             <div className="flex h-16 shrink-0 items-center">
               <span className="sr-only">barbid</span>
-              <h1 className="text-2xl font-medium text-red-400 tracking-widest">
+              <h1 className="text-2xl font-medium text-indigo-300 tracking-widest">
                 barbid
               </h1>
             </div>
@@ -229,8 +231,8 @@ export default function UserLayout() {
                           className={({ isActive }) =>
                             classNames(
                               isActive
-                                ? "bg-red-500 text-white"
-                                : "text-gray-400 hover:bg-gray-800 hover:text-red-400",
+                                ? "bg-indigo-600 text-white"
+                                : "text-gray-400 hover:bg-gray-800 hover:text-indigo-300",
                               "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
                             )
                           }
@@ -257,8 +259,8 @@ export default function UserLayout() {
                           aria-label={business.name}
                           className={classNames(
                             business.current
-                              ? "bg-red-500 text-white"
-                              : "text-gray-400 hover:bg-gray-800 hover:text-red-400",
+                              ? "bg-indigo-600 text-white"
+                              : "text-gray-400 hover:bg-gray-800 hover:text-indigo-300",
                             "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
                           )}
                         >
@@ -278,8 +280,8 @@ export default function UserLayout() {
                     className={({ isActive }) =>
                       classNames(
                         isActive
-                          ? "bg-red-500 text-white"
-                          : "text-gray-400 hover:bg-gray-800 hover:text-red-400",
+                          ? "bg-indigo-600 text-white"
+                          : "text-gray-400 hover:bg-gray-800 hover:text-indigo-300",
                         "group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
                       )
                     }
@@ -297,7 +299,7 @@ export default function UserLayout() {
         </div>
 
         <div className="lg:pl-72">
-          <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-xs sm:gap-x-6 sm:px-6 lg:px-8">
+          <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-xs sm:gap-x-6 sm:px-6 lg:px-8 relative">
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
@@ -328,16 +330,31 @@ export default function UserLayout() {
                 />
               </form>
               <div className="flex items-center gap-x-4 lg:gap-x-6">
-                <button
-                  type="button"
-                  className="-m-2.5 p-2.5 text-red-400 hover:text-red-500"
-                >
-                  <span className="sr-only">View notifications</span>
-                  <BellIcon
-                    aria-hidden="true"
-                    className="size-6 text-red-400"
-                  />
-                </button>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={toggleNotificationPanel}
+                    className="-m-2.5 p-2.5 text-indigo-600 hover:text-indigo-500 transition-all duration-200 cursor-pointer hover:scale-110 relative -mt-1"
+                  >
+                    <span className="sr-only">View notifications</span>
+                    <BellIcon
+                      aria-hidden="true"
+                      className={`size-8 text-indigo-600 transition-transform duration-200 ${
+                        unreadCount > 0 ? "animate-pulse" : ""
+                      }`}
+                    />
+
+                    {/* Notification badge */}
+                    {unreadCount > 0 && (
+                      <span className="absolute top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-red-600 text-[10px] font-medium transition-opacity duration-200 animate-pulse-reverse">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    )}
+                  </button>
+                </div>
+
+                {/* Notification positioned relative to main page container */}
+                <Notification />
 
                 {/* Separator */}
                 <div
@@ -347,7 +364,7 @@ export default function UserLayout() {
 
                 {/* Profile dropdown */}
                 <Menu as="div" className="relative">
-                  <MenuButton className="-m-1.5 flex items-center p-1.5 focus:outline-red-400">
+                  <MenuButton className="-m-1.5 flex items-center p-1.5 focus:outline-indigo-600">
                     <span className="sr-only">Open user menu</span>
                     <img
                       alt={userData?.profile?.username}
@@ -375,19 +392,19 @@ export default function UserLayout() {
                       <NavLink
                         to={"/profile/" + userData?.profile?.username}
                         aria-label="Your profile"
-                        className="block px-3 py-1 text-sm/6 text-gray-900 data-focus:bg-red-50 data-focus:outline-hidden"
+                        className="block px-3 py-1 text-sm/6 text-gray-900 data-focus:bg-indigo-50 data-focus:outline-hidden"
                       >
                         Your profile
                       </NavLink>
                     </MenuItem>
                     <MenuItem>
-                      <NavLink
+                      <button
                         onClick={() => logout()}
                         aria-label="Sign out"
-                        className="block px-3 py-1 text-sm/6 text-gray-900 data-focus:bg-red-50 data-focus:outline-hidden"
+                        className="block w-full text-left px-3 py-1 text-sm/6 text-gray-900 data-focus:bg-indigo-50 data-focus:outline-hidden"
                       >
                         Sign out
-                      </NavLink>
+                      </button>
                     </MenuItem>
                   </MenuItems>
                 </Menu>

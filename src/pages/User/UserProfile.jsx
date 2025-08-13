@@ -1,7 +1,8 @@
 import { useAuth } from "../../contexts/AuthContext";
-import { getDatabase, ref, onValue } from "firebase/database";
+import { getDatabase, ref, onValue, get } from "firebase/database";
 import { useState, useEffect } from "react";
 import { writeUserData } from "../../firebase/firebase";
+import { useParams } from "react-router-dom";
 
 import TopBar from "../../components/User/UserProfile/TopBar";
 import Skills from "../../components/User/UserProfile/Skills";
@@ -13,16 +14,34 @@ import BentoGrid from "../../components/User/UserProfile/BentoGrid";
 
 const UserProfile = () => {
   const { currentUser } = useAuth();
+  const { username } = useParams();
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     const db = getDatabase();
-    const reference = ref(db, "users/" + currentUser?.uid);
-    onValue(reference, (snapshot) => {
-      const data = snapshot.val();
-      setUserData(data);
-    });
-  }, [currentUser]);
+    if (username) {
+      // First, find the user ID by username
+      const usernamesRef = ref(db, "usernames/" + username);
+      get(usernamesRef).then((snapshot) => {
+        if (snapshot.exists()) {
+          const userId = snapshot.val();
+          // Now fetch the user's profile data
+          const userRef = ref(db, "users/" + userId + "/profile");
+          onValue(userRef, (profileSnapshot) => {
+            const profileData = profileSnapshot.val();
+            setUserData({ profile: profileData });
+          });
+        }
+      });
+    } else {
+      // Fallback to current user's profile
+      const userRef = ref(db, "users/" + currentUser?.uid + "/profile");
+      onValue(userRef, (snapshot) => {
+        const data = snapshot.val();
+        setUserData({ profile: data });
+      });
+    }
+  }, [username, currentUser]);
 
   const themeClasses = {
     amber: ["bg-amber-900", "text-amber-900", "bg-amber-200", "text-amber-900"],
@@ -101,7 +120,7 @@ const UserProfile = () => {
     about: userData?.profile?.about,
     theme: userData?.profile?.theme || "gray",
     reviews: userData?.profile?.reviews,
-    id: currentUser?.uid,
+    id: username || currentUser?.uid,
   };
 
   return (

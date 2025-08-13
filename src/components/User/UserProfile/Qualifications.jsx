@@ -1,29 +1,4 @@
-const qualifications = [
-  {
-    name: "Personal Licence Holder",
-    date: "2025-01-01",
-  },
-  {
-    name: "BIIAB Level 2",
-    date: "2025-01-01",
-  },
-  {
-    name: "Cicerone Certified Beer Server",
-    date: "2025-01-01",
-  },
-  {
-    name: "Fire Safety Awareness Certificate",
-    date: "2025-01-01",
-  },
-  {
-    name: "HACCP Level 2",
-    date: "2025-01-01",
-  },
-  {
-    name: "Emergency First Aid at Work",
-    date: "2025-01-01",
-  },
-];
+// Use profile data instead of hardcoded data
 
 const themeClasses = {
   amber: ["bg-amber-800", "text-amber-100", "text-amber-800"],
@@ -62,27 +37,33 @@ export default function Qualifications({ profile }) {
           Qualifications
         </h3>
       </div>
-      <ul role="list" className="divide-y divide-gray-100">
-        {qualifications.map((qualification, index) => (
-          <li
-            key={`${qualification.name}-${index}`}
-            className="flex gap-x-4 py-5 text-left lg:text-right"
-          >
-            <div className=" min-w-0 lg:ml-auto text-left lg:text-right lg:mx-0">
-              <p
-                className={`text-sm/6 font-semibold text-white text-left lg:text-right`}
-              >
-                {qualification.name}
-              </p>
-              <p
-                className={`mt-1 truncate text-xs/5 text-white text-left lg:text-right`}
-              >
-                {qualification.date}
-              </p>
-            </div>
-          </li>
-        ))}
-      </ul>
+      {profile.qualifications && profile.qualifications.length > 0 ? (
+        <ul role="list" className="divide-y divide-gray-100">
+          {profile.qualifications.map((qualification, index) => (
+            <li
+              key={`${qualification.name}-${index}`}
+              className="flex gap-x-4 py-5 text-left lg:text-right"
+            >
+              <div className=" min-w-0 lg:ml-auto text-left lg:text-right lg:mx-0">
+                <p
+                  className={`text-sm/6 font-semibold text-white text-left lg:text-right`}
+                >
+                  {qualification.name}
+                </p>
+                <p
+                  className={`mt-1 truncate text-xs/5 text-white text-left lg:text-right`}
+                >
+                  {qualification.date}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="py-8 text-center">
+          <p className="text-sm text-gray-400">No qualifications added yet.</p>
+        </div>
+      )}
     </div>
   );
 }

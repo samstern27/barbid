@@ -1,3 +1,4 @@
+import React from "react";
 import {
   CalendarIcon,
   CurrencyPoundIcon,
@@ -10,10 +11,13 @@ import getDistance from "../../../utils/getDistance";
 import { LocationContext } from "../../../contexts/LocationContext";
 import { useContext, useMemo } from "react";
 
-const FindWorkJob = ({ job }) => {
+const FindWorkJob = React.memo(({ job }) => {
   // Calculate distance from user's location
   const { coords } = useContext(LocationContext);
   const distance = useMemo(() => {
+    // Only calculate distance if we have coordinates
+    if (!coords.lat || !coords.lng) return null;
+
     return getDistance(
       job.location.lat,
       job.location.lng,
@@ -26,7 +30,7 @@ const FindWorkJob = ({ job }) => {
       <div className="min-w-0 flex-1 flex-row">
         <h2 className="text-xl font-bold text-gray-900 sm:truncate sm:text-2xl sm:tracking-tight">
           {job.businessName} -{" "}
-          <span className="text-md font-normal text-red-500">
+          <span className="text-md font-normal text-indigo-600">
             {job.jobTitle}
           </span>
         </h2>
@@ -60,13 +64,15 @@ const FindWorkJob = ({ job }) => {
             />
             {job.location.address}, {job.location.postcode}, {job.location.city}
           </div>
-          <div className="mt-2 flex items-center text-sm text-gray-500">
-            <MapPinIcon
-              aria-hidden="true"
-              className="mr-1.5 size-5 shrink-0 text-gray-400"
-            />
-            {distance.toFixed(1)} km
-          </div>
+          {distance !== null && (
+            <div className="mt-2 flex items-center text-sm text-gray-500">
+              <MapPinIcon
+                aria-hidden="true"
+                className="mr-1.5 size-5 shrink-0 text-gray-400"
+              />
+              {distance.toFixed(1)} km
+            </div>
+          )}
         </div>
       </div>
       <div className="mt-5 flex lg:mt-0 lg:ml-4">
@@ -96,6 +102,6 @@ const FindWorkJob = ({ job }) => {
       </div>
     </div>
   );
-};
+});
 
 export default FindWorkJob;

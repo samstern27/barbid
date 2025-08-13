@@ -1,86 +1,87 @@
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
-import Breadcrumb from "../../UI/Breadcrumb";
+import Breadcrumb from "../../../components/UI/Breadcrumb";
 import { useParams } from "react-router-dom";
 import { getDatabase, ref, onValue } from "firebase/database";
 import { useAuth } from "../../../contexts/AuthContext";
-import { useBusiness } from "../../../contexts/BusinessContext";
 import { useState, useEffect } from "react";
 import { ChevronDownIcon } from "@heroicons/react/16/solid";
-import Loader from "../../UI/Loader";
+import Loader from "../../../components/UI/Loader";
+import { JobProvider, useJob } from "../../../contexts/JobContext";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-const MyBusinessDetailLayout = () => {
-  const { businessId } = useParams();
+const MyJobsLayoutContent = () => {
+  const { jobId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser } = useAuth();
-  const { selectBusinessById } = useBusiness();
+  const { selectJobById } = useJob();
 
-  const [business, setBusiness] = useState(null);
+  const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch business data using businessId from params
+  // Check if we're in overview mode (no jobId) or detail mode (with jobId)
+  const isOverviewMode = !jobId;
+
+  // Fetch job data using jobId from params (only when in detail mode)
   useEffect(() => {
-    if (!businessId || !currentUser?.uid) {
+    if (isOverviewMode) {
+      setLoading(false);
+      return;
+    }
+
+    if (!jobId || !currentUser?.uid) {
       setLoading(false);
       return;
     }
 
     const db = getDatabase();
-    const businessRef = ref(
-      db,
-      `users/${currentUser.uid}/business/${businessId}`
-    );
+    const jobRef = ref(db, `users/${currentUser.uid}/jobs/${jobId}`);
 
-    const unsubscribe = onValue(businessRef, (snapshot) => {
+    const unsubscribe = onValue(jobRef, (snapshot) => {
       if (snapshot.exists()) {
-        const businessData = { id: businessId, ...snapshot.val() };
-        setBusiness(businessData);
-        // Update the BusinessContext with the current business
-        selectBusinessById(businessId);
+        const jobData = { id: jobId, ...snapshot.val() };
+        setJob(jobData);
+        // Update the JobContext with the current job
+        selectJobById(jobId);
       } else {
-        // Business not found, redirect to my-business
-        navigate("/my-business");
+        // Job not found, redirect to overview
+        navigate("/jobs/overview");
       }
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [businessId, currentUser?.uid, navigate, selectBusinessById]);
+  }, [jobId, currentUser?.uid, navigate, selectJobById, isOverviewMode]);
 
   const tabs = [
-    { name: "Overview", href: `/my-business/${businessId}/overview` },
+    { name: "Overview", href: "/jobs/overview" },
     {
-      name: "Job Listings",
-      href: `/my-business/${businessId}/job-listings`,
+      name: "Active",
+      href: "/jobs/active",
     },
     {
-      name: "Past Candidates",
-      href: `/my-business/${businessId}/past-candidates`,
+      name: "Accepted",
+      href: "/jobs/accepted",
     },
-    { name: "Reviews", href: `/my-business/${businessId}/reviews` },
-    { name: "Settings", href: `/my-business/${businessId}/settings` },
+    {
+      name: "Rejected",
+      href: "/jobs/rejected",
+    },
   ];
 
-  const pages = [
-    { name: "Businesses", href: "/my-business", current: false },
-    {
-      name: business?.name,
-      href: `/my-business/${businessId}/overview`,
-      current: true,
-    },
-  ];
+  const pages = [{ name: "Jobs", href: "/jobs", current: false }];
 
   return (
     <div className="flex flex-col m-10 gap-6">
       <Breadcrumb pages={pages} />
       <div className="border-b border-gray-200 pb-5 sm:pb-0 animate-[fadeIn_0.6s_ease-in-out]">
         <h3 className="text-base font-semibold text-gray-900">
-          {business?.name}
+          {isOverviewMode ? "My Jobs" : job?.title}
         </h3>
+
         <div className="mt-3 sm:mt-4">
           <div className="grid grid-cols-1 sm:hidden">
             <select
@@ -134,7 +135,7 @@ const MyBusinessDetailLayout = () => {
       </div>
       {loading ? (
         <div className="flex flex-1 flex-col justify-center items-center min-h-[60vh]">
-          <Loader size="2xl" text="Loading business..." />
+          <Loader size="2xl" text="Loading job..." />
         </div>
       ) : (
         <Outlet />
@@ -143,4 +144,12 @@ const MyBusinessDetailLayout = () => {
   );
 };
 
-export default MyBusinessDetailLayout;
+const MyJobsLayout = () => {
+  return (
+    <JobProvider>
+      <MyJobsLayoutContent />
+    </JobProvider>
+  );
+};
+
+export default MyJobsLayout;

@@ -120,6 +120,8 @@ export default function UserSettings() {
     oneLine: "",
     occupation: "",
     skills: [],
+    qualifications: [],
+    experience: [],
     profilePicture: "",
     avatar: "",
     theme: "",
@@ -143,6 +145,18 @@ export default function UserSettings() {
 
   // Add state for new skill input
   const [newSkill, setNewSkill] = useState("");
+
+  // Add state for new qualification input
+  const [newQualification, setNewQualification] = useState("");
+  const [newQualificationDate, setNewQualificationDate] = useState("");
+
+  // Add state for new experience input
+  const [newExperienceCompany, setNewExperienceCompany] = useState("");
+  const [newExperienceRole, setNewExperienceRole] = useState("");
+  const [newExperienceStartDate, setNewExperienceStartDate] = useState("");
+  const [newExperienceEndDate, setNewExperienceEndDate] = useState("");
+  const [newExperiencePosition, setNewExperiencePosition] =
+    useState("Full-time");
 
   // Load user data from the database when the component mounts or user changes
   useEffect(() => {
@@ -240,6 +254,71 @@ export default function UserSettings() {
     }
   };
 
+  // Add new qualification to the list
+  const handleAddQualification = () => {
+    if (newQualification.trim() && newQualificationDate) {
+      const qualification = {
+        name: newQualification.trim(),
+        date: newQualificationDate,
+      };
+      setProfileFormData((prev) => ({
+        ...prev,
+        qualifications: [...prev.qualifications, qualification],
+      }));
+      setNewQualification("");
+      setNewQualificationDate("");
+    }
+  };
+
+  // Remove qualification from the list
+  const handleRemoveQualification = (qualificationToRemove) => {
+    setProfileFormData((prev) => ({
+      ...prev,
+      qualifications: prev.qualifications.filter(
+        (qual) =>
+          qual.name !== qualificationToRemove.name ||
+          qual.date !== qualificationToRemove.date
+      ),
+    }));
+  };
+
+  // Add new experience to the list
+  const handleAddExperience = () => {
+    if (
+      newExperienceCompany.trim() &&
+      newExperienceRole.trim() &&
+      newExperienceStartDate
+    ) {
+      const experience = {
+        id: Date.now(), // Simple ID generation
+        name: newExperienceCompany.trim(),
+        role: newExperienceRole.trim(),
+        startDate: newExperienceStartDate,
+        endDate: newExperienceEndDate || "Present",
+        position: newExperiencePosition,
+      };
+      setProfileFormData((prev) => ({
+        ...prev,
+        experience: [...prev.experience, experience],
+      }));
+      setNewExperienceCompany("");
+      setNewExperienceRole("");
+      setNewExperienceStartDate("");
+      setNewExperienceEndDate("");
+      setNewExperiencePosition("Full-time");
+    }
+  };
+
+  // Remove experience from the list
+  const handleRemoveExperience = (experienceToRemove) => {
+    setProfileFormData((prev) => ({
+      ...prev,
+      experience: prev.experience.filter(
+        (exp) => exp.id !== experienceToRemove.id
+      ),
+    }));
+  };
+
   // Handle profile section submission
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
@@ -315,6 +394,8 @@ export default function UserSettings() {
         occupation: selectedOccupation?.name || profileFormData.occupation,
         oneLine: profileFormData.oneLine,
         skills: profileFormData.skills,
+        qualifications: profileFormData.qualifications,
+        experience: profileFormData.experience,
         about: profileFormData.about,
         profilePicture: newProfilePictureURL,
         coverPhoto: newCoverPhotoURL,
@@ -386,6 +467,8 @@ export default function UserSettings() {
         coverPhoto: originalData.coverPhoto,
         occupation: originalData.occupation,
         skills: originalData.skills,
+        qualifications: originalData.qualifications || [],
+        experience: originalData.experience || [],
         avatar: originalData.avatar,
         theme: originalData.theme,
         firstName: originalData.firstName,
@@ -598,6 +681,162 @@ export default function UserSettings() {
                 </div>
                 <p className="mt-2 text-sm/6 text-gray-600">
                   Add skills relevant to your role in the hospitality industry.
+                </p>
+              </div>
+
+              {/* Qualifications field */}
+              <div className="col-span-full">
+                <label
+                  htmlFor="qualifications"
+                  className="block text-sm/6 font-medium text-gray-900"
+                >
+                  Qualifications
+                </label>
+                <div className="mt-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newQualification}
+                      onChange={(e) => setNewQualification(e.target.value)}
+                      placeholder="Qualification name"
+                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
+                    />
+                    <input
+                      type="date"
+                      value={newQualificationDate}
+                      onChange={(e) => setNewQualificationDate(e.target.value)}
+                      className="block w-48 rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddQualification}
+                      className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {profileFormData.qualifications.map(
+                      (qualification, index) => (
+                        <span
+                          key={`${qualification.name}-${index}`}
+                          className="inline-flex items-center gap-x-0.5 rounded-md bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
+                        >
+                          {qualification.name} ({qualification.date})
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleRemoveQualification(qualification)
+                            }
+                            className="group relative -mr-1 size-3.5 rounded-xs hover:bg-blue-600/20"
+                          >
+                            <span className="sr-only">Remove</span>
+                            <svg
+                              viewBox="0 0 14 14"
+                              className="size-3.5 stroke-blue-800/50 group-hover:stroke-blue-800/75"
+                            >
+                              <path d="M4 4l6 6m0-6l-6 6" />
+                            </svg>
+                            <span className="absolute -inset-1" />
+                          </button>
+                        </span>
+                      )
+                    )}
+                  </div>
+                </div>
+                <p className="mt-2 text-sm/6 text-gray-600">
+                  Add your qualifications and certifications with the date
+                  obtained.
+                </p>
+              </div>
+
+              {/* Experience field */}
+              <div className="col-span-full">
+                <label
+                  htmlFor="experience"
+                  className="block text-sm/6 font-medium text-gray-900"
+                >
+                  Work Experience
+                </label>
+                <div className="mt-2 space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <input
+                      type="text"
+                      value={newExperienceCompany}
+                      onChange={(e) => setNewExperienceCompany(e.target.value)}
+                      placeholder="Company name"
+                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
+                    />
+                    <input
+                      type="text"
+                      value={newExperienceRole}
+                      onChange={(e) => setNewExperienceRole(e.target.value)}
+                      placeholder="Job role"
+                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <input
+                      type="date"
+                      value={newExperienceStartDate}
+                      onChange={(e) =>
+                        setNewExperienceStartDate(e.target.value)
+                      }
+                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
+                    />
+                    <input
+                      type="date"
+                      value={newExperienceEndDate}
+                      onChange={(e) => setNewExperienceEndDate(e.target.value)}
+                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
+                    />
+                    <select
+                      value={newExperiencePosition}
+                      onChange={(e) => setNewExperiencePosition(e.target.value)}
+                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
+                    >
+                      <option value="Full-time">Full-time</option>
+                      <option value="Part-time">Part-time</option>
+                      <option value="Casual">Casual</option>
+                      <option value="Contract">Contract</option>
+                      <option value="Temporary">Temporary</option>
+                    </select>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddExperience}
+                    className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  >
+                    Add Experience
+                  </button>
+                  <div className="mt-3 space-y-2">
+                    {profileFormData.experience.map((exp) => (
+                      <div
+                        key={exp.id}
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                      >
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {exp.name}
+                          </p>
+                          <p className="text-sm text-gray-600">{exp.role}</p>
+                          <p className="text-xs text-gray-500">
+                            {exp.startDate} - {exp.endDate} • {exp.position}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveExperience(exp)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <p className="mt-2 text-sm/6 text-gray-600">
+                  Add your work experience in the hospitality industry.
                 </p>
               </div>
 

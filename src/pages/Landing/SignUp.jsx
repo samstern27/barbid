@@ -89,7 +89,7 @@ const SignUp = () => {
 
   return (
     <div>
-      <div className="text-center bg-gradient-to-r from-red-400 to-red-400 min-h-[180px] sm:p-6 p-4">
+      <div className="text-center bg-gradient-to-r from-indigo-600 to-indigo-600 min-h-[180px] sm:p-6 p-4">
         <h4 className="sm:text-3xl text-2xl text-white font-medium mt-3">
           Create your free account
         </h4>
@@ -114,7 +114,7 @@ const SignUp = () => {
                 id="name"
                 name="name"
                 type="text"
-                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-red-400 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-indigo-600 outline-0 transition-all"
                 placeholder="Enter name"
                 required
                 ref={firstNameRef}
@@ -131,7 +131,7 @@ const SignUp = () => {
                 id="lname"
                 name="lname"
                 type="text"
-                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-red-400 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-indigo-600 outline-0 transition-all"
                 placeholder="Enter last name"
                 required
                 ref={lastNameRef}
@@ -148,7 +148,7 @@ const SignUp = () => {
                 id="email"
                 name="email"
                 type="email"
-                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-red-400 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-indigo-600 outline-0 transition-all"
                 placeholder="Enter email"
                 required
                 ref={emailRef}
@@ -165,7 +165,7 @@ const SignUp = () => {
                 id="number"
                 name="number"
                 type="tel"
-                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-red-400 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-indigo-600 outline-0 transition-all"
                 placeholder="Enter mobile number"
                 ref={numberRef}
               />
@@ -181,7 +181,7 @@ const SignUp = () => {
                 id="password"
                 name="password"
                 type="password"
-                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-red"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-indigo-600 outline-0 transition-all"
                 placeholder="Enter password"
                 required
                 ref={passwordRef}
@@ -198,7 +198,7 @@ const SignUp = () => {
                 id="cpassword"
                 name="cpassword"
                 type="password"
-                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-red-400 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-indigo-600 outline-0 transition-all"
                 placeholder="Enter confirm password"
                 required
                 ref={cpasswordRef}
@@ -215,7 +215,7 @@ const SignUp = () => {
                 id="dateOfBirth"
                 name="dateOfBirth"
                 type="date"
-                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-red-400 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-800 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-indigo-600 outline-0 transition-all"
                 required
                 ref={dateOfBirthRef}
               />
@@ -225,7 +225,7 @@ const SignUp = () => {
             <button
               type="submit"
               disabled={loading}
-              className="py-2.5 px-5 text-sm font-medium tracking-wider rounded-md cursor-pointer text-white bg-red-400 hover:bg-red-500 focus:outline-0 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="py-2.5 px-5 text-sm font-medium tracking-wider rounded-md cursor-pointer text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-0 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Creating account..." : "Sign up"}
             </button>
@@ -287,7 +287,7 @@ const SignUp = () => {
               Already have an account?{" "}
               <NavLink
                 to="/login"
-                className="text-red-400 hover:text-red-500 font-medium transition-colors"
+                className="text-indigo-600 hover:text-indigo-500 font-medium transition-colors"
               >
                 Log in
               </NavLink>
