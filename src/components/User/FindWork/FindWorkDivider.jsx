@@ -27,24 +27,53 @@ const FindWorkDivider = React.memo(
 
     // Memoize the expensive sorting and filtering calculations
     const sortedJobs = useMemo(() => {
-      if (!publicJobs || publicJobs.length === 0) return [];
+      if (!publicJobs || publicJobs.length === 0) {
+        console.log("FindWorkDivider: No public jobs to process");
+        return [];
+      }
+
+      console.log(
+        `FindWorkDivider: Processing ${publicJobs.length} public jobs`
+      );
 
       // Filter for only open jobs
       let jobs = publicJobs.filter((job) => job.status === "Open");
+      console.log(
+        `FindWorkDivider: After status filter (Open only): ${jobs.length} jobs`
+      );
 
-      if (jobs.length === 0) return [];
+      if (jobs.length === 0) {
+        console.log("FindWorkDivider: No open jobs found");
+        return [];
+      }
 
       // Filter out jobs from private businesses
       jobs = jobs.filter((job) => {
         // If we can't determine business privacy, assume it's public (show the job)
-        if (!job.businessPrivacy) return true;
+        if (!job.businessPrivacy) {
+          console.log(
+            `Job ${job.id}: No business privacy info, assuming public`
+          );
+          return true;
+        }
+        console.log(
+          `Job ${job.id}: Business privacy is ${
+            job.businessPrivacy
+          }, showing: ${job.businessPrivacy === "public"}`
+        );
         return job.businessPrivacy === "public";
       });
 
-      if (jobs.length === 0) return [];
+      console.log(`FindWorkDivider: After privacy filter: ${jobs.length} jobs`);
+
+      if (jobs.length === 0) {
+        console.log("FindWorkDivider: No public business jobs found");
+        return [];
+      }
 
       // Calculate distances for all jobs if we have user location
       if (coords.lat && coords.lng) {
+        console.log("FindWorkDivider: Calculating distances for jobs");
         jobs.forEach((job) => {
           if (job.location && job.location.lat && job.location.lng) {
             job.distance = getDistance(
@@ -53,90 +82,93 @@ const FindWorkDivider = React.memo(
               job.location.lat,
               job.location.lng
             );
+            console.log(
+              `Job ${job.id}: Distance calculated as ${job.distance} km`
+            );
+          } else {
+            console.log(
+              `Job ${job.id}: No location coordinates, skipping distance calculation`
+            );
           }
         });
+      } else {
+        console.log(
+          "FindWorkDivider: No user coordinates, skipping distance calculations"
+        );
       }
 
       // Apply filters
+      console.log("FindWorkDivider: Applying filters:", filters);
       jobs = jobs.filter((job) => {
         // Job position filter
         if (filters["job-position"] && filters["job-position"].length > 0) {
-          const jobTitle = job.jobTitle?.toLowerCase() || "";
-          const matchesPosition = filters["job-position"].some((position) =>
-            jobTitle.includes(position.toLowerCase())
+          const jobPosition = job.jobTitle?.toLowerCase() || "";
+          const hasMatchingPosition = filters["job-position"].some((filter) =>
+            jobPosition.includes(filter.toLowerCase())
           );
-          if (!matchesPosition) return false;
+          if (!hasMatchingPosition) {
+            console.log(`Job ${job.id}: Filtered out by job position filter`);
+            return false;
+          }
         }
 
         // Distance filter
         if (filters.distance && filters.distance.length > 0) {
-          const selectedDistance = filters.distance[0];
-          if (selectedDistance > 0) {
-            if (!job.distance && job.distance !== 0) return false;
-
-            if (selectedDistance === 101) {
-              // 100km+ filter
-              if (job.distance < 100) return false;
-            } else {
-              // Less than X km filters
-              if (job.distance >= selectedDistance) return false;
-            }
+          const maxDistance = Math.max(...filters.distance);
+          if (job.distance && job.distance > maxDistance) {
+            console.log(
+              `Job ${job.id}: Filtered out by distance filter (${job.distance} km > ${maxDistance} km)`
+            );
+            return false;
           }
         }
 
         // City filter
         if (filters.city && filters.city.length > 0) {
           const jobCity = job.location?.city?.toLowerCase() || "";
-          const matchesCity = filters.city.some((city) =>
-            jobCity.includes(city.toLowerCase())
+          const hasMatchingCity = filters.city.some((filter) =>
+            jobCity.includes(filter.toLowerCase())
           );
-          if (!matchesCity) return false;
+          if (!hasMatchingCity) {
+            console.log(`Job ${job.id}: Filtered out by city filter`);
+            return false;
+          }
         }
 
         return true;
       });
 
+      console.log(
+        `FindWorkDivider: After all filters: ${jobs.length} jobs remaining`
+      );
+
       // Apply sorting
-      switch (sortMethod) {
-        case "closest":
-          jobs.sort((a, b) => {
-            if (!a.distance && !b.distance) return 0;
-            if (!a.distance) return 1;
-            if (!b.distance) return 1;
-            return a.distance - b.distance;
-          });
-          break;
-
-        case "highest-paying":
-          jobs.sort((a, b) => {
-            const payA = parseFloat(a.payRate) || 0;
-            const payB = parseFloat(b.payRate) || 0;
-            return payB - payA; // Highest first
-          });
-          break;
-
-        case "newest":
-          jobs.sort((a, b) => {
-            const dateA = new Date(a.createdAt || 0);
-            const dateB = new Date(b.createdAt || 0);
-            return dateB - dateA; // Newest first
-          });
-          break;
-
-        case "least-applied":
-          jobs.sort((a, b) => {
-            const applicantsA = a.applicantCount || 0;
-            const applicantsB = b.applicantCount || 0;
-            return applicantsA - applicantsB; // Least applied first
-          });
-          break;
-
-        default:
-          break;
+      if (sortMethod === "closest") {
+        jobs.sort((a, b) => {
+          if (!a.distance && !b.distance) return 0;
+          if (!a.distance) return 1;
+          if (!b.distance) return -1;
+          return a.distance - b.distance;
+        });
+      } else if (sortMethod === "newest") {
+        jobs.sort((a, b) => {
+          const dateA = new Date(a.createdAt || 0);
+          const dateB = new Date(b.createdAt || 0);
+          return dateB - dateA;
+        });
+      } else if (sortMethod === "highest") {
+        jobs.sort((a, b) => {
+          const payA = parseFloat(a.payRate) || 0;
+          const payB = parseFloat(b.payRate) || 0;
+          return payB - payA;
+        });
       }
 
+      console.log(`FindWorkDivider: Final sorted jobs: ${jobs.length} jobs`);
+      console.log("FindWorkDivider: Jobs to render:", jobs);
+
       return jobs;
-    }, [publicJobs, coords.lat, coords.lng, filters, sortMethod]);
+    }, [publicJobs, coords, filters, sortMethod]);
 
     useEffect(() => {
       // When we get data from Firebase, check immediately

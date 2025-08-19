@@ -1,4 +1,5 @@
 import { useBusiness } from "../../../contexts/BusinessContext";
+import { useAuth } from "../../../contexts/AuthContext";
 import { useParams, useNavigate, NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
@@ -7,6 +8,7 @@ import {
   update,
   increment,
   onValue,
+  set,
 } from "firebase/database";
 import {
   EyeIcon,
@@ -23,6 +25,7 @@ import Loader from "../../UI/Loader";
 export default function MyBusinessJobListingsDetail() {
   const { jobId } = useParams();
   const { selectedBusiness, updateJob, deleteJob } = useBusiness();
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -144,6 +147,27 @@ export default function MyBusinessJobListingsDetail() {
           applicantAttended: true,
         });
 
+        // Create notification for the applicant that their shift has been completed
+        await set(
+          ref(
+            db,
+            `users/${job.acceptedUserId}/notifications/${jobId}_completed`
+          ),
+          {
+            id: `${jobId}_completed`,
+            type: "job_completed",
+            title: "Shift Completed!",
+            message: `Your shift at ${job.businessName} has been marked as completed.`,
+            avatar: null,
+            timestamp: now.toISOString(),
+            isRead: false,
+            jobId: jobId,
+            businessId: job.businessId,
+            businessName: job.businessName,
+            jobTitle: job.jobTitle,
+          }
+        );
+
         setVerificationResult({
           success: true,
           message: "Verification successful! Applicant marked as attended.",
@@ -194,13 +218,8 @@ export default function MyBusinessJobListingsDetail() {
   const handleDeleteJob = async () => {
     setIsDeleting(true);
     try {
+      // deleteJob() already handles updating jobListings counts
       await deleteJob(jobId);
-
-      const db = getDatabase();
-      const businessRef = ref(db, "businesses/" + selectedBusiness.id);
-      await update(businessRef, {
-        jobListings: increment(-1),
-      });
 
       // Navigate immediately after successful deletion
       navigate(`/my-business/${selectedBusiness.id}/job-listings`);

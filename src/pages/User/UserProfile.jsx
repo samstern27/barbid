@@ -177,12 +177,6 @@ const UserProfile = () => {
       <TopBar profile={profile} />
       <Stats profile={profile} />
       <BentoGrid profile={profile} />
-      <div className="flex flex-col lg:flex-row">
-        <Qualifications profile={profile} />
-        <Experience profile={profile} />
-      </div>
-      <About profile={profile} />
-      <Skills profile={profile} />
     </div>
   );
 };

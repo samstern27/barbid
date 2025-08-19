@@ -1,9 +1,11 @@
 import { useRef } from "react";
 import { Transition } from "@headlessui/react";
 import { useNotification } from "../../contexts/NotificationContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Notification() {
   const notificationRef = useRef(null);
+  const navigate = useNavigate();
   const {
     notifications,
     isOpen,
@@ -31,7 +33,43 @@ export default function Notification() {
     if (!notification.isRead) {
       markAsRead(notification.id);
     }
-    // TODO: Handle navigation or action based on notification type
+
+    // Handle navigation based on notification type
+    if (
+      notification.type === "job_application" &&
+      notification.jobId &&
+      notification.businessId
+    ) {
+      // Navigate to the job applicants list for business owners
+      navigate(
+        `/my-business/${notification.businessId}/job-listings/${notification.jobId}/applicants`
+      );
+      closeNotificationPanel();
+    } else if (notification.type === "job_accepted" && notification.jobId) {
+      // Navigate to the job application detail for accepted jobs
+      navigate(`/jobs/application/${notification.jobId}`);
+      closeNotificationPanel();
+    } else if (notification.type === "job_completed" && notification.jobId) {
+      // Navigate to the job application detail for completed jobs
+      navigate(`/jobs/application/${notification.jobId}`);
+      closeNotificationPanel();
+    } else if (
+      notification.type === "job_auto_closed" &&
+      notification.jobId &&
+      notification.businessId
+    ) {
+      // Navigate to the job details page for auto-closed jobs
+      navigate(
+        `/my-business/${notification.businessId}/job-listings/${notification.jobId}`
+      );
+      closeNotificationPanel();
+    }
+  };
+
+  // Handle "View all notifications" click
+  const handleViewAllNotifications = () => {
+    navigate("/activity");
+    closeNotificationPanel();
   };
 
   return (
@@ -168,7 +206,10 @@ export default function Notification() {
             {/* Footer */}
             {notifications.length > 0 && (
               <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-                <button className="w-full text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200 py-2 px-4 rounded-lg hover:bg-indigo-50">
+                <button
+                  onClick={handleViewAllNotifications}
+                  className="w-full text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200 py-2 px-4 rounded-lg hover:bg-indigo-50"
+                >
                   View all notifications
                 </button>
               </div>

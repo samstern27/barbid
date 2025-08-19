@@ -45,6 +45,13 @@
               ".write": "auth != null && auth.uid === $uid"
             }
           }
+        },
+        "notifications": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid",
+          "$notificationId": {
+            ".write": "auth != null && (auth.uid === $uid || (newData.child('type').val() == 'job_application' || newData.child('type').val() == 'job_accepted' || newData.child('type').val() == 'job_completed' || newData.child('type').val() == 'job_auto_closed'))"
+          }
         }
       }
     },
@@ -54,7 +61,19 @@
         ".write": "auth != null",
         "$jobId": {
           ".read": "auth != null",
-          ".write": "auth != null"
+          ".write": "auth != null",
+          "jobApplications": {
+            "$userId": {
+              ".read": "auth != null",
+              ".write": "auth != null"
+            }
+          }
+        }
+      },
+      "businesses": {
+        "$businessId": {
+          ".read": "auth != null",
+          ".write": false
         }
       }
     },

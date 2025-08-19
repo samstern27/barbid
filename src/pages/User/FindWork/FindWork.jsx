@@ -17,6 +17,10 @@ const FindWorkContent = () => {
     city: [],
   });
 
+  // Debug logging
+  console.log("FindWork: publicJobs loaded:", publicJobs?.length || 0);
+  console.log("FindWork: Jobs data:", publicJobs);
+
   // TODO: Add error and loading states
 
   const pages = [{ name: "Find Work", href: "#", current: true }];

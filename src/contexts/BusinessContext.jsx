@@ -183,6 +183,19 @@ export const BusinessProvider = ({ children }) => {
         jobListings: jobsCount,
       });
 
+      // Also update the public business jobListings count
+      const publicBusinessRef = ref(
+        db,
+        `public/businesses/${selectedBusiness.id}`
+      );
+      try {
+        await update(publicBusinessRef, {
+          jobListings: jobsCount,
+        });
+      } catch (error) {
+        console.log("Public business reference not found, skipping update");
+      }
+
       // Update local state after successful deletion
       if (selectedBusiness.jobs) {
         const { [jobId]: deletedJob, ...remainingJobs } = selectedBusiness.jobs;

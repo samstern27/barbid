@@ -173,7 +173,14 @@ export default function UserSettings() {
     get(profileRef).then((snapshot) => {
       const data = snapshot.val();
       if (data) {
-        setProfileFormData((prev) => ({ ...prev, ...data }));
+        setProfileFormData((prev) => ({
+          ...prev,
+          ...data,
+          // Ensure arrays are properly initialized
+          skills: data.skills || [],
+          qualifications: data.qualifications || [],
+          experience: data.experience || [],
+        }));
         setOriginalData(data);
         if (data.occupation) {
           const matchingOccupation = occupations.find(
@@ -297,10 +304,19 @@ export default function UserSettings() {
         endDate: newExperienceEndDate || "Present",
         position: newExperiencePosition,
       };
-      setProfileFormData((prev) => ({
-        ...prev,
-        experience: [...prev.experience, experience],
-      }));
+
+      console.log("Adding new experience:", experience);
+      console.log("Current experience array:", profileFormData.experience);
+
+      setProfileFormData((prev) => {
+        const newState = {
+          ...prev,
+          experience: [...(prev.experience || []), experience],
+        };
+        console.log("New profile state:", newState);
+        return newState;
+      });
+
       setNewExperienceCompany("");
       setNewExperienceRole("");
       setNewExperienceStartDate("");
@@ -389,7 +405,7 @@ export default function UserSettings() {
         );
       }
 
-      await update(userProfileRef, {
+      const updateData = {
         ...profileFormData,
         occupation: selectedOccupation?.name || profileFormData.occupation,
         oneLine: profileFormData.oneLine,
@@ -401,7 +417,12 @@ export default function UserSettings() {
         coverPhoto: newCoverPhotoURL,
         theme: selectedTheme.color,
         lastUpdated: new Date().toISOString(),
-      });
+      };
+
+      console.log("Updating profile with data:", updateData);
+      console.log("Experience data being saved:", updateData.experience);
+
+      await update(userProfileRef, updateData);
 
       setSuccess("Profile settings updated successfully!");
     } catch (error) {

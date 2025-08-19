@@ -112,6 +112,7 @@ export default function CreateJob({ createJobOpen, setCreateJobOpen }) {
         businessId: selectedBusiness.id,
         businessName: selectedBusiness.name,
         businessOwnerId: userId,
+        businessPrivacy: selectedBusiness.privacy, // Include business privacy in job data
         createdAt: new Date().toISOString(),
       };
 
@@ -126,14 +127,23 @@ export default function CreateJob({ createJobOpen, setCreateJobOpen }) {
       );
 
       // Only post to public jobs if the business is public
+      console.log("Business privacy setting:", selectedBusiness.privacy);
+      console.log("Business ID:", selectedBusiness.id);
+      console.log(
+        "Will post to public jobs:",
+        selectedBusiness.privacy === "public"
+      );
+
       if (selectedBusiness.privacy === "public") {
         const publicJobRef = ref(db, "public/jobs/" + jobId);
+        console.log("Posting job to public jobs:", jobId);
         // Set the same data to both paths
         await Promise.all([
           set(userJobRef, jobData),
           set(publicJobRef, jobData),
         ]);
       } else {
+        console.log("Business is private, not posting to public jobs");
         // Only set to user's private business if business is private
         await set(userJobRef, jobData);
       }

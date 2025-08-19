@@ -3,6 +3,7 @@ import {
   ref,
   get,
   update,
+  set,
   query,
   orderByChild,
   startAt,
@@ -116,6 +117,21 @@ class JobAutoCloseService {
           `users/${job.businessOwnerId}/business/${job.businessId}/jobs/${jobId}`
         );
         await update(businessJobRef, updateData);
+
+        // Create notification for business owner about auto-closure
+        await set(ref(db, `users/${job.businessOwnerId}/notifications/${jobId}_auto_closed`), {
+          id: `${jobId}_auto_closed`,
+          type: "job_auto_closed",
+          title: "Job Auto-Closed",
+          message: `Your job "${job.jobTitle}" has been automatically closed because the shift starts in less than 30 minutes.`,
+          avatar: null,
+          timestamp: new Date().toISOString(),
+          isRead: false,
+          jobId: jobId,
+          businessId: job.businessId,
+          businessName: job.businessName,
+          jobTitle: job.jobTitle,
+        });
       }
 
       console.log(`Successfully auto-closed job ${jobId}: ${job.jobTitle}`);

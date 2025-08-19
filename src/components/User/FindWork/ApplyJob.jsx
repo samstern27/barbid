@@ -108,7 +108,12 @@ export default function ApplyJob({ applyOpen, setApplyOpen, job }) {
         "users/" + userId + "/jobs/applied/" + applicationId
       );
 
-      // Save application data to both locations
+      console.log("Starting job application process...");
+      console.log("Job data:", job);
+      console.log("User details:", userDetails);
+      console.log("Business Owner ID:", job.businessOwnerId);
+
+      // Save application data first (most important)
       await Promise.all([
         set(applyJobRef, {
           applicationId: applicationId,
@@ -165,6 +170,38 @@ export default function ApplyJob({ applyOpen, setApplyOpen, job }) {
           applicantCount: increment(1),
         }),
       ]);
+
+      console.log("Application data saved successfully");
+
+      // Create notification separately (non-critical)
+      try {
+        if (job.businessOwnerId) {
+          await set(ref(db, `users/${job.businessOwnerId}/notifications/${applicationId}`), {
+            id: applicationId,
+            type: "job_application",
+            title: userDetails.firstName || userDetails.username,
+            message: `applied for your ${job.jobTitle} position`,
+            avatar: userDetails.avatar || null,
+            timestamp: new Date().toISOString(),
+            isRead: false,
+            jobId: job.id,
+            applicationId: applicationId,
+            userId: userId,
+            username: userDetails.username,
+            firstName: userDetails.firstName || userDetails.username,
+            lastName: userDetails.lastName || "",
+            jobTitle: job.jobTitle,
+            businessId: job.businessId,
+            businessName: job.businessName,
+          });
+          console.log("Notification created successfully");
+        } else {
+          console.warn("No business owner ID found, skipping notification");
+        }
+      } catch (notificationError) {
+        console.error("Failed to create notification (non-critical):", notificationError);
+        // Don't fail the entire application process for this
+      }
 
       // Close the form after successful submission
       setApplyOpen(false);

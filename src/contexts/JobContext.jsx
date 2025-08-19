@@ -41,78 +41,30 @@ export const JobProvider = ({ children }) => {
           ...data[id],
         }));
 
-        // Fetch business privacy information for each job
-        const fetchBusinessPrivacy = async () => {
-          try {
-            const db = getDatabase();
-            const jobsWithPrivacy = await Promise.all(
-              jobsArray.map(async (job) => {
-                if (!job.businessId || !job.businessOwnerId) {
-                  return { ...job, businessPrivacy: "public" }; // Default to public
-                }
-
-                try {
-                  // Try to get business privacy directly from the privacy field
-                  const businessPrivacyRef = ref(
-                    db,
-                    `users/${job.businessOwnerId}/business/${job.businessId}/privacy`
-                  );
-                  const businessPrivacySnapshot = await get(businessPrivacyRef);
-
-                  if (businessPrivacySnapshot.exists()) {
-                    const privacy = businessPrivacySnapshot.val();
-                    console.log(
-                      `Job ${job.id}: Business ${job.businessId} privacy: ${privacy}`
-                    );
-                    return {
-                      ...job,
-                      businessPrivacy: privacy,
-                    };
-                  }
-
-                  console.log(
-                    `Job ${job.id}: Business ${job.businessId} privacy not found, defaulting to public`
-                  );
-                  return { ...job, businessPrivacy: "public" }; // Default to public
-                } catch (error) {
-                  console.warn(
-                    `Could not fetch privacy for business ${job.businessId}:`,
-                    error
-                  );
-                  return { ...job, businessPrivacy: "public" }; // Default to public
-                }
-              })
-            );
-
-            const openArray = jobsWithPrivacy.filter(
-              (job) => job.status === "Open"
-            );
-            const closedArray = jobsWithPrivacy.filter(
-              (job) => job.status === "Closed"
-            );
-            const filledArray = jobsWithPrivacy.filter(
-              (job) => job.status === "Filled"
-            );
-            setPublicJobs(jobsWithPrivacy);
-            setClosedJobs(closedArray);
-            setFilledJobs(filledArray);
-          } catch (error) {
-            console.error("Error fetching business privacy:", error);
-            // Fallback to original behavior
-            const openArray = jobsArray.filter((job) => job.status === "Open");
-            const closedArray = jobsArray.filter(
-              (job) => job.status === "Closed"
-            );
-            const filledArray = jobsArray.filter(
-              (job) => job.status === "Filled"
-            );
-            setPublicJobs(jobsArray);
-            setClosedJobs(closedArray);
-            setFilledJobs(filledArray);
+        // Use business privacy stored directly in job data
+        const jobsWithPrivacy = jobsArray.map((job) => {
+          // If the job already has businessPrivacy stored, use it
+          if (job.businessPrivacy) {
+            return job;
           }
-        };
 
-        fetchBusinessPrivacy();
+          // If no businessPrivacy is stored, assume it's public (show the job)
+          // This ensures backward compatibility with existing jobs
+          return { ...job, businessPrivacy: "public" };
+        });
+
+        const openArray = jobsWithPrivacy.filter(
+          (job) => job.status === "Open"
+        );
+        const closedArray = jobsWithPrivacy.filter(
+          (job) => job.status === "Closed"
+        );
+        const filledArray = jobsWithPrivacy.filter(
+          (job) => job.status === "Filled"
+        );
+        setPublicJobs(openArray);
+        setClosedJobs(closedArray);
+        setFilledJobs(filledArray);
       } else {
         setPublicJobs([]);
         setClosedJobs([]);

@@ -6,6 +6,7 @@ import React, {
   useEffect,
 } from "react";
 import { useAuth } from "./AuthContext";
+import { getDatabase, ref, onValue, update, remove, get } from "firebase/database";
 
 const NotificationContext = createContext();
 
@@ -39,25 +40,64 @@ export const NotificationProvider = ({ children }) => {
   }, []);
 
   // Mark notification as read
-  const markAsRead = useCallback((notificationId) => {
+  const markAsRead = useCallback(async (notificationId) => {
+    if (!currentUser?.uid) return;
+
+    try {
+      const db = getDatabase();
+      const notificationRef = ref(db, `users/${currentUser.uid}/notifications/${notificationId}`);
+      await update(notificationRef, { isRead: true });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+
     setNotifications((prev) =>
       prev.map((notif) =>
         notif.id === notificationId ? { ...notif, isRead: true } : notif
       )
     );
     setUnreadCount((prev) => Math.max(0, prev - 1));
-  }, []);
+  }, [currentUser?.uid]);
 
   // Mark all notifications as read
-  const markAllAsRead = useCallback(() => {
+  const markAllAsRead = useCallback(async () => {
+    if (!currentUser?.uid) return;
+
+    try {
+      const db = getDatabase();
+      const notificationsRef = ref(db, `users/${currentUser.uid}/notifications`);
+      
+      // Get all notifications and mark them as read
+      const notificationsSnapshot = await get(ref(db, `users/${currentUser.uid}/notifications`));
+      if (notificationsSnapshot.exists()) {
+        const updates = {};
+        Object.keys(notificationsSnapshot.val()).forEach(notificationId => {
+          updates[`${notificationId}/isRead`] = true;
+        });
+        await update(notificationsRef, updates);
+      }
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+    }
+
     setNotifications((prev) =>
       prev.map((notif) => ({ ...notif, isRead: true }))
     );
     setUnreadCount(0);
-  }, []);
+  }, [currentUser?.uid]);
 
   // Remove a notification
-  const removeNotification = useCallback((notificationId) => {
+  const removeNotification = useCallback(async (notificationId) => {
+    if (!currentUser?.uid) return;
+
+    try {
+      const db = getDatabase();
+      const notificationRef = ref(db, `users/${currentUser.uid}/notifications/${notificationId}`);
+      await remove(notificationRef);
+    } catch (error) {
+      console.error("Error removing notification:", error);
+    }
+
     setNotifications((prev) => {
       const notification = prev.find((n) => n.id === notificationId);
       if (notification && !notification.isRead) {
@@ -65,13 +105,23 @@ export const NotificationProvider = ({ children }) => {
       }
       return prev.filter((n) => n.id !== notificationId);
     });
-  }, []);
+  }, [currentUser?.uid]);
 
   // Clear all notifications
-  const clearAllNotifications = useCallback(() => {
+  const clearAllNotifications = useCallback(async () => {
+    if (!currentUser?.uid) return;
+
+    try {
+      const db = getDatabase();
+      const notificationsRef = ref(db, `users/${currentUser.uid}/notifications`);
+      await remove(notificationsRef);
+    } catch (error) {
+      console.error("Error clearing all notifications:", error);
+    }
+
     setNotifications([]);
     setUnreadCount(0);
-  }, []);
+  }, [currentUser?.uid]);
 
   // Toggle notification panel
   const toggleNotificationPanel = useCallback(() => {
@@ -98,33 +148,30 @@ export const NotificationProvider = ({ children }) => {
       return;
     }
 
-    // TODO: Load notifications from Firebase
-    // For now, we'll use sample data
-    const sampleNotifications = [
-      {
-        id: 1,
-        type: "message",
-        title: "Bar Manager",
-        message: "You have a new shift application!",
-        avatar:
-          "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.2&w=160&h=160&q=80",
-        timestamp: new Date(Date.now() - 2 * 60 * 1000), // 2 minutes ago
-        isRead: false,
-      },
-      {
-        id: 2,
-        type: "job",
-        title: "Bar Manager",
-        message: "You have a new shift application!",
-        avatar:
-          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=160&h=160&q=80",
-        timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
-        isRead: false,
-      },
-    ];
+    const db = getDatabase();
+    const notificationsRef = ref(db, `users/${currentUser.uid}/notifications`);
 
-    setNotifications(sampleNotifications);
-    setUnreadCount(sampleNotifications.length);
+    const unsubscribe = onValue(notificationsRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const notificationsData = snapshot.val();
+        const notificationsArray = Object.entries(notificationsData).map(([id, notification]) => ({
+          id,
+          ...notification,
+          timestamp: new Date(notification.timestamp),
+        }));
+
+        // Sort by timestamp (newest first)
+        const sortedNotifications = notificationsArray.sort((a, b) => b.timestamp - a.timestamp);
+        
+        setNotifications(sortedNotifications);
+        setUnreadCount(sortedNotifications.filter(n => !n.isRead).length);
+      } else {
+        setNotifications([]);
+        setUnreadCount(0);
+      }
+    });
+
+    return () => unsubscribe();
   }, [currentUser?.uid]);
 
   const value = {

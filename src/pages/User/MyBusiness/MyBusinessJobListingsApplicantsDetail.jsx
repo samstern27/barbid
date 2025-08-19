@@ -1,7 +1,7 @@
 import { useBusiness } from "../../../contexts/BusinessContext";
 import { useParams, useNavigate, NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { getDatabase, ref, onValue, get, update } from "firebase/database";
+import { getDatabase, ref, onValue, get, update, set } from "firebase/database";
 import { ArrowLeftIcon, CheckIcon } from "@heroicons/react/24/outline";
 
 // Generate a random 6-digit verification code
@@ -73,6 +73,13 @@ export default function MyBusinessJobListingsApplicantsDetail() {
           ...jobData,
           applicantCount: jobData.applicantCount || 0,
         });
+        // Clear any previous errors when job is found
+        setError(null);
+        // Also clear errors if job is filled (successful acceptance)
+        if (jobData.status === "Filled") {
+          s;
+          setError(null);
+        }
         jobLoaded = true;
       } else {
         setError("Job not found");
@@ -106,6 +113,8 @@ export default function MyBusinessJobListingsApplicantsDetail() {
                 ...applicationData,
                 profile: userProfile,
               });
+              // Clear any previous errors when applicant is found
+              setError(null);
             } catch (error) {
               console.error(`Error fetching data for user ${userId}:`, error);
               setApplicant({
@@ -183,6 +192,26 @@ export default function MyBusinessJobListingsApplicantsDetail() {
       });
 
       console.log("Application status updated to Accepted");
+
+      // Create notification for the applicant
+      await set(
+        ref(db, `users/${applicant.userId}/notifications/${applicationId}`),
+        {
+          id: applicationId,
+          type: "job_accepted",
+          title: "Application Accepted!",
+          message: `Your application for ${job.jobTitle} at ${job.businessName} has been accepted!`,
+          avatar: null, // Business avatar could be added here
+          timestamp: new Date().toISOString(),
+          isRead: false,
+          jobId: jobId,
+          applicationId: applicationId,
+          businessId: job.businessId,
+          businessName: job.businessName,
+          jobTitle: job.jobTitle,
+          verificationCode: verificationCode,
+        }
+      );
 
       // Note: We can't update the user's applied job status from here because
       // we don't have permission to write to other users' data.

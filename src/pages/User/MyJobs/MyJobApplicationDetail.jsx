@@ -276,13 +276,33 @@ export default function MyJobApplicationDetail() {
   // Determine the current section based on application status
   const getCurrentSection = () => {
     if (application.status === "Accepted") return "accepted";
+
+    // Check if job is filled and current user is the accepted user
+    if (job?.status === "Filled" && job?.acceptedUserId === currentUser?.uid) {
+      return "accepted";
+    }
+
+    // Check if job is completed and current user is the accepted user
+    if (
+      job?.status === "Completed" &&
+      job?.acceptedUserId === currentUser?.uid
+    ) {
+      return "accepted";
+    }
+
     if (job?.status === "Open") return "active";
-    if (job?.status === "Closed" || job?.status === "Filled") return "rejected";
+    if (job?.status === "Closed") return "rejected";
+    if (job?.status === "Filled") return "rejected"; // Only if not the accepted user
 
     // If we have a job but no application status, check if it's an active job
     if (job && !application.status) {
       if (job.status === "Open") return "active";
-      if (job.status === "Closed" || job.status === "Filled") return "rejected";
+      if (job.status === "Filled" && job.acceptedUserId === currentUser?.uid)
+        return "accepted";
+      if (job.status === "Completed" && job.acceptedUserId === currentUser?.uid)
+        return "accepted";
+      if (job.status === "Closed") return "rejected";
+      if (job.status === "Filled") return "rejected"; // Only if not the accepted user
     }
 
     return "overview";
