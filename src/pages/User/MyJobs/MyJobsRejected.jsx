@@ -64,7 +64,10 @@ export default function MyJobsRejected() {
                         ...application,
                         id: application.jobId,
                         // Use application status if it's "Accepted", otherwise use job status
-                        status: application.status === "Accepted" ? "Accepted" : (jobData.status || "Unknown"),
+                        status:
+                          application.status === "Accepted"
+                            ? "Accepted"
+                            : jobData.status || "Unknown",
                         applicantCount: jobData.applicantCount || 0,
                         jobTitle: jobData.jobTitle || application.jobTitle,
                         startOfShift:
@@ -86,7 +89,14 @@ export default function MyJobsRejected() {
                       job.status !== "Accepted"
                   );
 
-                  setJobs(endedJobs);
+                  // Sort by newest first (by createdAt date, fallback to appliedAt)
+                  const sortedEndedJobs = endedJobs.sort((a, b) => {
+                    const dateA = new Date(a.createdAt || a.appliedAt || 0);
+                    const dateB = new Date(b.createdAt || b.appliedAt || 0);
+                    return dateB - dateA; // Newest first
+                  });
+
+                  setJobs(sortedEndedJobs);
                 } else {
                   // Fallback to application data if public jobs not found
                   const fallbackJobs = Object.values(applications).map(
@@ -103,7 +113,17 @@ export default function MyJobsRejected() {
                       (job.status === "Closed" || job.status === "Deleted") &&
                       job.status !== "Accepted"
                   );
-                  setJobs(endedFallbackJobs);
+
+                  // Sort by newest first (by appliedAt date)
+                  const sortedEndedFallbackJobs = endedFallbackJobs.sort(
+                    (a, b) => {
+                      const dateA = new Date(a.appliedAt || 0);
+                      const dateB = new Date(b.appliedAt || 0);
+                      return dateB - dateA; // Newest first
+                    }
+                  );
+
+                  setJobs(sortedEndedFallbackJobs);
                 }
                 setLoading(false);
               })
@@ -124,7 +144,17 @@ export default function MyJobsRejected() {
                     (job.status === "Closed" || job.status === "Deleted") &&
                     job.status !== "Accepted"
                 );
-                setJobs(endedFallbackJobs);
+
+                // Sort by newest first (by appliedAt date)
+                const sortedEndedFallbackJobs = endedFallbackJobs.sort(
+                  (a, b) => {
+                    const dateA = new Date(a.appliedAt || 0);
+                    const dateB = new Date(b.appliedAt || 0);
+                    return dateB - dateA; // Newest first
+                  }
+                );
+
+                setJobs(sortedEndedFallbackJobs);
                 setLoading(false);
               });
           } else {
@@ -236,7 +266,7 @@ export default function MyJobsRejected() {
                         </td>
                         <td className="py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-0">
                           <NavLink
-                            to={`/my-jobs/${job.id}`}
+                            to={`/jobs/application/${job.id}`}
                             className="text-indigo-500 hover:text-indigo-600 flex items-center gap-2"
                           >
                             <EyeIcon className="w-4 h-4" />

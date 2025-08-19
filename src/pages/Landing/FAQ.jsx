@@ -42,11 +42,6 @@ const faqs = [
       "We'll notify you if your shift hasn't had any applicants, and you can increase the hourly rate or share the ad again to attract more workers.",
   },
   {
-    question: "How do reviews work?",
-    answer:
-      "After a shift, both the employer and the worker can leave a short review. These help build trust and show who's reliable and great to work with.",
-  },
-  {
     question: "Is Barbid just for pubs?",
     answer:
       "Nope — while it's designed with pubs and bars in mind, any venue that needs short-term hospitality staff (like coffee shops, restaurants, clubs, or events) can use it too.",

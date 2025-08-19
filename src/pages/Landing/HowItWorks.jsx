@@ -42,9 +42,9 @@ const HowItWorks = () => {
             </p>
             <p className="mt-8 text-base/7 text-gray-600">
               We've created a platform that's transparent, flexible, and
-              community-driven. Every profile, every booking, every review —
-              it's all designed to help people work better together, with
-              clarity and confidence from the start.
+              community-driven. Every profile, every booking — it's all designed
+              to help people work better together, with clarity and confidence
+              from the start.
             </p>
           </div>
           <div className="pt-16 lg:row-span-2 lg:-mr-16 xl:mr-auto">

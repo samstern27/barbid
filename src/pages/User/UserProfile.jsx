@@ -19,27 +19,63 @@ const UserProfile = () => {
 
   useEffect(() => {
     const db = getDatabase();
+    console.log(
+      "UserProfile useEffect triggered with username:",
+      username,
+      "currentUser:",
+      currentUser?.uid
+    );
+
     if (username) {
       // First, find the user ID by username
       const usernamesRef = ref(db, "usernames/" + username);
-      get(usernamesRef).then((snapshot) => {
-        if (snapshot.exists()) {
-          const userId = snapshot.val();
-          // Now fetch the user's profile data
-          const userRef = ref(db, "users/" + userId + "/profile");
-          onValue(userRef, (profileSnapshot) => {
-            const profileData = profileSnapshot.val();
-            setUserData({ profile: profileData });
-          });
-        }
-      });
+      console.log("Looking up username:", username);
+      get(usernamesRef)
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            const userId = snapshot.val();
+            console.log("Found userId for username:", userId);
+            // Now fetch the user's profile data
+            const userRef = ref(db, "users/" + userId + "/profile");
+            onValue(
+              userRef,
+              (profileSnapshot) => {
+                const profileData = profileSnapshot.val();
+                console.log("Profile data received:", profileData);
+                setUserData({ profile: profileData });
+              },
+              (error) => {
+                console.error("Error reading profile data:", error);
+                console.error("Error code:", error.code);
+                console.error("Error message:", error.message);
+              }
+            );
+          } else {
+            console.log("Username not found in usernames collection");
+          }
+        })
+        .catch((error) => {
+          console.error("Error looking up username:", error);
+          console.error("Error code:", error.code);
+          console.error("Error message:", error.message);
+        });
     } else {
       // Fallback to current user's profile
+      console.log("No username provided, using current user");
       const userRef = ref(db, "users/" + currentUser?.uid + "/profile");
-      onValue(userRef, (snapshot) => {
-        const data = snapshot.val();
-        setUserData({ profile: data });
-      });
+      onValue(
+        userRef,
+        (snapshot) => {
+          const data = snapshot.val();
+          console.log("Current user profile data:", data);
+          setUserData({ profile: data });
+        },
+        (error) => {
+          console.error("Error reading current user profile:", error);
+          console.error("Error code:", error.code);
+          console.error("Error message:", error.message);
+        }
+      );
     }
   }, [username, currentUser]);
 
@@ -119,8 +155,17 @@ const UserProfile = () => {
     backgroundImage: userData?.profile?.coverPhoto,
     about: userData?.profile?.about,
     theme: userData?.profile?.theme || "gray",
-    reviews: userData?.profile?.reviews,
-    id: username || currentUser?.uid,
+    id: currentUser?.uid, // Always use the actual Firebase user ID
+    qualifications: userData?.profile?.qualifications,
+    experience: userData?.profile?.experience,
+    createdAt:
+      userData?.profile?.createdAt ||
+      userData?.createdAt ||
+      currentUser?.metadata?.creationTime,
+    lastActive:
+      userData?.profile?.lastActive ||
+      userData?.lastActive ||
+      new Date().toISOString(),
   };
 
   return (
@@ -132,6 +177,12 @@ const UserProfile = () => {
       <TopBar profile={profile} />
       <Stats profile={profile} />
       <BentoGrid profile={profile} />
+      <div className="flex flex-col lg:flex-row">
+        <Qualifications profile={profile} />
+        <Experience profile={profile} />
+      </div>
+      <About profile={profile} />
+      <Skills profile={profile} />
     </div>
   );
 };

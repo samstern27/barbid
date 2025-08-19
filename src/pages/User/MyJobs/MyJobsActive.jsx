@@ -87,7 +87,14 @@ export default function MyJobsActive() {
                     (job) => job.status === "Open"
                   );
 
-                  setJobs(activeJobs);
+                  // Sort by newest first (by createdAt date, fallback to appliedAt)
+                  const sortedActiveJobs = activeJobs.sort((a, b) => {
+                    const dateA = new Date(a.createdAt || a.appliedAt || 0);
+                    const dateB = new Date(b.createdAt || b.appliedAt || 0);
+                    return dateB - dateA; // Newest first
+                  });
+
+                  setJobs(sortedActiveJobs);
                 } else {
                   // Fallback to application data if public jobs not found
                   const fallbackJobs = Object.values(applications).map(
@@ -102,7 +109,15 @@ export default function MyJobsActive() {
                   const activeFallbackJobs = fallbackJobs.filter(
                     (job) => job.status === "Open"
                   );
-                  setJobs(activeFallbackJobs);
+                  
+                  // Sort by newest first (by appliedAt date)
+                  const sortedActiveFallbackJobs = activeFallbackJobs.sort((a, b) => {
+                    const dateA = new Date(a.appliedAt || 0);
+                    const dateB = new Date(b.appliedAt || 0);
+                    return dateB - dateA; // Newest first
+                  });
+                  
+                  setJobs(sortedActiveFallbackJobs);
                 }
                 setLoading(false);
               })
@@ -121,7 +136,15 @@ export default function MyJobsActive() {
                 const activeFallbackJobs = fallbackJobs.filter(
                   (job) => job.status === "Open"
                 );
-                setJobs(activeFallbackJobs);
+                
+                // Sort by newest first (by appliedAt date)
+                const sortedActiveFallbackJobs = activeFallbackJobs.sort((a, b) => {
+                  const dateA = new Date(a.appliedAt || 0);
+                  const dateB = new Date(b.appliedAt || 0);
+                  return dateB - dateA; // Newest first
+                });
+                
+                setJobs(sortedActiveFallbackJobs);
                 setLoading(false);
               });
           } else {
@@ -226,7 +249,7 @@ export default function MyJobsActive() {
                         </td>
                         <td className="py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-0">
                           <NavLink
-                            to={`/my-jobs/${job.id}`}
+                            to={`/jobs/application/${job.id}`}
                             className="text-indigo-500 hover:text-indigo-600 flex items-center gap-2"
                           >
                             <EyeIcon className="w-4 h-4" />

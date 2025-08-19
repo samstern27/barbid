@@ -1,7 +1,7 @@
 import {
   MagnifyingGlassIcon,
   CurrencyPoundIcon,
-  StarIcon,
+  ClockIcon,
 } from "@heroicons/react/20/solid";
 import barGlow from "../../assets/images/bar-glow.jpg";
 
@@ -9,7 +9,7 @@ const features = [
   {
     name: "Browse live shift ads.",
     description:
-      "See open shifts near you in real time. Apply in seconds and get notified if you’re picked.",
+      "See open shifts near you in real time. Apply in seconds and get notified if you're picked.",
     icon: MagnifyingGlassIcon,
   },
   {
@@ -19,10 +19,10 @@ const features = [
     icon: CurrencyPoundIcon,
   },
   {
-    name: "Build your rep.",
+    name: "Flexible scheduling.",
     description:
-      "Get reviewed after each shift, and build a profile that helps you stand out. The better your reviews, the more shifts you'll land.",
-    icon: StarIcon,
+      "Work when it suits you. Pick up shifts that fit your schedule and build your experience in the hospitality industry.",
+    icon: ClockIcon,
   },
 ];
 

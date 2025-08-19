@@ -3,7 +3,7 @@
 import { useAuth } from "../../contexts/AuthContext";
 import { useNotification } from "../../contexts/NotificationContext";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getDatabase, ref, onValue } from "firebase/database";
 import {
   Dialog,
@@ -24,9 +24,9 @@ import {
   BriefcaseIcon,
   MagnifyingGlassIcon,
   BuildingStorefrontIcon,
-  IdentificationIcon,
-  StarIcon,
+  ClockIcon,
 } from "@heroicons/react/24/outline";
+import { UserIcon } from "@heroicons/react/24/solid";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import Notification from "../UI/Notification";
 
@@ -40,6 +40,7 @@ export default function UserLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userData, setUserData] = useState(null);
   const location = useLocation();
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
@@ -52,30 +53,52 @@ export default function UserLayout() {
       setUserData(data);
     });
   }, [currentUser]);
-  const navigation = [
-    { name: "Home", href: "/", icon: HomeIcon },
-    {
-      name: "My Jobs",
-      href: "/jobs",
-      icon: BriefcaseIcon,
-    },
-    {
-      name: "Find Work",
-      href: "/find-work",
-      icon: MagnifyingGlassIcon,
-    },
-    {
-      name: "My Business",
-      href: "/my-business",
-      icon: BuildingStorefrontIcon,
-    },
-    {
-      name: "Roles",
-      href: "/roles",
-      icon: IdentificationIcon,
-    },
-    { name: "Reviews", href: "/reviews", icon: StarIcon },
-  ];
+
+  const navigation = useMemo(() => {
+    console.log(
+      "Building navigation with userData:",
+      userData,
+      "currentUser:",
+      currentUser?.uid
+    );
+    const profileHref = `profile/${
+      userData?.profile?.username || currentUser?.uid
+    }`;
+    console.log("Profile href constructed as:", profileHref);
+
+    return [
+      {
+        name: "Home",
+        href: "/",
+        icon: HomeIcon,
+      },
+      {
+        name: "Profile",
+        href: profileHref,
+        icon: UserIcon,
+      },
+      {
+        name: "My Jobs",
+        href: "jobs",
+        icon: BriefcaseIcon,
+      },
+      {
+        name: "Find Work",
+        href: "find-work",
+        icon: MagnifyingGlassIcon,
+      },
+      {
+        name: "My Business",
+        href: "my-business",
+        icon: BuildingStorefrontIcon,
+      },
+      {
+        name: "Activity",
+        href: "activity",
+        icon: ClockIcon,
+      },
+    ];
+  }, [userData, currentUser]);
   const businesses = [
     {
       id: 1,
@@ -121,7 +144,7 @@ export default function UserLayout() {
               </TransitionChild>
 
               {/* Mobile Sidebar */}
-              <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-950 px-6 pb-4 ring-1 ring-white/10">
+              <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-gray-950 to-gray-900 px-6 pb-4 ring-1 ring-white/10">
                 <div className="flex h-16 shrink-0 items-center">
                   <h1 className="text-2xl font-medium text-indigo-600 tracking-widest">
                     barbid
@@ -183,25 +206,64 @@ export default function UserLayout() {
                       </ul>
                     </li>
                     <li className="mt-auto">
-                      <NavLink
-                        to="/settings"
-                        onClick={() => setSidebarOpen(false)}
-                        aria-label="Settings"
-                        className={({ isActive }) =>
-                          classNames(
-                            isActive
-                              ? "bg-indigo-600 text-white"
-                              : "text-gray-400 hover:bg-gray-800 hover:text-indigo-600",
-                            "group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
-                          )
-                        }
-                      >
-                        <Cog6ToothIcon
-                          aria-hidden="true"
-                          className="size-6 shrink-0"
+                      <div className="space-y-1 bg-gray-800 p-3 -mx-6 -mb-4 relative">
+                        <div
+                          className="absolute inset-0 opacity-5"
+                          style={{
+                            backgroundImage: `repeating-linear-gradient(
+                              45deg,
+                              transparent,
+                              transparent 4px,
+                              rgba(255, 255, 255, 0.5) 4px,
+                              rgba(255, 255, 255, 0.5) 5px
+                            )`,
+                          }}
                         />
-                        Settings
-                      </NavLink>
+                        <div className="relative z-10 space-y-1">
+                          <NavLink
+                            to="/settings"
+                            aria-label="Settings"
+                            onClick={() => setSidebarOpen(false)}
+                            className={({ isActive }) =>
+                              classNames(
+                                isActive
+                                  ? "bg-gray-600 text-white"
+                                  : "text-gray-400 hover:bg-gray-700 hover:text-indigo-600",
+                                "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
+                              )
+                            }
+                          >
+                            <Cog6ToothIcon
+                              aria-hidden="true"
+                              className="size-6 shrink-0"
+                            />
+                            Settings
+                          </NavLink>
+                          <button
+                            onClick={() => {
+                              logout();
+                              setSidebarOpen(false);
+                            }}
+                            aria-label="Sign out"
+                            className="group flex w-full gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-400 hover:bg-gray-700 hover:text-indigo-600"
+                          >
+                            <svg
+                              className="size-6 shrink-0"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                              />
+                            </svg>
+                            Sign out
+                          </button>
+                        </div>
+                      </div>
                     </li>
                   </ul>
                 </nav>
@@ -212,7 +274,7 @@ export default function UserLayout() {
 
         {/* Desktop Sidebar */}
         <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-950 px-6 pb-4">
+          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-gray-950 to-gray-900 px-6 pb-4 shadow-2xl">
             <div className="flex h-16 shrink-0 items-center">
               <span className="sr-only">barbid</span>
               <h1 className="text-2xl font-medium text-indigo-300 tracking-widest">
@@ -274,24 +336,60 @@ export default function UserLayout() {
                   </ul>
                 </li>
                 <li className="mt-auto">
-                  <NavLink
-                    to="/settings"
-                    aria-label="Settings"
-                    className={({ isActive }) =>
-                      classNames(
-                        isActive
-                          ? "bg-indigo-600 text-white"
-                          : "text-gray-400 hover:bg-gray-800 hover:text-indigo-300",
-                        "group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
-                      )
-                    }
-                  >
-                    <Cog6ToothIcon
-                      aria-hidden="true"
-                      className="size-6 shrink-0"
+                  <div className="space-y-1 bg-gray-800 p-3 -mx-6 -mb-4 relative">
+                    <div
+                      className="absolute inset-0 opacity-5"
+                      style={{
+                        backgroundImage: `repeating-linear-gradient(
+                          45deg,
+                          transparent,
+                          transparent 4px,
+                          rgba(255, 255, 255, 0.5) 4px,
+                          rgba(255, 255, 255, 0.5) 5px
+                        )`,
+                      }}
                     />
-                    Settings
-                  </NavLink>
+                    <div className="relative z-10 space-y-1">
+                      <NavLink
+                        to="/settings"
+                        aria-label="Settings"
+                        className={({ isActive }) =>
+                          classNames(
+                            isActive
+                              ? "bg-indigo-600 text-white"
+                              : "text-gray-400 hover:bg-gray-700 hover:text-indigo-300",
+                            "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
+                          )
+                        }
+                      >
+                        <Cog6ToothIcon
+                          aria-hidden="true"
+                          className="size-6 shrink-0"
+                        />
+                        Settings
+                      </NavLink>
+                      <button
+                        onClick={() => logout()}
+                        aria-label="Sign out"
+                        className="group flex w-full gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-400 hover:bg-gray-700 hover:text-indigo-300"
+                      >
+                        <svg
+                          className="size-6 shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                          />
+                        </svg>
+                        Sign out
+                      </button>
+                    </div>
+                  </div>
                 </li>
               </ul>
             </nav>
@@ -361,53 +459,6 @@ export default function UserLayout() {
                   aria-hidden="true"
                   className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-900/10"
                 />
-
-                {/* Profile dropdown */}
-                <Menu as="div" className="relative">
-                  <MenuButton className="-m-1.5 flex items-center p-1.5 focus:outline-indigo-600">
-                    <span className="sr-only">Open user menu</span>
-                    <img
-                      alt={userData?.profile?.username}
-                      src={userData?.profile?.profilePicture}
-                      className="size-8 rounded-full bg-white object-cover"
-                    />
-                    <span className="hidden lg:flex lg:items-center">
-                      <span
-                        aria-hidden="true"
-                        className="ml-4 text-sm/6 font-semibold text-gray-900"
-                      >
-                        {userData?.profile?.username}
-                      </span>
-                      <ChevronDownIcon
-                        aria-hidden="true"
-                        className="ml-2 size-5 text-gray-400"
-                      />
-                    </span>
-                  </MenuButton>
-                  <MenuItems
-                    transition
-                    className="absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
-                  >
-                    <MenuItem>
-                      <NavLink
-                        to={"/profile/" + userData?.profile?.username}
-                        aria-label="Your profile"
-                        className="block px-3 py-1 text-sm/6 text-gray-900 data-focus:bg-indigo-50 data-focus:outline-hidden"
-                      >
-                        Your profile
-                      </NavLink>
-                    </MenuItem>
-                    <MenuItem>
-                      <button
-                        onClick={() => logout()}
-                        aria-label="Sign out"
-                        className="block w-full text-left px-3 py-1 text-sm/6 text-gray-900 data-focus:bg-indigo-50 data-focus:outline-hidden"
-                      >
-                        Sign out
-                      </button>
-                    </MenuItem>
-                  </MenuItems>
-                </Menu>
               </div>
             </div>
           </div>

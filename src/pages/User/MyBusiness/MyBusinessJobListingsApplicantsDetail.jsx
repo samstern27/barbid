@@ -11,7 +11,7 @@ const generateVerificationCode = () => {
 
 export default function MyBusinessJobListingsApplicantsDetail() {
   const { applicationId, jobId } = useParams();
-  const { selectedBusiness } = useBusiness();
+  const { selectedBusiness, loading: businessLoading } = useBusiness();
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
   const [applicant, setApplicant] = useState(null);
@@ -20,8 +20,36 @@ export default function MyBusinessJobListingsApplicantsDetail() {
   const [accepting, setAccepting] = useState(false);
   const [showConfirmAccept, setShowConfirmAccept] = useState(false);
 
+  // Check if business is loaded
+  if (businessLoading) {
+    return (
+      <div className="flex flex-1 flex-col justify-center items-center min-h-[60vh]">
+        <div className="text-gray-500 text-lg">Loading business...</div>
+      </div>
+    );
+  }
+
+  // Check if business is selected
+  if (!selectedBusiness) {
+    return (
+      <div className="flex flex-1 flex-col justify-center items-center min-h-[60vh]">
+        <div className="text-red-500 text-lg">No business selected</div>
+        <NavLink
+          to="/my-business"
+          className="mt-4 text-indigo-600 hover:text-indigo-500"
+        >
+          Back to My Business
+        </NavLink>
+      </div>
+    );
+  }
+
   useEffect(() => {
-    if (!jobId || !applicationId) return;
+    if (!jobId || !applicationId || !selectedBusiness?.id) {
+      setError("Missing required parameters");
+      setLoading(false);
+      return;
+    }
 
     const db = getDatabase();
     const jobRef = ref(db, `public/jobs/${jobId}`);
@@ -73,26 +101,10 @@ export default function MyBusinessJobListingsApplicantsDetail() {
               const userProfileSnapshot = await get(userProfileRef);
               const userProfile = userProfileSnapshot.val() || {};
 
-              // Fetch user reviews to calculate average rating
-              const userReviewsRef = ref(db, `users/${userId}/profile/reviews`);
-              const userReviewsSnapshot = await get(userReviewsRef);
-              const userReviews = userReviewsSnapshot.val() || {};
-
-              // Calculate average rating
-              const reviewValues = Object.values(userReviews);
-              const averageRating =
-                reviewValues.length > 0
-                  ? reviewValues.reduce(
-                      (sum, review) => sum + (review.rating || 0),
-                      0
-                    ) / reviewValues.length
-                  : 0;
-
               setApplicant({
                 userId,
                 ...applicationData,
                 profile: userProfile,
-                rating: averageRating,
               });
             } catch (error) {
               console.error(`Error fetching data for user ${userId}:`, error);
@@ -100,7 +112,6 @@ export default function MyBusinessJobListingsApplicantsDetail() {
                 userId,
                 ...applicationData,
                 profile: {},
-                rating: 0,
               });
             }
           } else {
@@ -118,7 +129,7 @@ export default function MyBusinessJobListingsApplicantsDetail() {
       unsubscribeJob();
       unsubscribeApplications();
     };
-  }, [jobId, applicationId]);
+  }, [jobId, applicationId, selectedBusiness?.id]);
 
   // Show confirmation dialog
   const handleAcceptClick = () => {
@@ -139,6 +150,13 @@ export default function MyBusinessJobListingsApplicantsDetail() {
       // Generate a unique verification code for this acceptance
       const verificationCode = generateVerificationCode();
 
+      console.log(
+        "Accepting application for job:",
+        jobId,
+        "with verification code:",
+        verificationCode
+      );
+
       // Only update the public job listing - this is accessible to everyone
       const publicJobRef = ref(db, `public/jobs/${jobId}`);
       await update(publicJobRef, {
@@ -151,6 +169,8 @@ export default function MyBusinessJobListingsApplicantsDetail() {
         verificationCode: verificationCode, // Store the verification code
       });
 
+      console.log("Job status updated to Filled");
+
       // Update the applicant's application status in the public job
       const applicationRef = ref(
         db,
@@ -162,9 +182,14 @@ export default function MyBusinessJobListingsApplicantsDetail() {
         verificationCode: verificationCode, // Store the verification code here too
       });
 
+      console.log("Application status updated to Accepted");
+
       // Note: We can't update the user's applied job status from here because
       // we don't have permission to write to other users' data.
       // The user will see their application was accepted through the public job status change.
+
+      // Wait a moment for the database updates to propagate
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Success! Navigate back to applicants list
       navigate(
@@ -258,7 +283,7 @@ export default function MyBusinessJobListingsApplicantsDetail() {
     <div>
       {/* Navigation */}
       <NavLink
-        to={`/my-business/${selectedBusiness.id}/job-listings/${jobId}/applicants`}
+        to={`/my-business/${selectedBusiness?.id}/job-listings/${jobId}/applicants`}
         className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200 mb-8"
       >
         <ArrowLeftIcon className="w-4 h-4" />
@@ -301,21 +326,13 @@ export default function MyBusinessJobListingsApplicantsDetail() {
                     {applicant.profile.occupation}
                   </p>
                 )}
-                {applicant.rating > 0 && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm text-gray-400">•</span>
-                    <span className="text-sm font-medium text-gray-700">
-                      {applicant.rating.toFixed(1)} ★
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
           </div>
 
           {/* View Profile Button */}
           <NavLink
-            to={`/profile/${applicant.username}`}
+            to={`/profile/${applicant?.username || "unknown"}`}
             className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200 cursor-pointer"
           >
             <svg
@@ -445,9 +462,16 @@ export default function MyBusinessJobListingsApplicantsDetail() {
           <button
             type="button"
             onClick={handleAcceptClick}
-            disabled={accepting || job.status === "Filled"}
+            disabled={
+              accepting ||
+              job.status === "Filled" ||
+              job.status === "Completed" ||
+              job.acceptedUserId
+            }
             className={`inline-flex items-center gap-2 px-6 py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 ${
-              job.status === "Filled"
+              job.status === "Filled" ||
+              job.status === "Completed" ||
+              job.acceptedUserId
                 ? "bg-gray-400 text-gray-600 cursor-not-allowed"
                 : "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500"
             } disabled:opacity-50 disabled:cursor-not-allowed`}
@@ -455,13 +479,18 @@ export default function MyBusinessJobListingsApplicantsDetail() {
             <CheckIcon className="w-5 h-5" />
             {accepting
               ? "Accepting..."
-              : job.status === "Filled"
+              : job.status === "Filled" ||
+                job.status === "Completed" ||
+                job.acceptedUserId
               ? "Job Filled"
               : "Accept Application"}
           </button>
         </div>
+
         <p className="text-center text-sm text-gray-500 mt-2">
-          {job.status === "Filled"
+          {job.status === "Filled" ||
+          job.status === "Completed" ||
+          job.acceptedUserId
             ? "This job has already been filled and cannot accept more applications."
             : "This will accept the applicant for the position and close the job listing"}
         </p>

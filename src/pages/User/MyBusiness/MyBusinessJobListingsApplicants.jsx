@@ -3,7 +3,22 @@ import { useBusiness } from "../../../contexts/BusinessContext";
 import { ArrowLeftIcon, EyeIcon } from "@heroicons/react/20/solid";
 import { useState, useEffect } from "react";
 import { getDatabase, ref, onValue, get } from "firebase/database";
-import StarRating from "../../../components/UI/StarRating";
+
+// Simple function to format relative time
+const formatRelativeTime = (dateString) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMs = now - date;
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+  if (diffInMinutes < 1) return "Just now";
+  if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
+  if (diffInHours < 24) return `${diffInHours} hours ago`;
+  if (diffInDays < 7) return `${diffInDays} days ago`;
+  return date.toLocaleDateString();
+};
 
 export default function MyBusinessJobListingsApplicants() {
   const { jobId } = useParams();
@@ -11,6 +26,7 @@ export default function MyBusinessJobListingsApplicants() {
   const [job, setJob] = useState(null);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const db = getDatabase();
 
   console.log(job);
 
@@ -18,7 +34,6 @@ export default function MyBusinessJobListingsApplicants() {
   useEffect(() => {
     if (!jobId) return;
 
-    const db = getDatabase();
     const jobRef = ref(db, `public/jobs/${jobId}`);
     const applicationsRef = ref(db, `public/jobs/${jobId}/jobApplications`);
 
@@ -62,104 +77,27 @@ export default function MyBusinessJobListingsApplicants() {
     }
 
     const fetchApplicantData = async () => {
-      const db = getDatabase();
+      if (!applications.length) return;
+
       const enrichedData = await Promise.all(
         applications.map(async (application) => {
-          try {
-            // Fetch current user profile data for additional details
-            const userProfileRef = ref(
-              db,
-              `users/${application.userId}/profile`
-            );
-            const userProfileSnapshot = await get(userProfileRef);
-            const userProfile = userProfileSnapshot.val() || {};
+          const userId = application.userId;
+          const userProfileRef = ref(db, `users/${userId}/profile`);
+          const userProfileSnapshot = await get(userProfileRef);
+          const userProfile = userProfileSnapshot.val() || {};
 
-            // Fetch user reviews to calculate average rating
-            const userReviewsRef = ref(
-              db,
-              `users/${application.userId}/profile/reviews`
-            );
-            const userReviewsSnapshot = await get(userReviewsRef);
-            const userReviews = userReviewsSnapshot.val() || {};
-
-            // Calculate average rating
-            const reviewValues = Object.values(userReviews);
-            const averageRating =
-              reviewValues.length > 0
-                ? reviewValues.reduce(
-                    (sum, review) => sum + (review.rating || 0),
-                    0
-                  ) / reviewValues.length
-                : 0;
-
-            // Calculate initials from firstName and lastName
-            const getInitials = (firstName, lastName) => {
-              if (!firstName && !lastName) return "N/A";
-
-              const first = firstName ? firstName.charAt(0).toUpperCase() : "";
-              const last = lastName ? lastName.charAt(0).toUpperCase() : "";
-
-              if (first && last) {
-                return `${first}.${last}.`;
-              } else if (first) {
-                return `${first}.`;
-              } else if (last) {
-                return `${last}.`;
-              }
-
-              return "N/A";
-            };
-
-            return {
-              userId: application.userId,
-              applicationId: application.applicationId,
-              username: application.username || "Unknown",
-              firstName: userProfile.firstName || application.firstName || "",
-              lastName: userProfile.lastName || application.lastName || "",
-              initials: getInitials(
-                userProfile.firstName,
-                userProfile.lastName
-              ),
-              occupation: userProfile.occupation || "N/A",
-              rating: averageRating > 0 ? averageRating : 0,
-              payRate: application.payRate
-                ? `£${application.payRate}/hr`
-                : "N/A",
-              applied: application.appliedAt
-                ? new Date(application.appliedAt).toLocaleDateString()
-                : "N/A",
-              image: userProfile.avatar || "/default-avatar.png",
-              message: application.message || "",
-              startOfShift: application.startOfShift,
-              endOfShift: application.endOfShift,
-            };
-          } catch (error) {
-            console.error(
-              `Error fetching data for user ${application.userId}:`,
-              error
-            );
-            // Return fallback data if there's an error
-            return {
-              userId: application.userId,
-              applicationId: application.applicationId,
-              username: application.username || "Unknown",
-              firstName: application.firstName || "",
-              lastName: application.lastName || "",
-              initials: "N/A",
-              occupation: "N/A",
-              rating: 0,
-              payRate: application.payRate
-                ? `£${application.payRate}/hr`
-                : "N/A",
-              applied: application.appliedAt
-                ? new Date(application.appliedAt).toLocaleDateString()
-                : "N/A",
-              image: "/default-avatar.png",
-              message: application.message || "",
-              startOfShift: application.startOfShift,
-              endOfShift: application.endOfShift,
-            };
-          }
+          return {
+            ...application,
+            username: userProfile.username || "Unknown",
+            occupation: userProfile.occupation || "Not specified",
+            image: userProfile.avatar || "/src/assets/user.png",
+            initials:
+              userProfile.firstName && userProfile.lastName
+                ? `${userProfile.firstName[0]}${userProfile.lastName[0]}`
+                : "U",
+            payRate: application.payRate || "Not specified",
+            applied: formatRelativeTime(application.appliedAt),
+          };
         })
       );
 
@@ -270,12 +208,9 @@ export default function MyBusinessJobListingsApplicants() {
                           <div className="text-gray-900">
                             {person.occupation}
                           </div>
-                          <div className="mt-1 text-gray-500">
-                            <StarRating rating={person.rating} />
-                          </div>
                         </td>
                         <td className="px-3 py-5 text-sm whitespace-nowrap text-gray-500">
-                          {person.payRate}
+                          £{parseFloat(person.payRate).toFixed(2)}/hr
                         </td>
                         <td className="px-3 py-5 text-sm whitespace-nowrap text-gray-500">
                           {person.applied}

@@ -34,6 +34,15 @@ const FindWorkDivider = React.memo(
 
       if (jobs.length === 0) return [];
 
+      // Filter out jobs from private businesses
+      jobs = jobs.filter((job) => {
+        // If we can't determine business privacy, assume it's public (show the job)
+        if (!job.businessPrivacy) return true;
+        return job.businessPrivacy === "public";
+      });
+
+      if (jobs.length === 0) return [];
+
       // Calculate distances for all jobs if we have user location
       if (coords.lat && coords.lng) {
         jobs.forEach((job) => {
@@ -180,7 +189,7 @@ const FindWorkDivider = React.memo(
       );
     } else if (showNoJobs || (publicJobs && publicJobs.length === 0)) {
       return (
-        <div className="flex flex-1 flex-col justify-center items-center min-h-[60vh]">
+        <div className="flex flex-1 flex-col justify-center items-center min-h-[60vh] animate-[fadeIn_0.6s_ease-in-out]">
           <div className="text-center">
             <svg
               fill="none"

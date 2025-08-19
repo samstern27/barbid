@@ -68,14 +68,8 @@ export default function ApplyJob({ applyOpen, setApplyOpen, job }) {
     const userSnapshot = await get(userRef);
     const userProfile = userSnapshot.val() || {};
 
-    // Fetch user reviews
-    const reviewsRef = ref(db, "users/" + userId + "/profile/reviews");
-    const reviewsSnapshot = await get(reviewsRef);
-    const reviews = reviewsSnapshot.val() || {};
-
     return {
       ...userProfile,
-      reviews: Object.values(reviews),
     };
   };
 
@@ -83,99 +77,111 @@ export default function ApplyJob({ applyOpen, setApplyOpen, job }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Find user details
-    const userDetails = await findUserDetails();
+    setIsSubmitting(true);
+    setError("");
 
-    // TODO: Implement job application logic
-    const db = getDatabase();
-    const userId = currentUser.uid;
+    try {
+      // Find user details
+      const userDetails = await findUserDetails();
 
-    // Calculate average rating from all reviews
-    const averageRating =
-      userDetails.reviews && userDetails.reviews.length > 0
-        ? userDetails.reviews.reduce((sum, review) => sum + review.rating, 0) /
-          userDetails.reviews.length
-        : 0;
+      const db = getDatabase();
+      const userId = currentUser.uid;
 
-    // Determine the actual values to send (original or custom)
-    const actualStartTime = useOriginalTimes ? job?.startOfShift : startOfShift;
-    const actualEndTime = useOriginalTimes ? job?.endOfShift : endOfShift;
-    const actualPayRate = useOriginalPay ? job?.payRate : payRate;
+      // Determine the actual values to send (original or custom)
+      const actualStartTime = useOriginalTimes
+        ? job?.startOfShift
+        : startOfShift;
+      const actualEndTime = useOriginalTimes ? job?.endOfShift : endOfShift;
+      const actualPayRate = useOriginalPay ? job?.payRate : payRate;
 
-    // Generate a single application ID for this application
-    const applicationId = uuidv4();
+      // Generate a single application ID for this application
+      const applicationId = uuidv4();
 
-    const applyJobRef = ref(
-      db,
-      "public/jobs/" + job.id + "/jobApplications/" + userId
-    );
+      const applyJobRef = ref(
+        db,
+        "public/jobs/" + job.id + "/jobApplications/" + userId
+      );
 
-    // Also save to user's applied jobs list
-    const userAppliedJobRef = ref(
-      db,
-      "users/" + userId + "/jobs/applied/" + applicationId
-    );
+      // Also save to user's applied jobs list
+      const userAppliedJobRef = ref(
+        db,
+        "users/" + userId + "/jobs/applied/" + applicationId
+      );
 
-    // Save application data to both locations
-    await Promise.all([
-      set(applyJobRef, {
-        applicationId: applicationId,
-        jobId: job.id,
-        businessId: job.businessId,
-        businessName: job.businessName,
-        userId: userId,
-        username: userDetails.username,
-        firstName: userDetails.firstName || userDetails.username,
-        lastName: userDetails.lastName || "",
-        avatar: userDetails.avatar || null,
-        occupation: userDetails.occupation || null,
-        rating: averageRating,
-        jobTitle: job.jobTitle,
-        startOfShift: actualStartTime,
-        endOfShift: actualEndTime,
-        payRate: actualPayRate,
-        message: message,
-        appliedAt: new Date().toISOString(),
-        // Store flags to indicate if original values were used
-        usedOriginalTimes: useOriginalTimes,
-        usedOriginalPay: useOriginalPay,
-        // Store original job values for comparison
-        originalJobStartTime: job?.startOfShift,
-        originalJobEndTime: job?.endOfShift,
-        originalJobPayRate: job?.payRate,
-      }),
-      set(userAppliedJobRef, {
-        applicationId: applicationId,
-        jobId: job.id,
-        businessId: job.businessId,
-        businessName: job.businessName,
-        userId: userId,
-        username: userDetails.username,
-        firstName: userDetails.firstName || userDetails.username,
-        lastName: userDetails.lastName || "",
-        avatar: userDetails.avatar || null,
-        occupation: userDetails.occupation || null,
-        rating: averageRating,
-        jobTitle: job.jobTitle,
-        startOfShift: actualStartTime,
-        endOfShift: actualEndTime,
-        payRate: actualPayRate,
-        message: message,
-        appliedAt: new Date().toISOString(),
-        // Store flags to indicate if original values were used
-        usedOriginalTimes: useOriginalTimes,
-        usedOriginalPay: useOriginalPay,
-        // Store original job values for comparison
-        originalJobStartTime: job?.startOfShift,
-        originalJobEndTime: job?.endOfShift,
-        originalJobPayRate: job?.payRate,
-      }),
-      // Increment the applicant count for this job
-      update(ref(db, `public/jobs/${job.id}`), {
-        applicantCount: increment(1),
-      }),
-    ]);
-    setApplyOpen(false);
+      // Save application data to both locations
+      await Promise.all([
+        set(applyJobRef, {
+          applicationId: applicationId,
+          jobId: job.id,
+          businessId: job.businessId,
+          businessName: job.businessName,
+          userId: userId,
+          username: userDetails.username,
+          firstName: userDetails.firstName || userDetails.username,
+          lastName: userDetails.lastName || "",
+          avatar: userDetails.avatar || null,
+          occupation: userDetails.occupation || null,
+          jobTitle: job.jobTitle,
+          startOfShift: actualStartTime,
+          endOfShift: actualEndTime,
+          payRate: actualPayRate,
+          message: message,
+          appliedAt: new Date().toISOString(),
+          // Store flags to indicate if original values were used
+          usedOriginalTimes: useOriginalTimes,
+          usedOriginalPay: useOriginalPay,
+          // Store original job values for comparison
+          originalJobStartTime: job?.startOfShift,
+          originalJobEndTime: job?.endOfShift,
+          originalJobPayRate: job?.payRate,
+        }),
+        set(userAppliedJobRef, {
+          applicationId: applicationId,
+          jobId: job.id,
+          businessId: job.businessId,
+          businessName: job.businessName,
+          userId: userId,
+          username: userDetails.username,
+          firstName: userDetails.firstName || userDetails.username,
+          lastName: userDetails.lastName || "",
+          avatar: userDetails.avatar || null,
+          occupation: userDetails.occupation || null,
+          jobTitle: job.jobTitle,
+          startOfShift: actualStartTime,
+          endOfShift: actualEndTime,
+          payRate: actualPayRate,
+          message: message,
+          appliedAt: new Date().toISOString(),
+          // Store flags to indicate if original values were used
+          usedOriginalTimes: useOriginalTimes,
+          usedOriginalPay: useOriginalPay,
+          // Store original job values for comparison
+          originalJobStartTime: job?.startOfShift,
+          originalJobEndTime: job?.endOfShift,
+          originalJobPayRate: job?.payRate,
+        }),
+        // Increment the applicant count for this job
+        update(ref(db, `public/jobs/${job.id}`), {
+          applicantCount: increment(1),
+        }),
+      ]);
+
+      // Close the form after successful submission
+      setApplyOpen(false);
+
+      // Reset form state
+      setStartOfShift("");
+      setEndOfShift("");
+      setMessage("");
+      setPayRate("");
+      setUseOriginalTimes(true);
+      setUseOriginalPay(true);
+    } catch (error) {
+      console.error("Error applying for job:", error);
+      setError("Failed to apply for job. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

@@ -1,6 +1,5 @@
-import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useNavigate, useLocation, useParams } from "react-router-dom";
 import Breadcrumb from "../../../components/UI/Breadcrumb";
-import { useParams } from "react-router-dom";
 import { getDatabase, ref, onValue } from "firebase/database";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useState, useEffect } from "react";
@@ -25,9 +24,13 @@ const MyJobsLayoutContent = () => {
   // Check if we're in overview mode (no jobId) or detail mode (with jobId)
   const isOverviewMode = !jobId;
 
-  // Fetch job data using jobId from params (only when in detail mode)
+  // Check if we're in application detail mode
+  const isApplicationDetailMode =
+    jobId && location.pathname.includes("/application/");
+
+  // Fetch job data using jobId from params (only when in detail mode, not application detail)
   useEffect(() => {
-    if (isOverviewMode) {
+    if (isOverviewMode || isApplicationDetailMode) {
       setLoading(false);
       return;
     }
@@ -54,7 +57,14 @@ const MyJobsLayoutContent = () => {
     });
 
     return () => unsubscribe();
-  }, [jobId, currentUser?.uid, navigate, selectJobById, isOverviewMode]);
+  }, [
+    jobId,
+    currentUser?.uid,
+    navigate,
+    selectJobById,
+    isOverviewMode,
+    isApplicationDetailMode,
+  ]);
 
   const tabs = [
     { name: "Overview", href: "/jobs/overview" },
@@ -79,7 +89,7 @@ const MyJobsLayoutContent = () => {
       <Breadcrumb pages={pages} />
       <div className="border-b border-gray-200 pb-5 sm:pb-0 animate-[fadeIn_0.6s_ease-in-out]">
         <h3 className="text-base font-semibold text-gray-900">
-          {isOverviewMode ? "My Jobs" : job?.title}
+          {isOverviewMode ? "My Jobs" : isApplicationDetailMode ? "Job Application Details" : job?.title}
         </h3>
 
         <div className="mt-3 sm:mt-4">

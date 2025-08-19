@@ -53,15 +53,11 @@ const MyBusinessDetailLayout = () => {
 
   const tabs = [
     { name: "Overview", href: `/my-business/${businessId}/overview` },
+    { name: "Job Listings", href: `/my-business/${businessId}/job-listings` },
     {
-      name: "Job Listings",
-      href: `/my-business/${businessId}/job-listings`,
+      name: "Previous Staff",
+      href: `/my-business/${businessId}/previous-staff`,
     },
-    {
-      name: "Past Candidates",
-      href: `/my-business/${businessId}/past-candidates`,
-    },
-    { name: "Reviews", href: `/my-business/${businessId}/reviews` },
     { name: "Settings", href: `/my-business/${businessId}/settings` },
   ];
 

@@ -52,14 +52,14 @@ export default function CreateJob({ createJobOpen, setCreateJobOpen }) {
       return;
     }
 
-    // Check if start time is at least 2 hours from now
+    // Check if start time is at least 1 hour from now
     const now = new Date();
     const startTime = new Date(startOfShift);
-    const twoHoursFromNow = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+    const oneHourFromNow = new Date(now.getTime() + 1 * 60 * 60 * 1000);
 
-    if (startTime <= twoHoursFromNow) {
+    if (startTime <= oneHourFromNow) {
       setError(
-        "Start of shift must be at least 2 hours from now to allow time for applications"
+        "Start of shift must be at least 1 hour from now to allow time for applications"
       );
       return;
     }
@@ -125,10 +125,18 @@ export default function CreateJob({ createJobOpen, setCreateJobOpen }) {
           jobId
       );
 
-      const publicJobRef = ref(db, "public/jobs/" + jobId);
-
-      // Set the same data to both paths
-      await Promise.all([set(userJobRef, jobData), set(publicJobRef, jobData)]);
+      // Only post to public jobs if the business is public
+      if (selectedBusiness.privacy === "public") {
+        const publicJobRef = ref(db, "public/jobs/" + jobId);
+        // Set the same data to both paths
+        await Promise.all([
+          set(userJobRef, jobData),
+          set(publicJobRef, jobData),
+        ]);
+      } else {
+        // Only set to user's private business if business is private
+        await set(userJobRef, jobData);
+      }
 
       // Count existing jobs and update jobListings
       const jobsRef = ref(

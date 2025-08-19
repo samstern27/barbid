@@ -40,7 +40,15 @@ export default function MyBusinessJobListings() {
             ...job,
             applicantCount: job.applicantCount || 0,
           }));
-          setJobs(jobs);
+
+          // Sort by newest first (by createdAt date)
+          const sortedJobs = jobs.sort((a, b) => {
+            const dateA = new Date(a.createdAt || 0);
+            const dateB = new Date(b.createdAt || 0);
+            return dateB - dateA; // Newest first
+          });
+
+          setJobs(sortedJobs);
         } else {
           setJobs([]);
         }
@@ -70,7 +78,13 @@ export default function MyBusinessJobListings() {
               prevJobs.length === 0 ||
               businessJobs.length > prevJobs.length
             ) {
-              return businessJobs;
+              // Sort by newest first (by createdAt date)
+              const sortedBusinessJobs = businessJobs.sort((a, b) => {
+                const dateA = new Date(a.createdAt || 0);
+                const dateB = new Date(b.createdAt || 0);
+                return dateB - dateA; // Newest first
+              });
+              return sortedBusinessJobs;
             }
             return prevJobs;
           });

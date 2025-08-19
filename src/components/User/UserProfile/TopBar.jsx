@@ -1,5 +1,5 @@
 import React from "react";
-import { BriefcaseIcon, StarIcon } from "@heroicons/react/20/solid";
+import { BriefcaseIcon } from "@heroicons/react/20/solid";
 import { useAuth } from "../../../contexts/AuthContext";
 
 function classNames(...classes) {
@@ -9,11 +9,6 @@ function classNames(...classes) {
 const TopBar = ({ profile }) => {
   const { currentUser } = useAuth();
   const theme = profile.theme || "gray";
-  const rating =
-    profile.reviews?.length > 0
-      ? profile.reviews.reduce((sum, review) => sum + review.rating, 0) /
-        profile.reviews.length
-      : 0;
 
   const themeClasses = {
     amber: ["bg-amber-900", "text-amber-500"],
@@ -79,8 +74,12 @@ const TopBar = ({ profile }) => {
               <h2
                 className={`truncate text-2xl font-bold text-white text-shadow-md`}
               >
-                {profile.firstName ? profile.firstName[0] + "." : ""}
-                {profile.lastName ? profile.lastName[0] + "." : ""}
+                {profile.firstName
+                  ? profile.firstName[0].toUpperCase() + "."
+                  : ""}
+                {profile.lastName
+                  ? profile.lastName[0].toUpperCase() + "."
+                  : ""}
               </h2>
               <h3 className="text-sm text-gray-200 text-shadow-md">
                 @{profile.username ? profile.username : "No username"}
@@ -103,24 +102,9 @@ const TopBar = ({ profile }) => {
           </div>
         </div>
         <div className="mt-10 flex flex-col items-center gap-2">
-          <h3 className="text-4xl font-light text-shadow-sm text-white sm:text-4xl sm:tracking-tight text-center">
+          <h3 className="text-4xl font-light text-shadow-sm text-white sm:text-4xl sm:tracking-tight text-center mb-4">
             {profile.occupation ? profile.occupation : "No occupation"}
           </h3>
-          <div className="flex items-center gap-1 justify-center mt-2 mb-7">
-            {[...Array(5)].map((_, index) => (
-              <StarIcon
-                key={index}
-                aria-hidden="true"
-                className={classNames(
-                  index < rating ? "text-yellow-400" : "text-gray-200",
-                  "size-5 shrink-0"
-                )}
-              />
-            ))}
-            <span className="text-gray-200 text-sm">
-              ({profile.reviews?.length})
-            </span>
-          </div>
         </div>
       </div>
     </div>

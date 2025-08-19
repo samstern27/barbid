@@ -28,8 +28,8 @@ const JobStatusIndicator = ({ job, showAutoCloseWarning = true }) => {
     const timeUntilShift = getTimeUntilShift();
     if (!timeUntilShift) return false;
 
-    // Show warning if shift starts in less than 2 hours
-    return timeUntilShift.totalMinutes <= 120;
+    // Show warning if shift starts in less than 1 hour
+    return timeUntilShift.totalMinutes <= 60;
   };
 
   // Get status styling
@@ -53,10 +53,10 @@ const JobStatusIndicator = ({ job, showAutoCloseWarning = true }) => {
     const timeUntilShift = getTimeUntilShift();
     if (!timeUntilShift) return "";
 
-    if (timeUntilShift.totalMinutes <= 60) {
+    if (timeUntilShift.totalMinutes <= 30) {
       return "bg-red-50 text-red-700 ring-1 ring-red-600/20 ring-inset";
-    } else if (timeUntilShift.totalMinutes <= 120) {
-      return "bg-yellow-50 text-yellow-700 ring-1 ring-yellow-600/20 ring-inset";
+    } else if (timeUntilShift.totalMinutes <= 60) {
+      return "bg-yellow-50 text-yellow-700 ring-1 ring-red-600/20 ring-inset";
     }
     return "";
   };
@@ -80,9 +80,9 @@ const JobStatusIndicator = ({ job, showAutoCloseWarning = true }) => {
           <span
             className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${getWarningStyling()}`}
           >
-            {timeUntilShift.totalMinutes <= 60
+            {timeUntilShift.totalMinutes <= 30
               ? "Closes soon!"
-              : "Closes in ~2 hours"}
+              : "Closes in ~1 hour"}
           </span>
         </div>
       )}

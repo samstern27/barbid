@@ -24,6 +24,7 @@ import MyJobsOverview from "./pages/User/MyJobs/MyJobsOverview";
 import MyJobsActive from "./pages/User/MyJobs/MyJobsActive";
 import MyJobsAccepted from "./pages/User/MyJobs/MyJobsAccepted";
 import MyJobsRejected from "./pages/User/MyJobs/MyJobsRejected";
+import MyJobApplicationDetail from "./pages/User/MyJobs/MyJobApplicationDetail";
 
 // FindWork Pages
 import FindWork from "./pages/User/FindWork/FindWork";
@@ -37,12 +38,11 @@ import MyBusinessJobListings from "./pages/User/MyBusiness/MyBusinessJobListings
 import MyBusinessJobListingsDetail from "./components/User/MyBusiness/MyBusinessJobListingsDetail";
 import MyBusinessJobListingsApplicants from "./pages/User/MyBusiness/MyBusinessJobListingsApplicants";
 import MyBusinessJobListingsApplicantsDetail from "./pages/User/MyBusiness/MyBusinessJobListingsApplicantsDetail";
-import MyBusinessPastCandidates from "./pages/User/MyBusiness/MyBusinessPastCandidates";
-import MyBusinessReviews from "./pages/User/MyBusiness/MyBusinessReviews";
+import MyBusinessPreviousStaff from "./pages/User/MyBusiness/MyBusinessPreviousStaff";
+import MyBusinessPreviousStaffDetail from "./pages/User/MyBusiness/MyBusinessPreviousStaffDetail";
 import MyBusinessSettings from "./pages/User/MyBusiness/MyBusinessSettings";
 
-import UserRoles from "./pages/User/UserRoles";
-import UserReviews from "./pages/User/UserReviews";
+import UserActivity from "./pages/User/UserActivity";
 import UserSettings from "./pages/User/UserSettings";
 
 import "./index.css";
@@ -68,11 +68,13 @@ function AppRoutes() {
             <Route path="active" element={<MyJobsActive />} />
             <Route path="accepted" element={<MyJobsAccepted />} />
             <Route path="rejected" element={<MyJobsRejected />} />
-            <Route path=":jobId" element={<MyJobsOverview />} />
+            <Route
+              path="application/:jobId"
+              element={<MyJobApplicationDetail />}
+            />
           </Route>
 
-          <Route path="roles" element={<UserRoles />} />
-          <Route path="reviews" element={<UserReviews />} />
+          <Route path="activity" element={<UserActivity />} />
           <Route path="settings" element={<UserSettings />} />
 
           {/* FindWork Routes */}
@@ -99,10 +101,6 @@ function AppRoutes() {
             {/* Main Business Pages */}
             <Route index element={<Navigate to="overview" replace />} />
             <Route path="overview" element={<MyBusinessOverview />} />
-            <Route path="reviews" element={<MyBusinessReviews />} />
-            <Route path="settings" element={<MyBusinessSettings />} />
-
-            {/* Job Listings Routes */}
             <Route path="job-listings" element={<MyBusinessJobListings />} />
             <Route
               path="job-listings/:jobId"
@@ -117,11 +115,16 @@ function AppRoutes() {
               element={<MyBusinessJobListingsApplicantsDetail />}
             />
 
-            {/* Past Candidates Routes */}
+            {/* Previous Staff Routes */}
             <Route
-              path="past-candidates"
-              element={<MyBusinessPastCandidates />}
+              path="previous-staff"
+              element={<MyBusinessPreviousStaff />}
             />
+            <Route
+              path="previous-staff/:shiftId"
+              element={<MyBusinessPreviousStaffDetail />}
+            />
+            <Route path="settings" element={<MyBusinessSettings />} />
           </Route>
         </Route>
       </Routes>

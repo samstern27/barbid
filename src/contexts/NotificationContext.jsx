@@ -121,16 +121,6 @@ export const NotificationProvider = ({ children }) => {
         timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
         isRead: false,
       },
-      {
-        id: 3,
-        type: "review",
-        title: "Bar Manager",
-        message: "You have a new shift application!",
-        avatar:
-          "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=160&h=160&q=80",
-        timestamp: new Date(Date.now() - 60 * 60 * 1000), // 1 hour ago
-        isRead: false,
-      },
     ];
 
     setNotifications(sampleNotifications);

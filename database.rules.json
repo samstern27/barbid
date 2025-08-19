@@ -10,14 +10,32 @@
         },
         "business": {
           "$businessId": {
-            ".read": "auth != null && auth.uid === $uid",
-            ".write": "auth != null && auth.uid === $uid",
+            ".read": "$uid === auth.uid",
+            ".write": "$uid === auth.uid",
+
             "jobs": {
               "$jobId": {
-                ".read": "auth != null && auth.uid === $uid",
-                ".write": "auth != null && auth.uid === $uid"
+                ".read": "$uid === auth.uid",
+                ".write": "$uid === auth.uid",
+                "applicants": {
+                  "$userId": {
+                    ".read": "$uid === auth.uid",
+                    ".write": "$uid === auth.uid"
+                  }
+                }
               }
+            },
+
+            "privacy": {
+              ".read": "auth != null"
             }
+          }
+        },
+
+        "businessPrivacy": {
+          "$businessId": {
+            ".read": "auth != null",
+            ".write": false
           }
         },
         "jobs": {

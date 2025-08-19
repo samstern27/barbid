@@ -57,12 +57,12 @@ class JobAutoCloseService {
 
     const now = new Date();
     const shiftStartTime = new Date(job.startOfShift);
-    const oneHourBeforeShift = new Date(
-      shiftStartTime.getTime() - 60 * 60 * 1000
+    const thirtyMinutesBeforeShift = new Date(
+      shiftStartTime.getTime() - 30 * 60 * 1000
     );
 
-    // Job should be closed if it's within 1 hour of shift start AND still open
-    return now >= oneHourBeforeShift;
+    // Job should be closed if it's within 30 minutes of shift start AND still open
+    return now >= thirtyMinutesBeforeShift;
   }
 
   // Check if a job has any accepted applications
@@ -101,7 +101,7 @@ class JobAutoCloseService {
       const updateData = {
         status: "Closed",
         autoClosedAt: new Date().toISOString(),
-        autoClosedReason: "Shift starts in less than 1 hour",
+        autoClosedReason: "Shift starts in less than 30 minutes",
         lastModified: new Date().toISOString(),
       };
 
