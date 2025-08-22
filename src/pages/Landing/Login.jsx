@@ -25,7 +25,30 @@ const Login = () => {
       setLoading(true);
       await login(emailRef.current.value, passwordRef.current.value);
     } catch (error) {
-      setError(error.message || "Failed to sign in");
+      // Convert Firebase error codes to user-friendly messages
+      let userFriendlyError = "Failed to sign in";
+
+      if (error.code === "auth/invalid-credential") {
+        userFriendlyError = "Incorrect email or password. Please try again.";
+      } else if (error.code === "auth/user-not-found") {
+        userFriendlyError = "No account found with this email address.";
+      } else if (error.code === "auth/wrong-password") {
+        userFriendlyError = "Incorrect password. Please try again.";
+      } else if (error.code === "auth/too-many-requests") {
+        userFriendlyError =
+          "Too many failed attempts. Please wait a moment before trying again.";
+      } else if (error.code === "auth/user-disabled") {
+        userFriendlyError =
+          "This account has been disabled. Please contact support.";
+      } else if (error.code === "auth/invalid-email") {
+        userFriendlyError = "Please enter a valid email address.";
+      } else if (error.message.includes("verify your email")) {
+        userFriendlyError = error.message; // Keep the email verification message as is
+      } else {
+        userFriendlyError = "An unexpected error occurred. Please try again.";
+      }
+
+      setError(userFriendlyError);
     } finally {
       setLoading(false);
     }
@@ -37,7 +60,29 @@ const Login = () => {
       setLoading(true);
       await signInWithGoogle();
     } catch (error) {
-      setError(error.message || "Failed to sign in with Google");
+      // Convert Firebase error codes to user-friendly messages
+      let userFriendlyError = "Failed to sign in with Google";
+
+      if (error.code === "auth/popup-closed-by-user") {
+        userFriendlyError = "Sign-in was cancelled. Please try again.";
+      } else if (error.code === "auth/popup-blocked") {
+        userFriendlyError =
+          "Pop-up was blocked. Please allow pop-ups for this site and try again.";
+      } else if (
+        error.code === "auth/account-exists-with-different-credential"
+      ) {
+        userFriendlyError =
+          "An account already exists with this email using a different sign-in method.";
+      } else if (error.code === "auth/operation-not-allowed") {
+        userFriendlyError =
+          "Google sign-in is not enabled. Please contact support.";
+      } else if (error.message.includes("already exists")) {
+        userFriendlyError = error.message; // Keep the existing message for this case
+      } else {
+        userFriendlyError = "An unexpected error occurred. Please try again.";
+      }
+
+      setError(userFriendlyError);
     } finally {
       setLoading(false);
     }
@@ -147,12 +192,12 @@ const Login = () => {
                     </div>
 
                     <div className="text-sm/6">
-                      <a
-                        href="#"
+                      <NavLink
+                        to="/forgot-password"
                         className="font-semibold text-indigo-600 hover:text-indigo-500"
                       >
                         Forgot password?
-                      </a>
+                      </NavLink>
                     </div>
                   </div>
 

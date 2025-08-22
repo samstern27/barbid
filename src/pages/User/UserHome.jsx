@@ -29,6 +29,7 @@ const UserHome = () => {
   });
   const [recentJobs, setRecentJobs] = useState([]);
   const [upcomingShifts, setUpcomingShifts] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     if (!currentUser?.uid) return;
@@ -94,6 +95,10 @@ const UserHome = () => {
         console.log("No public jobs data found"); // Debug log
       }
     });
+
+    // Set loaded state after initial data fetch
+    const timer = setTimeout(() => setIsLoaded(true), 100);
+    return () => clearTimeout(timer);
   }, [currentUser]);
 
   const calculateStats = (jobsData) => {
@@ -261,7 +266,11 @@ const UserHome = () => {
       <Breadcrumb />
 
       {/* Quick Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div
+        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 transition-all duration-700 ease-out ${
+          isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        }`}
+      >
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
@@ -325,7 +334,11 @@ const UserHome = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div
+        className={`grid grid-cols-1 lg:grid-cols-2 gap-6 transition-all duration-700 ease-out delay-200 ${
+          isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        }`}
+      >
         {/* Calendar Widget */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-4">
@@ -426,7 +439,11 @@ const UserHome = () => {
       </div>
 
       {/* Earnings Summary */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div
+        className={`bg-white rounded-lg shadow p-6 transition-all duration-700 ease-out delay-400 ${
+          isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        }`}
+      >
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
           Earnings Summary
         </h3>
@@ -508,7 +525,11 @@ const UserHome = () => {
       </div>
 
       {/* User Activity Summary */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div
+        className={`bg-white rounded-lg shadow p-6 transition-all duration-700 ease-out delay-600 ${
+          isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        }`}
+      >
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
           Job Application Activity
         </h3>
@@ -531,7 +552,11 @@ const UserHome = () => {
       </div>
 
       {/* Business Stats Section - Always show at bottom */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div
+        className={`bg-white rounded-lg shadow p-6 transition-all duration-700 ease-out delay-800 ${
+          isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        }`}
+      >
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
           Business Overview
         </h3>

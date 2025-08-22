@@ -11,7 +11,7 @@ import {
   get,
   remove,
 } from "firebase/database";
-import { deleteAllUserData } from "../../firebase/firebase";
+import { deleteAllUserData, updateUserPassword } from "../../firebase/firebase";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -158,9 +158,21 @@ export default function UserSettings() {
   const [newExperiencePosition, setNewExperiencePosition] =
     useState("Full-time");
 
+  // Password change state
+  const [passwordFormData, setPasswordFormData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [isLoaded, setIsLoaded] = useState(false);
+
   // Load user data from the database when the component mounts or user changes
   useEffect(() => {
     if (!currentUser) return;
+
     const db = getDatabase();
     const profileRef = ref(db, "users/" + currentUser.uid + "/profile");
     const personalRef = ref(db, "users/" + currentUser.uid + "/personal");
@@ -204,6 +216,15 @@ export default function UserSettings() {
     get(notificationsRef).then((snapshot) => {
       const data = snapshot.val();
       if (data) setNotificationsFormData((prev) => ({ ...prev, ...data }));
+    });
+
+    // Set loaded state after all data has been fetched
+    Promise.all([
+      get(profileRef),
+      get(personalRef),
+      get(notificationsRef),
+    ]).then(() => {
+      setTimeout(() => setIsLoaded(true), 200);
     });
   }, [currentUser]);
 
@@ -475,6 +496,55 @@ export default function UserSettings() {
     }
   };
 
+  // Handle password change
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Handle password submission
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validate passwords match
+    if (passwordFormData.newPassword !== passwordFormData.confirmPassword) {
+      setPasswordError("New passwords do not match");
+      return;
+    }
+
+    // Validate password length
+    if (passwordFormData.newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters long");
+      return;
+    }
+
+    setPasswordLoading(true);
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    try {
+      await updateUserPassword(
+        currentUser,
+        passwordFormData.currentPassword,
+        passwordFormData.newPassword
+      );
+
+      setPasswordSuccess("Password updated successfully!");
+      setPasswordFormData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error) {
+      setPasswordError(error.message || "Failed to update password");
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
   // Reset profile section
   const handleProfileReset = () => {
     if (originalData) {
@@ -516,7 +586,11 @@ export default function UserSettings() {
           Settings
         </h2>
       </div>
-      <div className="grid grid-cols-1 gap-x-8 gap-y-8 py-10 md:grid-cols-3">
+      <div
+        className={`grid grid-cols-1 gap-x-8 gap-y-8 py-10 md:grid-cols-3 transition-all duration-700 ease-out ${
+          isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        }`}
+      >
         <div className="px-4 sm:px-0">
           <h2 className="text-base/7 font-semibold text-gray-900">Profile</h2>
           <p className="mt-1 text-sm/6 text-gray-600">
@@ -1050,7 +1124,11 @@ export default function UserSettings() {
       </div>
 
       {/* Personal Information Section */}
-      <div className="grid grid-cols-1 gap-x-8 gap-y-8 py-10 md:grid-cols-3">
+      <div
+        className={`grid grid-cols-1 gap-x-8 gap-y-8 py-10 md:grid-cols-3 transition-all duration-700 ease-out delay-200 ${
+          isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        }`}
+      >
         <div className="px-4 sm:px-0">
           <h2 className="text-base/7 font-semibold text-gray-900">
             Personal Information
@@ -1304,7 +1382,11 @@ export default function UserSettings() {
       </div>
 
       {/* Notifications Section */}
-      <div className="grid grid-cols-1 gap-x-8 gap-y-8 py-10 md:grid-cols-3">
+      <div
+        className={`grid grid-cols-1 gap-x-8 gap-y-8 py-10 md:grid-cols-3 transition-all duration-700 ease-out delay-400 ${
+          isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        }`}
+      >
         <div className="px-4 sm:px-0">
           <h2 className="text-base/7 font-semibold text-gray-900">
             Notification Settings
@@ -1393,7 +1475,170 @@ export default function UserSettings() {
           </div>
         </div>
       </div>
-      <div className="bg-white mt-5 mb-5">
+
+      {/* Password Change Section - Only show for non-Google users */}
+      {currentUser?.providerData?.[0]?.providerId !== "google.com" && (
+        <div
+          className={`grid grid-cols-1 gap-x-8 gap-y-8 py-10 md:grid-cols-3 transition-all duration-700 ease-out delay-600 ${
+            isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          }`}
+        >
+          <div className="px-4 sm:px-0">
+            <h2 className="text-base/7 font-semibold text-gray-900">
+              Change Password
+            </h2>
+            <p className="mt-1 text-sm/6 text-gray-600">
+              Update your password to keep your account secure.
+            </p>
+          </div>
+          <div className="bg-white shadow-xs ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
+            <form onSubmit={handlePasswordSubmit}>
+              <div className="px-4 py-6 sm:p-8 grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                {/* Current Password */}
+                <div className="sm:col-span-4">
+                  <label
+                    htmlFor="currentPassword"
+                    className="block text-sm/6 font-medium text-gray-900"
+                  >
+                    Current Password
+                  </label>
+                  <div className="mt-2">
+                    <input
+                      type="password"
+                      name="currentPassword"
+                      id="currentPassword"
+                      required
+                      value={passwordFormData.currentPassword}
+                      onChange={handlePasswordChange}
+                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
+                      placeholder="Enter your current password"
+                    />
+                  </div>
+                </div>
+
+                {/* New Password */}
+                <div className="sm:col-span-4">
+                  <label
+                    htmlFor="newPassword"
+                    className="block text-sm/6 font-medium text-gray-900"
+                  >
+                    New Password
+                  </label>
+                  <div className="mt-2">
+                    <input
+                      type="password"
+                      name="newPassword"
+                      id="newPassword"
+                      required
+                      value={passwordFormData.newPassword}
+                      onChange={handlePasswordChange}
+                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
+                      placeholder="Enter your new password"
+                    />
+                  </div>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Password must be at least 6 characters long.
+                  </p>
+                </div>
+
+                {/* Confirm New Password */}
+                <div className="sm:col-span-4">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-sm/6 font-medium text-gray-900"
+                  >
+                    Confirm New Password
+                  </label>
+                  <div className="mt-2">
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      id="confirmPassword"
+                      required
+                      value={passwordFormData.confirmPassword}
+                      onChange={handlePasswordChange}
+                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
+                      placeholder="Re-enter your new password"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Password change section action buttons */}
+              <div className="flex items-center justify-end gap-x-6 border-t border-gray-900/10 px-4 py-4 sm:px-8">
+                <button
+                  type="submit"
+                  disabled={passwordLoading}
+                  className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+                >
+                  {passwordLoading ? "Updating..." : "Update Password"}
+                </button>
+              </div>
+            </form>
+
+            {/* Password change error and success messages */}
+            {passwordError && (
+              <div className="px-4 pb-4 sm:px-8">
+                <div className="rounded-md bg-red-50 p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-5 w-5 text-red-400"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-red-800">{passwordError}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {passwordSuccess && (
+              <div className="px-4 pb-4 sm:px-8">
+                <div className="rounded-md bg-green-50 p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-5 w-5 text-green-400"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.236 4.53L7.53 10.53a.75.75 0 00-1.06 1.06l2 3a.75.75 0 001.137.089l4-4.5z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-green-800">
+                        {passwordSuccess}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div
+        className={`bg-white mt-5 mb-5 transition-all duration-700 ease-out delay-800 ${
+          isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        }`}
+      >
         <div className="py-0 sm:p-0">
           <div className="sm:flex sm:items-start sm:justify-between">
             <div>
@@ -1493,7 +1738,11 @@ export default function UserSettings() {
       </div>
 
       {/* Error and success messages using UploadAlert */}
-      <div className="sticky bottom-0 w-full flex flex-col gap-2 p-4">
+      <div
+        className={`sticky bottom-0 w-full flex flex-col gap-2 p-4 transition-all duration-700 ease-out delay-1000 ${
+          isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        }`}
+      >
         {error && (
           <UploadAlert
             message={error}

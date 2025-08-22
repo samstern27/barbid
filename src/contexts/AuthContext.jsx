@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { auth, googleProvider } from "../firebase/firebase";
 import { useNavigate } from "react-router-dom";
-import { writeUserData } from "../firebase/firebase";
+import { writeUserData, sendVerificationEmail } from "../firebase/firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -76,10 +76,12 @@ export const AuthProvider = ({ children }) => {
         dateOfBirth
       );
 
-      // Set the current user before navigation
+      // Send verification email
+      await sendVerificationEmail(userCredential.user);
+
+      // Set the current user but don't navigate - user needs to verify email
       setCurrentUser(userCredential.user);
-      navigate("/", { replace: true });
-      return userCredential.user;
+      return { user: userCredential.user, needsVerification: true };
     } catch (error) {
       throw error;
     }
@@ -92,6 +94,15 @@ export const AuthProvider = ({ children }) => {
         email,
         password
       );
+
+      // Check if email is verified
+      if (!userCredential.user.emailVerified) {
+        // Sign out the user since they can't access the site
+        await signOut(auth);
+        throw new Error(
+          "Please verify your email address before signing in. Check your inbox for a verification link."
+        );
+      }
 
       navigate(`/`);
       return userCredential.user;
@@ -158,6 +169,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const resendVerificationEmail = async () => {
+    try {
+      if (currentUser && !currentUser.emailVerified) {
+        await sendVerificationEmail(currentUser);
+        return {
+          success: true,
+          message: "Verification email sent successfully!",
+        };
+      } else {
+        throw new Error("No unverified user found");
+      }
+    } catch (error) {
+      throw error;
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
@@ -167,12 +194,26 @@ export const AuthProvider = ({ children }) => {
     return unsubscribe;
   }, []);
 
+  // Function to refresh user auth state (useful for checking email verification)
+  const refreshUser = async () => {
+    if (currentUser) {
+      try {
+        await currentUser.reload();
+        // The onAuthStateChanged listener will automatically update the state
+      } catch (error) {
+        console.error("Error refreshing user:", error);
+      }
+    }
+  };
+
   const value = {
     currentUser,
     signup,
     login,
     logout,
     signInWithGoogle,
+    resendVerificationEmail,
+    refreshUser,
     loading,
   };
 

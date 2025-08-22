@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../../contexts/NotificationContext";
 
@@ -11,8 +11,15 @@ const pages = [{ name: "Notifications", href: "/activity", current: true }];
 const UserActivity = () => {
   const navigate = useNavigate();
   const { notifications, removeNotification, markAsRead } = useNotification();
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const { currentUser } = useAuth();
+
+  useEffect(() => {
+    // Set loaded state after component mounts
+    const timer = setTimeout(() => setIsLoaded(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Format timestamp to relative time
   const formatTimeAgo = (timestamp) => {
@@ -73,7 +80,11 @@ const UserActivity = () => {
       <Breadcrumb pages={pages} />
 
       {/* Notifications Section */}
-      <div className="bg-white shadow rounded-lg">
+      <div
+        className={`bg-white shadow rounded-lg transition-all duration-700 ease-out ${
+          isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        }`}
+      >
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
           <p className="text-sm text-gray-500">
@@ -83,12 +94,19 @@ const UserActivity = () => {
 
         <div className="divide-y divide-gray-200">
           {notifications.length > 0 ? (
-            notifications.map((notification) => (
+            notifications.map((notification, index) => (
               <div
                 key={notification.id}
-                className={`px-6 py-4 hover:bg-gray-50 transition-colors duration-200 cursor-pointer ${
+                className={`px-6 py-4 hover:bg-gray-50 transition-all duration-500 ease-out cursor-pointer ${
                   !notification.isRead ? "bg-blue-50/30" : ""
+                } ${
+                  isLoaded
+                    ? "opacity-100 translate-x-0"
+                    : "opacity-0 translate-x-4"
                 }`}
+                style={{
+                  transitionDelay: `${(index + 1) * 100}ms`,
+                }}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex items-start space-x-4">
@@ -182,7 +200,13 @@ const UserActivity = () => {
               </div>
             ))
           ) : (
-            <div className="px-6 py-8 text-center">
+            <div
+              className={`px-6 py-8 text-center transition-all duration-700 ease-out delay-300 ${
+                isLoaded
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+              }`}
+            >
               <div className="text-gray-400 mb-2">
                 <svg
                   className="w-12 h-12 mx-auto"

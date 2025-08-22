@@ -1,5 +1,14 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, deleteUser } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  deleteUser,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  updatePassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+} from "firebase/auth";
 import { getDatabase, ref, set, update, remove } from "firebase/database";
 import {
   getStorage,
@@ -121,6 +130,49 @@ export const deleteAllUserData = async (userId, username) => {
   await deleteUserFromDatabase(userId, username);
   await deleteUserFromStorage(userId);
   await deleteUserFromAuth(userId);
+};
+
+// Authentication utility functions
+export const sendVerificationEmail = async (user) => {
+  try {
+    await sendEmailVerification(user);
+    return { success: true, message: "Verification email sent successfully!" };
+  } catch (error) {
+    throw new Error(`Failed to send verification email: ${error.message}`);
+  }
+};
+
+export const sendPasswordResetEmailToUser = async (email) => {
+  try {
+    await sendPasswordResetEmail(auth, email);
+    return {
+      success: true,
+      message: "Password reset email sent successfully!",
+    };
+  } catch (error) {
+    throw new Error(`Failed to send password reset email: ${error.message}`);
+  }
+};
+
+export const updateUserPassword = async (
+  user,
+  currentPassword,
+  newPassword
+) => {
+  try {
+    // Re-authenticate user before password change
+    const credential = EmailAuthProvider.credential(
+      user.email,
+      currentPassword
+    );
+    await reauthenticateWithCredential(user, credential);
+
+    // Update password
+    await updatePassword(user, newPassword);
+    return { success: true, message: "Password updated successfully!" };
+  } catch (error) {
+    throw new Error(`Failed to update password: ${error.message}`);
+  }
 };
 
 export default app;

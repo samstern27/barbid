@@ -13,6 +13,8 @@ import Contact from "./pages/Landing/Contact";
 import Login from "./pages/Landing/Login";
 import SignUp from "./pages/Landing/SignUp";
 import FAQ from "./pages/Landing/FAQ";
+import ForgotPassword from "./pages/Landing/ForgotPassword";
+import EmailVerification from "./pages/Landing/EmailVerification";
 
 // User Pages
 
@@ -56,7 +58,21 @@ function AppRoutes() {
   }
 
   if (currentUser) {
-    // LOGGED IN ROUTES
+    // Check if user's email is verified
+    if (!currentUser.emailVerified) {
+      // Redirect unverified users to a verification page
+      return (
+        <Routes>
+          <Route path="/" element={<LandingLayout />}>
+            <Route index element={<Navigate to="/verify-email" replace />} />
+            <Route path="verify-email" element={<EmailVerification />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/verify-email" replace />} />
+        </Routes>
+      );
+    }
+
+    // LOGGED IN ROUTES (only for verified users)
     return (
       <Routes>
         <Route path="/" element={<UserLayout />}>
@@ -145,6 +161,7 @@ function AppRoutes() {
           <Route path="faq" element={<FAQ />} />
           <Route path="login" element={<Login />} />
           <Route path="signup" element={<SignUp />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
         </Route>
         {/* Catch all other routes and redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
