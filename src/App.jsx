@@ -20,7 +20,7 @@ import UserLayout from "./components/User/UserLayout";
 import UserHome from "./pages/User/UserHome";
 import UserProfile from "./pages/User/UserProfile";
 import MyJobsLayout from "./pages/User/MyJobs/MyJobsLayout";
-import MyJobsOverview from "./pages/User/MyJobs/MyJobsOverview";
+
 import MyJobsActive from "./pages/User/MyJobs/MyJobsActive";
 import MyJobsAccepted from "./pages/User/MyJobs/MyJobsAccepted";
 import MyJobsRejected from "./pages/User/MyJobs/MyJobsRejected";
@@ -33,7 +33,7 @@ import FindWorkJobDetail from "./pages/User/FindWork/FindWorkJobDetail";
 // MyBusiness Pages
 import MyBusiness from "./pages/User/MyBusiness/MyBusiness";
 import MyBusinessDetailLayout from "./components/User/MyBusiness/MyBusinessDetailLayout";
-import MyBusinessOverview from "./pages/User/MyBusiness/MyBusinessOverview";
+
 import MyBusinessJobListings from "./pages/User/MyBusiness/MyBusinessJobListings";
 import MyBusinessJobListingsDetail from "./components/User/MyBusiness/MyBusinessJobListingsDetail";
 import MyBusinessJobListingsApplicants from "./pages/User/MyBusiness/MyBusinessJobListingsApplicants";
@@ -63,8 +63,7 @@ function AppRoutes() {
           <Route index element={<UserHome />} />
           <Route path="profile/:username" element={<UserProfile />} />
           <Route path="jobs" element={<MyJobsLayout />}>
-            <Route index element={<Navigate to="overview" replace />} />
-            <Route path="overview" element={<MyJobsOverview />} />
+            <Route index element={<Navigate to="active" replace />} />
             <Route path="active" element={<MyJobsActive />} />
             <Route path="accepted" element={<MyJobsAccepted />} />
             <Route path="rejected" element={<MyJobsRejected />} />
@@ -74,7 +73,14 @@ function AppRoutes() {
             />
           </Route>
 
-          <Route path="activity" element={<UserActivity />} />
+          <Route
+            path="activity"
+            element={
+              <BusinessProvider>
+                <UserActivity />
+              </BusinessProvider>
+            }
+          />
           <Route path="settings" element={<UserSettings />} />
 
           {/* FindWork Routes */}
@@ -99,8 +105,7 @@ function AppRoutes() {
             }
           >
             {/* Main Business Pages */}
-            <Route index element={<Navigate to="overview" replace />} />
-            <Route path="overview" element={<MyBusinessOverview />} />
+            <Route index element={<Navigate to="job-listings" replace />} />
             <Route path="job-listings" element={<MyBusinessJobListings />} />
             <Route
               path="job-listings/:jobId"

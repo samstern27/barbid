@@ -1,39 +1,18 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../../contexts/NotificationContext";
-import { useBusiness } from "../../contexts/BusinessContext";
-import { getDatabase, ref, update } from "firebase/database";
+
 import { useAuth } from "../../contexts/AuthContext";
 import Breadcrumb from "../../components/UI/Breadcrumb";
 import { TrashIcon, EyeIcon } from "@heroicons/react/24/outline";
 
-const pages = [{ name: "Activity", href: "/activity", current: true }];
+const pages = [{ name: "Notifications", href: "/activity", current: true }];
 
 const UserActivity = () => {
   const navigate = useNavigate();
   const { notifications, removeNotification, markAsRead } = useNotification();
-  const { businesses } = useBusiness();
+
   const { currentUser } = useAuth();
-
-  // Function to fix business privacy
-  const fixBusinessPrivacy = async (businessId) => {
-    if (!currentUser?.uid) return;
-
-    try {
-      const db = getDatabase();
-      const businessRef = ref(
-        db,
-        `users/${currentUser.uid}/business/${businessId}`
-      );
-      await update(businessRef, { privacy: "public" });
-      alert(
-        "Business privacy changed to public! Jobs should now appear in Find Work."
-      );
-    } catch (error) {
-      console.error("Error updating business privacy:", error);
-      alert("Failed to update business privacy. Please try again.");
-    }
-  };
 
   // Format timestamp to relative time
   const formatTimeAgo = (timestamp) => {
@@ -92,19 +71,13 @@ const UserActivity = () => {
   return (
     <div className="flex flex-col m-10 gap-4">
       <Breadcrumb pages={pages} />
-      <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-bold">Activity</h1>
-        <p className="text-sm text-gray-500">
-          View your activity and notifications on the platform.
-        </p>
-      </div>
 
       {/* Notifications Section */}
       <div className="bg-white shadow rounded-lg">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
           <p className="text-sm text-gray-500">
-            All your notifications and activity updates
+            All your notifications and updates
           </p>
         </div>
 
@@ -119,14 +92,60 @@ const UserActivity = () => {
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex items-start space-x-4">
-                  <img
-                    src={
-                      notification.avatar ||
-                      "https://api.dicebear.com/9.x/bottts-neutral/svg?seed=default"
-                    }
-                    alt={notification.title}
-                    className="w-12 h-12 rounded-full flex-shrink-0"
-                  />
+                  <div className="w-12 h-12 rounded-full flex-shrink-0 bg-gray-100 flex items-center justify-center">
+                    {notification.avatar ? (
+                      <img
+                        src={notification.avatar}
+                        alt={notification.title}
+                        className="w-12 h-12 rounded-full"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 text-gray-600">
+                        {notification.type === "job_accepted" ? (
+                          <svg fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        ) : notification.type === "job_completed" ||
+                          notification.type === "shift_completed" ? (
+                          <svg fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                              fillRule="evenodd"
+                              d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        ) : notification.type === "job_application" ? (
+                          <svg fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                              fillRule="evenodd"
+                              d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        ) : notification.type === "job_auto_closed" ? (
+                          <svg fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                              fillRule="evenodd"
+                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        ) : (
+                          <svg fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                              fillRule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-medium text-gray-900 truncate">
@@ -185,53 +204,6 @@ const UserActivity = () => {
               </p>
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Debug Section - Business Privacy Settings */}
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <h3 className="text-sm font-medium text-yellow-800 mb-2">
-          🔍 Debug: Business Privacy Settings
-        </h3>
-        <p className="text-xs text-yellow-700 mb-3">
-          This section shows your business privacy settings. If your business is
-          "private", jobs won't appear in Find Work for other users.
-        </p>
-        {businesses.length > 0 ? (
-          <div className="space-y-2">
-            {businesses.map((business) => (
-              <div key={business.id} className="text-sm">
-                <span className="font-medium">{business.name}:</span>{" "}
-                <span
-                  className={`font-mono ${
-                    business.privacy === "public"
-                      ? "text-green-600"
-                      : "text-red-600"
-                  }`}
-                >
-                  {business.privacy || "public"}
-                </span>
-                {business.privacy === "private" && (
-                  <span className="text-red-600 text-xs ml-2">
-                    ⚠️ Jobs from this business won't appear in Find Work
-                  </span>
-                )}
-                {business.privacy === "private" && (
-                  <button
-                    onClick={() => fixBusinessPrivacy(business.id)}
-                    className="ml-2 px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-                  >
-                    Fix: Make Public
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-yellow-700">No businesses found</p>
-        )}
-        <div className="mt-3 text-xs text-yellow-600">
-          💡 To fix: Go to My Business → Settings and change privacy to "Public"
         </div>
       </div>
     </div>

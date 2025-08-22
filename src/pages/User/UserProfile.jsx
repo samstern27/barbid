@@ -174,9 +174,9 @@ const UserProfile = () => {
         themeClasses[profile.theme][0]
       } to-gray-700`}
     >
-      <TopBar profile={profile} />
-      <Stats profile={profile} />
-      <BentoGrid profile={profile} />
+      <TopBar profile={profile} className="animate-[fadeIn_0.4s_ease-in-out]" />
+      <Stats profile={profile} className="animate-[fadeIn_0.6s_ease-in-out]" />
+      <BentoGrid profile={profile} className="animate-[fadeIn_0.8s_ease-in-out]" />
     </div>
   );
 };

@@ -3,10 +3,7 @@ import Skills from "./Skills";
 import Experience from "./Experience";
 import Qualifications from "./Qualifications";
 
-export default function BentoGrid({ profile }) {
-  const aboutText =
-    profile.about || `${profile.username} has not added an about section`;
-
+export default function BentoGrid({ profile, className = "" }) {
   const themeClasses = {
     amber: ["bg-amber-900", "text-amber-900", "bg-amber-200", "text-amber-900"],
     blue: ["bg-blue-900", "text-blue-900", "bg-blue-200", "text-blue-900"],
@@ -76,7 +73,7 @@ export default function BentoGrid({ profile }) {
     <div
       className={`bg-gradient-to-b ${
         themeClasses[profile.theme][0]
-      } to-gray-700 py-24 sm:py-32 relative`}
+      } to-gray-700 py-24 sm:py-32 relative ${className}`}
     >
       <div
         className="absolute inset-0 opacity-5"
@@ -101,19 +98,7 @@ export default function BentoGrid({ profile }) {
           <div className="mt-10 grid grid-cols-1 gap-4 sm:mt-16 lg:grid-cols-6 lg:grid-rows-2">
             <div className="flex p-px lg:col-span-4">
               <div className="w-full overflow-hidden rounded-lg bg-gray-800 outline outline-white/15 max-lg:rounded-t-4xl lg:rounded-tl-4xl">
-                <div className="p-10">
-                  <h3 className="text-sm/4 font-semibold text-gray-400">
-                    Releases
-                  </h3>
-                  <p className="mt-2 text-lg font-medium tracking-tight text-white">
-                    About me
-                  </p>
-                  {aboutText.split("\n").map((para, idx) => (
-                    <p key={idx} className="text-sm text-gray-300 mb-4">
-                      {para}
-                    </p>
-                  ))}
-                </div>
+                <About profile={profile} />
               </div>
             </div>
             <div className="flex p-px lg:col-span-2">

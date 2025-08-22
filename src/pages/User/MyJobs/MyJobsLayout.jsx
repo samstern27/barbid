@@ -50,8 +50,8 @@ const MyJobsLayoutContent = () => {
         // Update the JobContext with the current job
         selectJobById(jobId);
       } else {
-        // Job not found, redirect to overview
-        navigate("/jobs/overview");
+        // Job not found, redirect to active jobs
+        navigate("/jobs/active");
       }
       setLoading(false);
     });
@@ -67,7 +67,6 @@ const MyJobsLayoutContent = () => {
   ]);
 
   const tabs = [
-    { name: "Overview", href: "/jobs/overview" },
     {
       name: "Active",
       href: "/jobs/active",
@@ -97,7 +96,7 @@ const MyJobsLayoutContent = () => {
             <select
               value={
                 tabs.find((tab) => location.pathname.startsWith(tab.href))
-                  ?.name || "Overview"
+                  ?.name || "Active"
               }
               onChange={(e) => {
                 const selectedTab = tabs.find(

@@ -45,21 +45,21 @@ const About = ({ profile }) => {
   };
   return (
     <div
-      className={`rounded-lg shadow-xl mt-10 mx-10 px-10 pt-10 pb-0 flex flex-col text-center gap-4 sm:p-6 lg:p-8 flex-1 items-start relative`}
-      style={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+      className={`rounded-lg m-4 sm:m-6 lg:m-8 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-4 sm:pb-6 lg:pb-8`}
     >
-      <div className="relative">
-        <h3
-          className={`text-base font-semibold text-white border-b border-gray-200 pb-5 lg:mx-0 text-left relative z-10 `}
-        >
-          About me
-        </h3>
+      <div className="border-b border-gray-200 pb-4 sm:pb-5">
+        <h3 className="text-base font-semibold text-white">About me</h3>
+      </div>
 
-        <p
-          className={`text-base max-w-5xl font-normal sm:text-base mx-auto py-5 lg:mx-0 text-white relative z-10 italic text-left`}
-        >
-          {aboutText}
-        </p>
+      <div className="mt-4 sm:mt-6">
+        {aboutText.split("\n").map((para, idx) => (
+          <p
+            key={idx}
+            className="text-base max-w-5xl font-normal text-white italic mb-4 last:mb-0"
+          >
+            {para}
+          </p>
+        ))}
       </div>
     </div>
   );

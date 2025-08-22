@@ -35,7 +35,7 @@ const Skills = ({ profile }) => {
     return (
       <span
         key={skill + idx}
-        className={`inline-flex items-start gap-x-1.5 rounded-md px-2 py-1 text-xs font-medium bg-white ${themeClasses[theme][2]}`}
+        className={`w-fit rounded-md px-2 py-1 text-xs font-medium bg-white ${themeClasses[theme][2]} text-left`}
       >
         {skill}
       </span>
@@ -43,14 +43,14 @@ const Skills = ({ profile }) => {
   });
   return (
     <div
-      className={` mt-10 mx-10 pb-10 px-10 pt-10  flex-col text-center gap-4 sm:p-6 lg:p-8 flex-1 items-start max-w-5xl`}
+      className={`mt-4 sm:mt-6 lg:mt-8 mx-4 sm:mx-6 lg:mx-8 pb-4 sm:pb-6 lg:pb-8 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 flex-col text-center gap-4 flex-1 items-start`}
     >
       <h3
-        className={`text-base font-semibold border-b border-gray-200 pb-5 lg:mx-0 text-left text-white`}
+        className={`text-base font-semibold border-b border-gray-200 pb-4 sm:pb-5 text-left text-white`}
       >
         Skills
       </h3>
-      <div className="mt-7 flex flex-row flex-wrap gap-3 justify-start">
+      <div className="mt-4 sm:mt-6 flex flex-col gap-2 sm:gap-3">
         {skillList}
       </div>
     </div>

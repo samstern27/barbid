@@ -9,8 +9,8 @@ function classNames(...classes) {
 
 export default function Experience({ profile }) {
   return (
-    <div className="rounded-lg  m-10 px-10 pt-10 pb-0">
-      <div className="border-b border-gray-200 pb-5">
+    <div className="rounded-lg m-4 sm:m-6 lg:m-8 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-0">
+      <div className="border-b border-gray-200 pb-4 sm:pb-5">
         <h3 className="text-base font-semibold text-white">Experience</h3>
       </div>
       {profile.experience && profile.experience.length > 0 ? (
@@ -18,10 +18,10 @@ export default function Experience({ profile }) {
           {profile.experience.map((exp) => (
             <li
               key={exp.id}
-              className="flex items-center justify-between gap-x-6 py-5"
+              className="flex items-center justify-between gap-x-4 sm:gap-x-6 py-3 sm:py-4"
             >
-              <div className="min-w-0 m">
-                <div className="flex items-start gap-x-3">
+              <div className="min-w-0">
+                <div className="flex items-start gap-x-2 sm:gap-x-3">
                   <p className="text-sm/6 font-semibold text-white">
                     {exp.name}
                   </p>

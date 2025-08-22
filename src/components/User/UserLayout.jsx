@@ -93,20 +93,12 @@ export default function UserLayout() {
         icon: BuildingStorefrontIcon,
       },
       {
-        name: "Activity",
+        name: "Notifications",
         href: "activity",
-        icon: ClockIcon,
+        icon: BellIcon,
       },
     ];
   }, [userData, currentUser]);
-  const businesses = [
-    {
-      id: 1,
-      name: "The Better Half",
-      href: "#",
-      initial: "TBH",
-    },
-  ];
 
   return (
     <>
@@ -174,32 +166,6 @@ export default function UserLayout() {
                                 className="size-6 shrink-0"
                               />
                               {item.name}
-                            </NavLink>
-                          </li>
-                        ))}
-                      </ul>
-                    </li>
-                    <li>
-                      <div className="text-xs/6 font-semibold text-gray-400">
-                        Your Businesses
-                      </div>
-                      <ul role="list" className="-mx-2 mt-2 space-y-1">
-                        {businesses.map((business) => (
-                          <li key={business.name}>
-                            <NavLink
-                              aria-label={business.name}
-                              to={business.href}
-                              className={classNames(
-                                business.current
-                                  ? "bg-indigo-600 text-white"
-                                  : "text-gray-400 hover:bg-gray-800 hover:text-indigo-600",
-                                "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
-                              )}
-                            >
-                              <span className="flex size-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium text-gray-400 group-hover:text-white">
-                                {business.initial}
-                              </span>
-                              <span className="truncate">{business.name}</span>
                             </NavLink>
                           </li>
                         ))}
@@ -304,32 +270,6 @@ export default function UserLayout() {
                             className="size-6 shrink-0"
                           />
                           {item.name}
-                        </NavLink>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-                <li>
-                  <div className="text-xs/6 font-semibold text-gray-400">
-                    Your Businesses
-                  </div>
-                  <ul role="list" className="-mx-2 mt-2 space-y-1">
-                    {businesses.map((business) => (
-                      <li key={business.name}>
-                        <NavLink
-                          to={business.href}
-                          aria-label={business.name}
-                          className={classNames(
-                            business.current
-                              ? "bg-indigo-600 text-white"
-                              : "text-gray-400 hover:bg-gray-800 hover:text-indigo-300",
-                            "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
-                          )}
-                        >
-                          <span className="flex size-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium text-gray-400 group-hover:text-white">
-                            {business.initial}
-                          </span>
-                          <span className="truncate">{business.name}</span>
                         </NavLink>
                       </li>
                     ))}

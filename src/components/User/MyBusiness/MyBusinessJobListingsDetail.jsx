@@ -147,6 +147,21 @@ export default function MyBusinessJobListingsDetail() {
           applicantAttended: true,
         });
 
+        // Calculate shift duration in hours
+        let shiftHours = 0;
+        if (job.startOfShift && job.endOfShift) {
+          const startTime = new Date(job.startOfShift);
+          const endTime = new Date(job.endOfShift);
+          shiftHours = (endTime - startTime) / (1000 * 60 * 60);
+        }
+
+        // Increment user's shift count and total hours
+        const userProfileRef = ref(db, `users/${job.acceptedUserId}/profile`);
+        await update(userProfileRef, {
+          shiftCount: increment(1),
+          totalHoursWorked: increment(shiftHours),
+        });
+
         // Create notification for the applicant that their shift has been completed
         await set(
           ref(

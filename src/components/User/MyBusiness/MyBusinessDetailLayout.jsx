@@ -52,7 +52,6 @@ const MyBusinessDetailLayout = () => {
   }, [businessId, currentUser?.uid, navigate, selectBusinessById]);
 
   const tabs = [
-    { name: "Overview", href: `/my-business/${businessId}/overview` },
     { name: "Job Listings", href: `/my-business/${businessId}/job-listings` },
     {
       name: "Previous Staff",
@@ -65,7 +64,7 @@ const MyBusinessDetailLayout = () => {
     { name: "Businesses", href: "/my-business", current: false },
     {
       name: business?.name,
-      href: `/my-business/${businessId}/overview`,
+      href: `/my-business/${businessId}/job-listings`,
       current: true,
     },
   ];
@@ -82,7 +81,7 @@ const MyBusinessDetailLayout = () => {
             <select
               value={
                 tabs.find((tab) => location.pathname.startsWith(tab.href))
-                  ?.name || "Overview"
+                  ?.name || "Job Listings"
               }
               onChange={(e) => {
                 const selectedTab = tabs.find(

@@ -28,13 +28,13 @@ const themeClasses = {
 export default function Qualifications({ profile }) {
   return (
     <div
-      className={`min-w-1/3 mt-10 ml-10 mr-10  px-10 pt-10 mb-10 flex flex-col  gap-4 sm:p-6 lg:p-8 bg-gray-800`}
+      className={`min-w-1/3 mt-4 sm:mt-6 lg:mt-8 ml-4 sm:ml-6 lg:ml-8 mr-4 sm:mr-6 lg:mr-8 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 mb-4 sm:mb-6 lg:mb-8 flex flex-col gap-4 bg-gray-800`}
     >
       <div className="flex items-center justify-start lg:justify-end ">
         <h3
-          className={`text-base font-semibold text-white w-full  text-left lg:text-right border-b border-gray-200 pb-5`}
+          className={`text-base font-semibold text-white w-full text-left lg:text-right border-b border-gray-200 pb-4 sm:pb-5`}
         >
-          Qualifications
+          Qualifications & Certificates
         </h3>
       </div>
       {profile.qualifications && profile.qualifications.length > 0 ? (
@@ -42,9 +42,9 @@ export default function Qualifications({ profile }) {
           {profile.qualifications.map((qualification, index) => (
             <li
               key={`${qualification.name}-${index}`}
-              className="flex gap-x-4 py-5 text-left lg:text-right"
+              className="flex gap-x-3 sm:gap-x-4 py-3 sm:py-4 text-left lg:text-right"
             >
-              <div className=" min-w-0 lg:ml-auto text-left lg:text-right lg:mx-0">
+              <div className="min-w-0 lg:ml-auto text-left lg:text-right lg:mx-0">
                 <p
                   className={`text-sm/6 font-semibold text-white text-left lg:text-right`}
                 >

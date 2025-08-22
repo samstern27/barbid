@@ -6,7 +6,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-const TopBar = ({ profile }) => {
+const TopBar = ({ profile, className = "" }) => {
   const { currentUser } = useAuth();
   const theme = profile.theme || "gray";
 
@@ -37,7 +37,7 @@ const TopBar = ({ profile }) => {
 
   return (
     <div
-      className={`bg-gradient-to-t ${themeClasses[theme][0]} to-gray-700 relative`}
+      className={`bg-gradient-to-t ${themeClasses[theme][0]} to-gray-700 relative ${className}`}
     >
       <div
         className="absolute inset-0 opacity-5"

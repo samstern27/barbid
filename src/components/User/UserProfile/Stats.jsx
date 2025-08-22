@@ -26,7 +26,7 @@ const themeClasses = {
   zinc: ["bg-zinc-600", "bg-zinc-500", "text-zinc-800", "#71717a"],
 };
 
-export default function Stats({ profile }) {
+export default function Stats({ profile, className = "" }) {
   const [stats, setStats] = useState([
     { name: "Total hours", value: "0", unit: "hrs" },
     { name: "Shifts completed", value: "0" },
@@ -99,75 +99,37 @@ export default function Stats({ profile }) {
 
   const fetchShiftStats = async (db, userId) => {
     try {
-      // Look for completed shifts in the user's job history
-      const userJobsRef = ref(db, `users/${userId}/jobs/applied`);
-      console.log("Attempting to access path:", `users/${userId}/jobs/applied`);
-      console.log("Current user ID:", userId);
-
-      const snapshot = await get(userJobsRef);
-
       console.log("Fetching shift stats for userId:", userId);
-      console.log("Snapshot exists:", snapshot.exists());
+
+      // Get shift stats directly from user profile
+      const userProfileRef = ref(db, `users/${userId}/profile`);
+      const snapshot = await get(userProfileRef);
 
       if (!snapshot.exists()) {
-        console.log("No applications found");
+        console.log("No user profile found");
         return { shiftsCompleted: 0, totalHours: 0 };
       }
 
-      const applications = snapshot.val();
-      console.log("All applications:", applications);
-      console.log("Applications type:", typeof applications);
-      console.log("Applications keys:", Object.keys(applications));
+      const profile = snapshot.val();
+      let shiftsCompleted = profile.shiftCount || 0;
+      let totalHours = profile.totalHoursWorked || 0;
 
-      let shiftsCompleted = 0;
-      let totalHours = 0;
+      // If profile doesn't have shift stats, migrate from existing data
+      if (!profile.shiftCount && !profile.totalHoursWorked) {
+        console.log("Migrating shift stats from existing data...");
+        const migratedStats = await migrateShiftStats(db, userId);
+        shiftsCompleted = migratedStats.shiftsCompleted;
+        totalHours = migratedStats.totalHours;
 
-      // Check each application for completed shifts
-      Object.entries(applications).forEach(([key, application], index) => {
-        console.log(`Application ${key}:`, application);
-        console.log(`Application status: "${application.status}"`);
-        console.log(`Application status type:`, typeof application.status);
-        console.log(`Status comparison:`, {
-          isCompleted: application.status === "Completed",
-          isCompletedLower: application.status === "completed",
-          isAccepted: application.status === "Accepted",
-          isAcceptedLower: application.status === "accepted",
-          isFinished: application.status === "Finished",
-          isFinishedLower: application.status === "finished",
-          isDone: application.status === "Done",
-          isDoneLower: application.status === "done",
+        // Update profile with migrated stats
+        await update(userProfileRef, {
+          shiftCount: shiftsCompleted,
+          totalHoursWorked: totalHours,
         });
-
-        if (
-          application.status === "Completed" ||
-          application.status === "Accepted" ||
-          application.status === "completed" ||
-          application.status === "accepted" ||
-          application.status === "Finished" ||
-          application.status === "finished" ||
-          application.status === "Done" ||
-          application.status === "done"
-        ) {
-          console.log(`Counting application ${key} as completed`);
-          shiftsCompleted++;
-
-          // Calculate hours from shift duration
-          if (application.startOfShift && application.endOfShift) {
-            const startTime = new Date(application.startOfShift);
-            const endTime = new Date(application.endOfShift);
-            const durationHours = (endTime - startTime) / (1000 * 60 * 60);
-            totalHours += durationHours;
-            console.log(`Added ${durationHours} hours from shift ${key}`);
-          }
-        } else {
-          console.log(
-            `Application ${key} not counted - status: "${application.status}"`
-          );
-        }
-      });
+      }
 
       console.log(
-        `Final stats - shiftsCompleted: ${shiftsCompleted}, totalHours: ${totalHours}`
+        `Profile stats - shiftsCompleted: ${shiftsCompleted}, totalHours: ${totalHours}`
       );
 
       return {
@@ -176,26 +138,63 @@ export default function Stats({ profile }) {
       };
     } catch (error) {
       console.error("Error fetching shift stats:", error);
-      console.error("Error code:", error.code);
-      console.error("Error message:", error.message);
-      console.error("Full error object:", error);
+      return { shiftsCompleted: 0, totalHours: 0 };
+    }
+  };
 
-      // Try to access a simpler path to test permissions
-      try {
-        console.log("Testing basic user access...");
-        const testRef = ref(db, `users/${userId}`);
-        const testSnapshot = await get(testRef);
-        console.log("Basic user access test result:", testSnapshot.exists());
-      } catch (testError) {
-        console.error("Basic user access also failed:", testError);
+  // Migration function to calculate stats from existing completed shifts
+  const migrateShiftStats = async (db, userId) => {
+    try {
+      const publicJobsRef = ref(db, `public/jobs`);
+      const snapshot = await get(publicJobsRef);
+
+      if (!snapshot.exists()) {
+        return { shiftsCompleted: 0, totalHours: 0 };
       }
 
+      const allJobs = snapshot.val();
+      let shiftsCompleted = 0;
+      let totalHours = 0;
+
+      // Check each job for completed shifts where this user was accepted
+      Object.entries(allJobs).forEach(([jobId, job]) => {
+        if (job.acceptedUserId === userId) {
+          // Check for various completed statuses (including old ones)
+          if (
+            job.status === "Completed" ||
+            job.status === "completed" ||
+            job.status === "Accepted" ||
+            job.status === "accepted" ||
+            job.status === "Filled" ||
+            job.status === "filled" ||
+            // Also check if the job has passed its end time (for old shifts)
+            (job.endOfShift && new Date() > new Date(job.endOfShift))
+          ) {
+            shiftsCompleted++;
+
+            // Calculate hours from shift duration
+            if (job.startOfShift && job.endOfShift) {
+              const startTime = new Date(job.startOfShift);
+              const endTime = new Date(job.endOfShift);
+              const durationHours = (endTime - startTime) / (1000 * 60 * 60);
+              totalHours += durationHours;
+            }
+          }
+        }
+      });
+
+      console.log(
+        `Migration complete - shiftsCompleted: ${shiftsCompleted}, totalHours: ${totalHours}`
+      );
+      return { shiftsCompleted, totalHours };
+    } catch (error) {
+      console.error("Error migrating shift stats:", error);
       return { shiftsCompleted: 0, totalHours: 0 };
     }
   };
 
   return (
-    <div>
+    <div className={className}>
       <div className="shadow-xl shadow-black/20">
         <div className="grid grid-cols-2 gap-0.25 bg-white/10  lg:grid-cols-4">
           {stats.map((stat) => (
