@@ -4,6 +4,8 @@ import loginBarImage from "../../assets/images/bar-glow.jpg";
 import pintPour from "../../assets/images/pint-pour-3.jpg";
 import { NavLink, useNavigate } from "react-router-dom";
 
+// Login page component for user authentication
+// Features email/password login, Google OAuth, and comprehensive error handling
 const Login = () => {
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
@@ -12,12 +14,15 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Redirect authenticated users to home page
   useEffect(() => {
     if (currentUser) {
       navigate("/", { replace: true });
     }
   }, [currentUser, navigate]);
 
+  // Handle email/password form submission
+  // Converts Firebase error codes to user-friendly messages
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -54,6 +59,8 @@ const Login = () => {
     }
   };
 
+  // Handle Google OAuth sign-in
+  // Provides user-friendly error messages for OAuth-specific issues
   const handleGoogleSignIn = async () => {
     try {
       setError("");
@@ -91,8 +98,10 @@ const Login = () => {
   return (
     <>
       <div className="flex min-h-full flex-1">
+        {/* Left side - Login form */}
         <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
           <div className="mx-auto w-full max-w-sm lg:w-96">
+            {/* Header section */}
             <div>
               <h2 className="mt-8 text-2xl/9 font-bold tracking-tight text-gray-900">
                 Sign in to your account
@@ -110,7 +119,9 @@ const Login = () => {
 
             <div className="mt-10">
               <div>
+                {/* Email/password login form */}
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Email input field */}
                   <div>
                     <label
                       htmlFor="email"
@@ -131,6 +142,7 @@ const Login = () => {
                     </div>
                   </div>
 
+                  {/* Password input field */}
                   <div>
                     <label
                       htmlFor="password"
@@ -151,6 +163,7 @@ const Login = () => {
                     </div>
                   </div>
 
+                  {/* Remember me checkbox and forgot password link */}
                   <div className="flex items-center justify-between">
                     <div className="flex gap-3">
                       <div className="flex h-6 shrink-0 items-center">
@@ -201,6 +214,7 @@ const Login = () => {
                     </div>
                   </div>
 
+                  {/* Submit button */}
                   <div>
                     <button
                       type="submit"
@@ -212,6 +226,7 @@ const Login = () => {
                   </div>
                 </form>
 
+                {/* Error message display */}
                 {error && (
                   <div className="mt-4 text-sm text-red-600 text-center">
                     {error}
@@ -219,7 +234,9 @@ const Login = () => {
                 )}
               </div>
 
+              {/* Social login section */}
               <div className="mt-10">
+                {/* Divider with "Or continue with" text */}
                 <div className="relative">
                   <div
                     aria-hidden="true"
@@ -234,6 +251,7 @@ const Login = () => {
                   </div>
                 </div>
 
+                {/* Google OAuth button */}
                 <div className="mt-6 grid grid-cols-1 gap-4">
                   <button
                     onClick={handleGoogleSignIn}
@@ -268,6 +286,8 @@ const Login = () => {
             </div>
           </div>
         </div>
+
+        {/* Right side - Background image (hidden on mobile) */}
         <div className="relative hidden w-0 flex-1 lg:block">
           <img
             alt=""

@@ -98,6 +98,8 @@ const themes = [
   { id: 22, color: "zinc", name: "Zinc" },
 ];
 
+// UserSettings component for comprehensive user profile and account management
+// Features profile editing, file uploads, password changes, and notification preferences
 export default function UserSettings() {
   const navigate = useNavigate();
   // Get the current user from AuthContext
@@ -157,6 +159,7 @@ export default function UserSettings() {
   const [newExperienceEndDate, setNewExperienceEndDate] = useState("");
   const [newExperiencePosition, setNewExperiencePosition] =
     useState("Full-time");
+  const [isCurrentPosition, setIsCurrentPosition] = useState(false);
 
   // Password change state
   const [passwordFormData, setPasswordFormData] = useState({
@@ -322,19 +325,18 @@ export default function UserSettings() {
         name: newExperienceCompany.trim(),
         role: newExperienceRole.trim(),
         startDate: newExperienceStartDate,
-        endDate: newExperienceEndDate || "Present",
+        endDate: isCurrentPosition ? "Present" : newExperienceEndDate,
         position: newExperiencePosition,
       };
 
-      console.log("Adding new experience:", experience);
-      console.log("Current experience array:", profileFormData.experience);
+      // Adding new experience to profile
 
       setProfileFormData((prev) => {
         const newState = {
           ...prev,
           experience: [...(prev.experience || []), experience],
         };
-        console.log("New profile state:", newState);
+        // New profile state updated
         return newState;
       });
 
@@ -343,6 +345,7 @@ export default function UserSettings() {
       setNewExperienceStartDate("");
       setNewExperienceEndDate("");
       setNewExperiencePosition("Full-time");
+      setIsCurrentPosition(false);
     }
   };
 
@@ -440,8 +443,7 @@ export default function UserSettings() {
         lastUpdated: new Date().toISOString(),
       };
 
-      console.log("Updating profile with data:", updateData);
-      console.log("Experience data being saved:", updateData.experience);
+      // Updating profile with data
 
       await update(userProfileRef, updateData);
 
@@ -732,7 +734,7 @@ export default function UserSettings() {
                   Skills
                 </label>
                 <div className="mt-2">
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <input
                       type="text"
                       value={newSkill}
@@ -788,7 +790,7 @@ export default function UserSettings() {
                   Qualifications
                 </label>
                 <div className="mt-2">
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <input
                       type="text"
                       value={newQualification}
@@ -800,7 +802,7 @@ export default function UserSettings() {
                       type="date"
                       value={newQualificationDate}
                       onChange={(e) => setNewQualificationDate(e.target.value)}
-                      className="block w-48 rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
+                      className="block w-full sm:w-48 rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
                     />
                     <button
                       type="button"
@@ -854,41 +856,64 @@ export default function UserSettings() {
                   Work Experience
                 </label>
                 <div className="mt-2 space-y-3">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-3">
                     <input
                       type="text"
                       value={newExperienceCompany}
                       onChange={(e) => setNewExperienceCompany(e.target.value)}
                       placeholder="Company name"
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
+                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none border border-gray-300 focus:border-indigo-600"
                     />
                     <input
                       type="text"
                       value={newExperienceRole}
                       onChange={(e) => setNewExperienceRole(e.target.value)}
                       placeholder="Job role"
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
+                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none border border-gray-300 focus:border-indigo-600"
                     />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="space-y-3">
                     <input
                       type="date"
                       value={newExperienceStartDate}
                       onChange={(e) =>
                         setNewExperienceStartDate(e.target.value)
                       }
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
+                      placeholder="Start date"
+                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none border border-gray-300 focus:border-indigo-600"
                     />
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="isCurrentPosition"
+                        checked={isCurrentPosition}
+                        onChange={(e) => {
+                          setIsCurrentPosition(e.target.checked);
+                          if (e.target.checked) {
+                            setNewExperienceEndDate("");
+                          }
+                        }}
+                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                      />
+                      <label
+                        htmlFor="isCurrentPosition"
+                        className="text-sm text-gray-700"
+                      >
+                        Current position
+                      </label>
+                    </div>
                     <input
                       type="date"
                       value={newExperienceEndDate}
                       onChange={(e) => setNewExperienceEndDate(e.target.value)}
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
+                      disabled={isCurrentPosition}
+                      placeholder="End date"
+                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none border border-gray-300 focus:border-indigo-600 disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-200"
                     />
                     <select
                       value={newExperiencePosition}
                       onChange={(e) => setNewExperiencePosition(e.target.value)}
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none"
+                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 appearance-none border border-gray-300 focus:border-indigo-600"
                     >
                       <option value="Full-time">Full-time</option>
                       <option value="Part-time">Part-time</option>

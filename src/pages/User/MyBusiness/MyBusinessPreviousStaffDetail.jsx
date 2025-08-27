@@ -66,16 +66,7 @@ export default function MyBusinessPreviousStaffDetail() {
                 applicationData.attended === true ||
                 applicationData.applicantAttended === true;
 
-              // Debug logging to help troubleshoot attendance issues
-              console.log("Attendance check for shift:", {
-                shiftId,
-                jobId,
-                userId,
-                applicationAttended: applicationData.attended,
-                applicationApplicantAttended: applicationData.applicantAttended,
-                hasAttended,
-                applicationData: applicationData,
-              });
+              // Attendance check for shift completed
 
               if (!hasAttended) {
                 setError("Applicant did not attend this shift");
@@ -134,7 +125,6 @@ export default function MyBusinessPreviousStaffDetail() {
           }
         );
       } catch (error) {
-        console.error("Error fetching shift data:", error);
         setError("Failed to load shift data");
         setLoading(false);
       }

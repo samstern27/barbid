@@ -108,10 +108,7 @@ export default function ApplyJob({ applyOpen, setApplyOpen, job }) {
         "users/" + userId + "/jobs/applied/" + applicationId
       );
 
-      console.log("Starting job application process...");
-      console.log("Job data:", job);
-      console.log("User details:", userDetails);
-      console.log("Business Owner ID:", job.businessOwnerId);
+      // Job application process started
 
       // Save application data first (most important)
       await Promise.all([
@@ -171,35 +168,53 @@ export default function ApplyJob({ applyOpen, setApplyOpen, job }) {
         }),
       ]);
 
-      console.log("Application data saved successfully");
+      // Application data saved successfully
 
       // Create notification separately (non-critical)
       try {
         if (job.businessOwnerId) {
-          await set(ref(db, `users/${job.businessOwnerId}/notifications/${applicationId}`), {
-            id: applicationId,
-            type: "job_application",
-            title: userDetails.firstName || userDetails.username,
-            message: `applied for your ${job.jobTitle} position`,
-            avatar: userDetails.avatar || null,
-            timestamp: new Date().toISOString(),
-            isRead: false,
-            jobId: job.id,
-            applicationId: applicationId,
-            userId: userId,
-            username: userDetails.username,
-            firstName: userDetails.firstName || userDetails.username,
-            lastName: userDetails.lastName || "",
-            jobTitle: job.jobTitle,
-            businessId: job.businessId,
-            businessName: job.businessName,
-          });
-          console.log("Notification created successfully");
+          // Generate initials for anonymity
+          const getInitials = (firstName, lastName) => {
+            const first = firstName ? firstName.charAt(0).toUpperCase() : "";
+            const last = lastName ? lastName.charAt(0).toUpperCase() : "";
+            return first + last || "A"; // Fallback to 'A' if no name available
+          };
+
+          const initials = getInitials(
+            userDetails.firstName,
+            userDetails.lastName
+          );
+
+          await set(
+            ref(
+              db,
+              `users/${job.businessOwnerId}/notifications/${applicationId}`
+            ),
+            {
+              id: applicationId,
+              type: "job_application",
+              title: initials,
+              message: `applied for your ${job.jobTitle} position`,
+              avatar: userDetails.avatar || null,
+              timestamp: new Date().toISOString(),
+              isRead: false,
+              jobId: job.id,
+              applicationId: applicationId,
+              userId: userId,
+              username: userDetails.username,
+              firstName: userDetails.firstName || userDetails.username,
+              lastName: userDetails.lastName || "",
+              jobTitle: job.jobTitle,
+              businessId: job.businessId,
+              businessName: job.businessName,
+            }
+          );
+          // Notification created successfully
         } else {
-          console.warn("No business owner ID found, skipping notification");
+          // No business owner ID found, skipping notification
         }
       } catch (notificationError) {
-        console.error("Failed to create notification (non-critical):", notificationError);
+        // Failed to create notification (non-critical)
         // Don't fail the entire application process for this
       }
 
@@ -214,7 +229,6 @@ export default function ApplyJob({ applyOpen, setApplyOpen, job }) {
       setUseOriginalTimes(true);
       setUseOriginalPay(true);
     } catch (error) {
-      console.error("Error applying for job:", error);
       setError("Failed to apply for job. Please try again.");
     } finally {
       setIsSubmitting(false);

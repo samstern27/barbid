@@ -19,13 +19,16 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { useJob } from "../../../contexts/JobContext";
 
+// Available sorting options for job listings
 const sortOptions = [
   { name: "Closest", value: "closest" },
   { name: "Newest", value: "newest" },
-  { name: "Highest Paying", value: "highest-paying" },
+  { name: "Highest Hourly Rate", value: "highest-paying" },
   { name: "Least Applied", value: "least-applied" },
 ];
 
+// Sort and filter component for job listings
+// Provides both mobile (dialog) and desktop (popover) interfaces
 const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
   const { publicJobs } = useJob();
   const [open, setOpen] = useState(false);
@@ -36,7 +39,8 @@ const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
     city: [],
   });
 
-  // Memoize cities calculation to avoid recalculating on every render
+  // Extract unique cities from available jobs for city filter
+  // Memoized to prevent recalculation on every render
   const cities = useMemo(() => {
     const citiesArray = publicJobs.map((job) =>
       job.location.city.toLowerCase()
@@ -44,7 +48,8 @@ const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
     return [...new Set(citiesArray)];
   }, [publicJobs]);
 
-  // Memoize filters array to avoid recreating on every render
+  // Filter configuration with job positions, distance ranges, and cities
+  // Memoized to prevent recreation on every render
   const filters = useMemo(
     () => [
       {
@@ -105,12 +110,14 @@ const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
     [cities]
   );
 
+  // Handle filter changes with different behavior for distance vs other filters
+  // Distance uses radio behavior (single selection), others use checkbox behavior
   const handleFilterChange = (filterId, value, checked) => {
     setSelectedFilters((prev) => {
       let newFilters;
 
       if (filterId === "distance") {
-        // For distance, allow unselecting by clicking the same option again
+        // Distance filter: radio behavior - clicking same option unselects it
         const currentDistance = prev[filterId] || [];
         if (currentDistance.includes(value)) {
           // If clicking the same option, unselect it
@@ -126,7 +133,7 @@ const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
           };
         }
       } else {
-        // For other filters, use checkbox behavior (multiple selection)
+        // Other filters: checkbox behavior - multiple selection allowed
         const currentFilters = prev[filterId] || [];
         if (checked) {
           newFilters = {
@@ -152,7 +159,7 @@ const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
 
   return (
     <div className="bg-white animate-[fadeIn_1.2s_ease-in-out]">
-      {/* Mobile filter dialog */}
+      {/* Mobile filter dialog - full-screen overlay on small devices */}
       <Dialog open={open} onClose={setOpen} className="relative z-40 sm:hidden">
         <DialogBackdrop
           transition
@@ -164,6 +171,7 @@ const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
             transition
             className="relative ml-auto flex size-full max-w-xs transform flex-col overflow-y-auto bg-white pt-4 pb-6 shadow-xl transition duration-300 ease-in-out data-closed:translate-x-full"
           >
+            {/* Mobile dialog header with close button */}
             <div className="flex items-center justify-between px-4">
               <h2 className="text-lg font-medium text-gray-900">Filters</h2>
               <button
@@ -177,7 +185,7 @@ const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
               </button>
             </div>
 
-            {/* Filters */}
+            {/* Mobile filter form with collapsible sections */}
             <form className="mt-4">
               {filters.map((section) => (
                 <Disclosure
@@ -206,6 +214,7 @@ const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
                           : ""
                       }`}
                     >
+                      {/* Filter options with custom checkbox/radio styling */}
                       {section.options.map((option, optionIdx) => (
                         <div key={option.value} className="flex gap-3">
                           <div className="flex h-5 shrink-0 items-center">
@@ -238,6 +247,7 @@ const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
                                     : "rounded-sm checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600"
                                 }`}
                               />
+                              {/* Custom checkbox/radio icons */}
                               <svg
                                 fill="none"
                                 viewBox="0 0 14 14"
@@ -273,7 +283,7 @@ const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
                 </Disclosure>
               ))}
 
-              {/* Mobile Clear All Filters Button */}
+              {/* Mobile clear filters button - only shown when filters are active */}
               {Object.values(selectedFilters).some(
                 (filters) => filters.length > 0
               ) && (
@@ -302,12 +312,14 @@ const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
         </div>
       </Dialog>
 
+      {/* Desktop filter section */}
       <section aria-labelledby="filter-heading" className="py-6 relative">
         <h2 id="filter-heading" className="sr-only">
           Product filters
         </h2>
 
         <div className="flex items-center justify-between">
+          {/* Sort dropdown menu */}
           <Menu as="div" className="relative inline-block text-left">
             <MenuButton className="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900">
               Sort
@@ -345,6 +357,7 @@ const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
             </MenuItems>
           </Menu>
 
+          {/* Mobile filters button - triggers dialog on small screens */}
           <button
             type="button"
             onClick={() => setOpen(true)}
@@ -353,8 +366,9 @@ const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
             Filters
           </button>
 
+          {/* Desktop filter popovers */}
           <div className="hidden sm:flex sm:items-baseline sm:space-x-8 relative">
-            {/* Clear All Filters Button - Desktop */}
+            {/* Clear filters button - desktop version */}
             {Object.values(selectedFilters).some(
               (filters) => filters.length > 0
             ) && (
@@ -376,6 +390,8 @@ const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
                 Clear
               </button>
             )}
+            
+            {/* Filter popover group for desktop */}
             <PopoverGroup className="flex items-baseline space-x-8">
               {filters.map((section, sectionIdx) => (
                 <Popover
@@ -385,6 +401,7 @@ const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
                   <div>
                     <PopoverButton className="group inline-flex items-center justify-center text-sm font-medium text-gray-700 hover:text-gray-900">
                       <span>{section.name}</span>
+                      {/* Filter count badge - shows number of active filters */}
                       {section.id !== "distance" &&
                       selectedFilters[section.id]?.length > 0 ? (
                         <span className="ml-1.5 rounded-sm bg-gray-200 px-1.5 py-0.5 text-xs font-semibold text-gray-700 tabular-nums">
@@ -398,6 +415,7 @@ const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
                     </PopoverButton>
                   </div>
 
+                  {/* Filter options popover panel */}
                   <PopoverPanel
                     transition
                     className="absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-white p-4 shadow-2xl ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
@@ -409,6 +427,7 @@ const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
                           : ""
                       }`}
                     >
+                      {/* Filter options with same styling as mobile */}
                       {section.options.map((option, optionIdx) => (
                         <div key={option.value} className="flex gap-3">
                           <div className="flex h-5 shrink-0 items-center">
@@ -441,6 +460,7 @@ const SortBar = React.memo(({ children, onSortChange, onFilterChange }) => {
                                     : "rounded-sm checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600"
                                 }`}
                               />
+                              {/* Custom checkbox/radio icons */}
                               <svg
                                 fill="none"
                                 viewBox="0 0 14 14"

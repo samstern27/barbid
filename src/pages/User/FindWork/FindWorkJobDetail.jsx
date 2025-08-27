@@ -9,18 +9,25 @@ import ApplyJob from "../../../components/User/FindWork/ApplyJob";
 import { getDatabase, ref, get } from "firebase/database";
 import { useAuth } from "../../../contexts/AuthContext";
 
+// Breadcrumb navigation configuration for job detail page
 const pages = [
   { name: "Find Work", href: "/find-work", current: false },
   { name: "Job Details", href: "#", current: true },
 ];
 
+// Main content component for job detail page
+// Displays comprehensive job information and handles application process
 function FindWorkJobDetailContent() {
+  // Authentication and job data from contexts
   const { currentUser } = useAuth();
   const { publicJobs } = useJob();
   const { jobId } = useParams();
+
+  // Find the specific job by ID from URL parameters
   const job = publicJobs.find((job) => job.id === jobId);
   const [loading, setLoading] = useState(true);
 
+  // Update loading state when job data is available
   useEffect(() => {
     if (job) {
       setLoading(false);
@@ -46,7 +53,8 @@ function FindWorkJobDetailContent() {
     checkIfApplied();
   }, [job, currentUser]);
 
-  // Map element
+  // Google Maps iframe element for job location
+  // Memoized to prevent unnecessary re-renders
   const mapElement = useMemo(() => {
     if (!job?.location) return null;
 
@@ -68,12 +76,15 @@ function FindWorkJobDetailContent() {
     );
   }, [job?.location?.address, job?.location?.city, job?.location?.postcode]);
 
-  // Apply and bid open states
+  // Application modal state
   const [applyOpen, setApplyOpen] = useState(false);
 
   return (
     <div className="flex flex-col m-10 gap-4 ">
+      {/* Navigation breadcrumb */}
       <Breadcrumb pages={pages} />
+
+      {/* Conditional rendering based on loading state */}
       {loading ? (
         <div className="flex flex-1 flex-col justify-center items-center min-h-[60vh]">
           <Loader
@@ -84,6 +95,7 @@ function FindWorkJobDetailContent() {
         </div>
       ) : (
         <div className="animate-[fadeIn_1.2s_ease-in-out]">
+          {/* Back navigation link */}
           <NavLink
             to="/find-work"
             className="inline-flex items-center gap-2 text-sm mb-6 font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200"
@@ -91,6 +103,8 @@ function FindWorkJobDetailContent() {
             <ArrowLeftIcon className="w-4 h-4" />
             Back to Find Work
           </NavLink>
+
+          {/* Job header with title and business name */}
           <div className="">
             <h3 className="text-base/7 font-normal text-gray-900">
               <span className="font-bold">{job?.jobTitle || "Loading..."}</span>{" "}
@@ -103,15 +117,19 @@ function FindWorkJobDetailContent() {
               View job details and apply.
             </p>
           </div>
+
+          {/* Action buttons section */}
           <div className="flex flex-col gap-4 mb-6 mt-6 sm:flex-row sm:gap-6 justify-start">
-            {/* Only show Apply button if user didn't create the job */}
+            {/* Show different content based on job ownership */}
             {currentUser && job?.businessOwnerId === currentUser.uid ? (
+              /* Owner cannot apply to their own job */
               <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-center">
                 <span className="text-sm font-medium text-blue-900">
                   This is your job listing - you cannot apply
                 </span>
               </div>
             ) : (
+              /* Apply button with different states */
               <button
                 type="button"
                 disabled={hasApplied}
@@ -135,8 +153,11 @@ function FindWorkJobDetailContent() {
               </button>
             )}
           </div>
+
+          {/* Job details section */}
           <div className="mt-6 border-t border-gray-100">
             <dl className="divide-y divide-gray-100">
+              {/* Job Title */}
               <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                 <dt className="text-sm/6 font-medium text-gray-900">
                   Job Title
@@ -145,6 +166,8 @@ function FindWorkJobDetailContent() {
                   <span className="grow">{job?.jobTitle || "Loading..."}</span>
                 </dd>
               </div>
+
+              {/* Job Description */}
               <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                 <dt className="text-sm/6 font-medium text-gray-900">
                   Description
@@ -155,6 +178,8 @@ function FindWorkJobDetailContent() {
                   </span>
                 </dd>
               </div>
+
+              {/* Pay Rate */}
               <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                 <dt className="text-sm/6 font-medium text-gray-900">
                   Pay Rate
@@ -165,6 +190,8 @@ function FindWorkJobDetailContent() {
                   </span>
                 </dd>
               </div>
+
+              {/* Start Time */}
               <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                 <dt className="text-sm/6 font-medium text-gray-900">
                   Start Time
@@ -179,6 +206,8 @@ function FindWorkJobDetailContent() {
                   </span>
                 </dd>
               </div>
+
+              {/* End Time */}
               <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                 <dt className="text-sm/6 font-medium text-gray-900">
                   End Time
@@ -193,6 +222,8 @@ function FindWorkJobDetailContent() {
                   </span>
                 </dd>
               </div>
+
+              {/* Job Status */}
               <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                 <dt className="text-sm/6 font-medium text-gray-900">Status</dt>
                 <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
@@ -209,6 +240,8 @@ function FindWorkJobDetailContent() {
                   </span>
                 </dd>
               </div>
+
+              {/* Created Date */}
               <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                 <dt className="text-sm/6 font-medium text-gray-900">Created</dt>
                 <dd className="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
@@ -219,6 +252,8 @@ function FindWorkJobDetailContent() {
                   </span>
                 </dd>
               </div>
+
+              {/* Location with Google Maps integration */}
               <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                 <dt className="text-sm/6 font-medium text-gray-900">
                   Location
@@ -244,6 +279,7 @@ function FindWorkJobDetailContent() {
         </div>
       )}
 
+      {/* Application modal component */}
       {job && (
         <ApplyJob applyOpen={applyOpen} setApplyOpen={setApplyOpen} job={job} />
       )}
@@ -251,6 +287,8 @@ function FindWorkJobDetailContent() {
   );
 }
 
+// Main FindWorkJobDetail page component with context providers
+// Wraps content with LocationProvider and JobProvider for data access
 export default function FindWorkJobDetail() {
   return (
     <LocationProvider>

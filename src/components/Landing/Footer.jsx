@@ -1,3 +1,5 @@
+// Footer navigation configuration
+// Main navigation links and social media icons with their SVG paths
 const navigation = {
   main: [
     { name: "About", href: "#" },
@@ -76,6 +78,7 @@ const Footer = () => {
   return (
     <footer className="bg-white">
       <div className="mx-auto max-w-7xl overflow-hidden px-6 py-20 sm:py-24 lg:px-8">
+        {/* Main navigation links */}
         <nav
           aria-label="Footer"
           className="-mb-6 flex flex-wrap justify-center gap-x-12 gap-y-3 text-sm/6"
@@ -90,6 +93,8 @@ const Footer = () => {
             </a>
           ))}
         </nav>
+
+        {/* Social media icons */}
         <div className="mt-16 flex justify-center gap-x-10">
           {navigation.social.map((item) => (
             <a
@@ -102,6 +107,8 @@ const Footer = () => {
             </a>
           ))}
         </div>
+
+        {/* Copyright notice */}
         <p className="mt-10 text-center text-sm/6 text-gray-600">
           &copy; 2025 Barbid, Inc. All rights reserved.
         </p>

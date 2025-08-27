@@ -4,7 +4,8 @@ import { ArrowLeftIcon, EyeIcon } from "@heroicons/react/20/solid";
 import { useState, useEffect } from "react";
 import { getDatabase, ref, onValue, get } from "firebase/database";
 
-// Simple function to format relative time
+// Utility function to format relative time for application timestamps
+// Converts dates to human-readable relative time (e.g., "2 hours ago")
 const formatRelativeTime = (dateString) => {
   const date = new Date(dateString);
   const now = new Date();
@@ -20,24 +21,30 @@ const formatRelativeTime = (dateString) => {
   return date.toLocaleDateString();
 };
 
+// MyBusinessJobListingsApplicants component for viewing job applicants
+// Displays applicant list with profile information and application details
 export default function MyBusinessJobListingsApplicants() {
+  // Route parameters and business context
   const { jobId } = useParams();
   const { selectedBusiness } = useBusiness();
+  
+  // Local state for job, applications, and loading
   const [job, setJob] = useState(null);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const db = getDatabase();
 
-  console.log(job);
+  // Job data loaded from Firebase
 
-  // Fetch job data
+  // Fetch job data and applications from Firebase
+  // Uses real-time listeners for live updates
   useEffect(() => {
     if (!jobId) return;
 
     const jobRef = ref(db, `public/jobs/${jobId}`);
     const applicationsRef = ref(db, `public/jobs/${jobId}/jobApplications`);
 
-    // Fetch job data
+    // Fetch job data with real-time updates
     const unsubscribeJob = onValue(jobRef, (snapshot) => {
       if (snapshot.exists()) {
         setJob({ id: jobId, ...snapshot.val() });
@@ -45,7 +52,7 @@ export default function MyBusinessJobListingsApplicants() {
       setLoading(false);
     });
 
-    // Fetch applications
+    // Fetch applications with real-time updates
     const unsubscribeApplications = onValue(applicationsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -60,16 +67,18 @@ export default function MyBusinessJobListingsApplicants() {
       }
     });
 
+    // Cleanup listeners on unmount
     return () => {
       unsubscribeJob();
       unsubscribeApplications();
     };
   }, [jobId]);
 
-  // State to store enriched applicant data
+  // State to store enriched applicant data with profile information
   const [enrichedApplicants, setEnrichedApplicants] = useState([]);
 
-  // Fetch current user data for each applicant
+  // Fetch current user data for each applicant to enrich the display
+  // Combines application data with user profile information
   useEffect(() => {
     if (!applications || applications.length === 0) {
       setEnrichedApplicants([]);
@@ -107,8 +116,9 @@ export default function MyBusinessJobListingsApplicants() {
     fetchApplicantData();
   }, [applications]);
 
-  console.log(enrichedApplicants);
+  // Enriched applicant data with profile information
 
+  // Loading state while fetching data
   if (loading) {
     return (
       <div className="flex flex-1 flex-col justify-center items-center min-h-[60vh]">
@@ -117,6 +127,7 @@ export default function MyBusinessJobListingsApplicants() {
     );
   }
 
+  // Error state if job is not found
   if (!job) {
     return (
       <div className="flex flex-1 flex-col justify-center items-center min-h-[60vh]">
@@ -127,6 +138,7 @@ export default function MyBusinessJobListingsApplicants() {
 
   return (
     <div>
+      {/* Back navigation link */}
       <NavLink
         to={`/my-business/${selectedBusiness.id}/job-listings/${jobId}`}
         className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200"
@@ -134,6 +146,8 @@ export default function MyBusinessJobListingsApplicants() {
         <ArrowLeftIcon className="w-4 h-4" />
         Back to Job Details
       </NavLink>
+      
+      {/* Page header with job title and business name */}
       <div className="mt-6">
         <div className="sm:flex sm:items-center">
           <div className="sm:flex-auto">
@@ -146,45 +160,56 @@ export default function MyBusinessJobListingsApplicants() {
           </div>
         </div>
 
+        {/* Applicants table section */}
         <div className="mt-8 flow-root">
           <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+              {/* Applicants table */}
               <table className="relative min-w-full divide-y divide-gray-300">
                 <thead>
                   <tr>
+                    {/* Username column */}
                     <th
                       scope="col"
                       className="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-0"
                     >
                       Username
                     </th>
+                    {/* Occupation column */}
                     <th
                       scope="col"
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
                       Occupation
                     </th>
+                    {/* Rate column */}
                     <th
                       scope="col"
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
                       Rate
                     </th>
+                    {/* Applied column */}
                     <th
                       scope="col"
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
                       Applied
                     </th>
+                    {/* Actions column */}
                     <th scope="col" className="py-3.5 pr-4 pl-3 sm:pr-0">
                       <span className="sr-only">Edit</span>
                     </th>
                   </tr>
                 </thead>
+                
+                {/* Table body with applicant data */}
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {enrichedApplicants.length > 0 ? (
+                    /* Render applicant rows when data exists */
                     enrichedApplicants.map((person, index) => (
                       <tr key={person.userId || index}>
+                        {/* Username cell with avatar and initials */}
                         <td className="py-5 pr-3 pl-4 text-sm whitespace-nowrap sm:pl-0">
                           <div className="flex items-center">
                             <div className="size-11 shrink-0">
@@ -204,17 +229,25 @@ export default function MyBusinessJobListingsApplicants() {
                             </div>
                           </div>
                         </td>
+                        
+                        {/* Occupation cell */}
                         <td className="px-3 py-5 text-sm whitespace-nowrap text-gray-500">
                           <div className="text-gray-900">
                             {person.occupation}
                           </div>
                         </td>
+                        
+                        {/* Pay rate cell with formatted currency */}
                         <td className="px-3 py-5 text-sm whitespace-nowrap text-gray-500">
                           £{parseFloat(person.payRate).toFixed(2)}/hr
                         </td>
+                        
+                        {/* Application time cell with relative formatting */}
                         <td className="px-3 py-5 text-sm whitespace-nowrap text-gray-500">
                           {person.applied}
                         </td>
+                        
+                        {/* View application action cell */}
                         <td className="py-5 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-0">
                           <NavLink
                             to={`/my-business/${selectedBusiness.id}/job-listings/${jobId}/applicants/${person.applicationId}`}
@@ -228,6 +261,7 @@ export default function MyBusinessJobListingsApplicants() {
                       </tr>
                     ))
                   ) : (
+                    /* Empty state when no applicants exist */
                     <tr>
                       <td
                         colSpan="5"

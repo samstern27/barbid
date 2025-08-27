@@ -5,6 +5,8 @@ import {
 } from "@headlessui/react";
 import { MinusSmallIcon, PlusSmallIcon } from "@heroicons/react/24/outline";
 
+// FAQ data array containing common questions and answers
+// Structured for easy maintenance and updates
 const faqs = [
   {
     question: "What is Barbid?",
@@ -48,14 +50,19 @@ const faqs = [
   },
 ];
 
+// FAQ page component using Headless UI for accessible accordion functionality
+// Features responsive design and smooth expand/collapse animations
 const FAQ = () => {
   return (
     <div className="bg-white">
       <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8 lg:py-40">
         <div className="mx-auto max-w-4xl">
+          {/* Page header with styled title */}
           <h2 className="text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
             Your questions, <span className="text-indigo-600">answered</span>
           </h2>
+          
+          {/* FAQ accordion list using Headless UI Disclosure components */}
           <dl className="mt-16 divide-y divide-gray-400">
             {faqs.map((faq) => (
               <Disclosure
@@ -63,11 +70,13 @@ const FAQ = () => {
                 as="div"
                 className="py-6 first:pt-0 last:pb-0"
               >
+                {/* Question header with expand/collapse button */}
                 <dt>
                   <DisclosureButton className="group flex w-full items-start justify-between text-left text-gray-900">
                     <span className="text-base/7 font-semibold">
                       {faq.question}
                     </span>
+                    {/* Dynamic icon that changes based on open/closed state */}
                     <span className="ml-6 flex h-7 items-center text-indigo-600">
                       <PlusSmallIcon
                         aria-hidden="true"
@@ -80,6 +89,8 @@ const FAQ = () => {
                     </span>
                   </DisclosureButton>
                 </dt>
+                
+                {/* Answer content that expands/collapses */}
                 <DisclosurePanel as="dd" className="mt-2 pr-12">
                   <p className="text-base/7 text-gray-600">{faq.answer}</p>
                 </DisclosurePanel>

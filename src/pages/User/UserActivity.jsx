@@ -6,8 +6,11 @@ import { useAuth } from "../../contexts/AuthContext";
 import Breadcrumb from "../../components/UI/Breadcrumb";
 import { TrashIcon, EyeIcon } from "@heroicons/react/24/outline";
 
+// Breadcrumb navigation configuration for notifications page
 const pages = [{ name: "Notifications", href: "/activity", current: true }];
 
+// UserActivity component for displaying and managing user notifications
+// Features notification display, navigation handling, and interactive UI animations
 const UserActivity = () => {
   const navigate = useNavigate();
   const { notifications, removeNotification, markAsRead } = useNotification();
@@ -15,13 +18,14 @@ const UserActivity = () => {
 
   const { currentUser } = useAuth();
 
+  // Set loaded state after component mounts for animation timing
   useEffect(() => {
     // Set loaded state after component mounts
     const timer = setTimeout(() => setIsLoaded(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
-  // Format timestamp to relative time
+  // Format timestamp to relative time for user-friendly display
   const formatTimeAgo = (timestamp) => {
     const now = new Date();
     const diff = now - timestamp;
@@ -35,7 +39,7 @@ const UserActivity = () => {
     return `${days} day${days > 1 ? "s" : ""} ago`;
   };
 
-  // Handle notification click
+  // Handle notification click with automatic read marking and navigation
   const handleNotificationClick = (notification) => {
     if (!notification.isRead) {
       markAsRead(notification.id);
@@ -69,7 +73,7 @@ const UserActivity = () => {
     }
   };
 
-  // Handle notification removal
+  // Handle notification removal with event propagation prevention
   const handleRemoveNotification = (e, notificationId) => {
     e.stopPropagation();
     removeNotification(notificationId);
@@ -77,14 +81,16 @@ const UserActivity = () => {
 
   return (
     <div className="flex flex-col m-10 gap-4">
+      {/* Navigation breadcrumb */}
       <Breadcrumb pages={pages} />
 
-      {/* Notifications Section */}
+      {/* Notifications Section with animated entrance */}
       <div
         className={`bg-white shadow rounded-lg transition-all duration-700 ease-out ${
           isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         }`}
       >
+        {/* Section header */}
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
           <p className="text-sm text-gray-500">
@@ -92,8 +98,10 @@ const UserActivity = () => {
           </p>
         </div>
 
+        {/* Notifications list with staggered animations */}
         <div className="divide-y divide-gray-200">
           {notifications.length > 0 ? (
+            /* Render notification items when notifications exist */
             notifications.map((notification, index) => (
               <div
                 key={notification.id}
@@ -110,6 +118,7 @@ const UserActivity = () => {
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex items-start space-x-4">
+                  {/* Notification avatar/icon with type-based styling */}
                   <div className="w-12 h-12 rounded-full flex-shrink-0 bg-gray-100 flex items-center justify-center">
                     {notification.avatar ? (
                       <img
@@ -118,8 +127,10 @@ const UserActivity = () => {
                         className="w-12 h-12 rounded-full"
                       />
                     ) : (
+                      /* Type-specific SVG icons for different notification types */
                       <div className="w-8 h-8 text-gray-600">
                         {notification.type === "job_accepted" ? (
+                          /* Checkmark icon for accepted jobs */
                           <svg fill="currentColor" viewBox="0 0 20 20">
                             <path
                               fillRule="evenodd"
@@ -129,6 +140,7 @@ const UserActivity = () => {
                           </svg>
                         ) : notification.type === "job_completed" ||
                           notification.type === "shift_completed" ? (
+                          /* Trophy icon for completed jobs/shifts */
                           <svg fill="currentColor" viewBox="0 0 20 20">
                             <path
                               fillRule="evenodd"
@@ -137,6 +149,7 @@ const UserActivity = () => {
                             />
                           </svg>
                         ) : notification.type === "job_application" ? (
+                          /* Document icon for job applications */
                           <svg fill="currentColor" viewBox="0 0 20 20">
                             <path
                               fillRule="evenodd"
@@ -145,6 +158,7 @@ const UserActivity = () => {
                             />
                           </svg>
                         ) : notification.type === "job_auto_closed" ? (
+                          /* X icon for auto-closed jobs */
                           <svg fill="currentColor" viewBox="0 0 20 20">
                             <path
                               fillRule="evenodd"
@@ -153,6 +167,7 @@ const UserActivity = () => {
                             />
                           </svg>
                         ) : (
+                          /* Default info icon for other notification types */
                           <svg fill="currentColor" viewBox="0 0 20 20">
                             <path
                               fillRule="evenodd"
@@ -164,6 +179,8 @@ const UserActivity = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* Notification content with title, message, and timestamp */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-medium text-gray-900 truncate">
@@ -176,6 +193,7 @@ const UserActivity = () => {
                     <p className="text-sm text-gray-600 mt-2 leading-relaxed">
                       {notification.message}
                     </p>
+                    {/* Unread indicator for new notifications */}
                     {!notification.isRead && (
                       <div className="mt-2 flex items-center space-x-2">
                         <span className="inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
@@ -185,6 +203,8 @@ const UserActivity = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* Action buttons for notification management */}
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={(e) =>
@@ -200,6 +220,7 @@ const UserActivity = () => {
               </div>
             ))
           ) : (
+            /* Empty state when no notifications exist */
             <div
               className={`px-6 py-8 text-center transition-all duration-700 ease-out delay-300 ${
                 isLoaded

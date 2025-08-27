@@ -1,49 +1,13 @@
-import { useParams, NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { getDatabase, ref, get } from "firebase/database";
+import { useParams, NavLink } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
-import {
-  ArrowLeftIcon,
-  MapPinIcon,
-  ClockIcon,
-  BanknotesIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { getDatabase, ref, get } from "firebase/database";
 import Loader from "../../../components/UI/Loader";
 import JobStatusIndicator from "../../../components/UI/JobStatusIndicator";
 
-const formatDateTime = (dateString) => {
-  if (!dateString) return "Not specified";
-  const date = new Date(dateString);
-  return date.toLocaleString("en-GB", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-const formatDate = (dateString) => {
-  if (!dateString) return "Not specified";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-GB", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-};
-
-const formatTime = (dateString) => {
-  if (!dateString) return "Not specified";
-  const date = new Date(dateString);
-  return date.toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
+// MyJobApplicationDetail component for viewing detailed job application information
+// Features comprehensive data fetching, fallback handling, and timeout management
 export default function MyJobApplicationDetail() {
   const { jobId } = useParams();
   const { currentUser } = useAuth();
@@ -53,20 +17,13 @@ export default function MyJobApplicationDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  console.log("MyJobApplicationDetail rendered with jobId:", jobId);
-  console.log("Current user:", currentUser?.uid);
+  // Component rendered with jobId and current user
 
   // Fetch application and job data
   useEffect(() => {
-    console.log(
-      "useEffect triggered with jobId:",
-      jobId,
-      "currentUser:",
-      currentUser?.uid
-    );
+    // useEffect triggered with jobId and currentUser
 
     if (!jobId || !currentUser?.uid) {
-      console.log("Missing jobId or currentUser, returning early");
       setError("Missing job ID or user not authenticated");
       setLoading(false);
       return;
@@ -78,7 +35,6 @@ export default function MyJobApplicationDetail() {
     // Increase timeout to 30 seconds and add better error handling
     const timeoutId = setTimeout(() => {
       if (isMounted) {
-        console.log("Timeout reached - setting error");
         setError("Loading timeout - please try again");
         setLoading(false);
       }
@@ -87,7 +43,7 @@ export default function MyJobApplicationDetail() {
     // Fetch data using one-time get instead of real-time listener
     const fetchData = async () => {
       try {
-        console.log("Starting data fetch for jobId:", jobId);
+        // Starting data fetch for jobId
 
         // First, try to fetch the job data directly with timeout
         const jobRef = ref(db, `public/jobs/${jobId}`);
@@ -102,7 +58,7 @@ export default function MyJobApplicationDetail() {
 
         if (jobSnapshot.exists()) {
           const jobData = jobSnapshot.val();
-          console.log("Found job data:", jobData);
+          // Found job data
           setJob(jobData);
 
           // Fetch business data if available with timeout
@@ -128,12 +84,12 @@ export default function MyJobApplicationDetail() {
                 setBusiness(businessSnapshot.val());
               }
             } catch (businessError) {
-              console.warn("Could not fetch business data:", businessError);
+              // Could not fetch business data
               // Don't fail the entire operation for business data
             }
           }
         } else {
-          console.log("Job not found in public jobs");
+          // Job not found in public jobs
         }
 
         // Now fetch the user's application data with timeout
@@ -152,7 +108,7 @@ export default function MyJobApplicationDetail() {
 
         if (applicationsSnapshot.exists()) {
           const applications = applicationsSnapshot.val();
-          console.log("Found applications:", applications);
+          // Found applications
 
           // Find the specific application by jobId
           let applicationEntry = null;
@@ -170,10 +126,10 @@ export default function MyJobApplicationDetail() {
           }
 
           if (applicationEntry) {
-            console.log("Found application entry:", applicationEntry);
+            // Found application entry
             setApplication(applicationEntry);
           } else {
-            console.log("No application found, creating fallback");
+            // No application found, creating fallback
             // Create fallback application from job data
             if (jobSnapshot.exists()) {
               const fallbackApplication = {
@@ -191,7 +147,7 @@ export default function MyJobApplicationDetail() {
             }
           }
         } else {
-          console.log("No applications found, creating fallback");
+          // No applications found, creating fallback
           // Create fallback application from job data
           if (jobSnapshot.exists()) {
             const fallbackApplication = {
@@ -217,7 +173,7 @@ export default function MyJobApplicationDetail() {
           setLoading(false);
         }
       } catch (error) {
-        console.error("Error in data fetching:", error);
+        // Error in data fetching
         if (isMounted) {
           setError("Failed to load data: " + error.message);
           setLoading(false);
@@ -234,14 +190,7 @@ export default function MyJobApplicationDetail() {
     };
   }, [jobId, currentUser?.uid]);
 
-  console.log(
-    "Rendering component - loading:",
-    loading,
-    "error:",
-    error,
-    "application:",
-    application
-  );
+  // Component rendering with current state
 
   if (loading) {
     return (

@@ -6,7 +6,10 @@ import { auth } from "../../firebase/firebase";
 import { writeUserData } from "../../firebase/firebase";
 import { NavLink } from "react-router-dom";
 
+// SignUp page component for user registration
+// Features form validation, age verification, email verification, and social sign-in options
 const SignUp = () => {
+  // Form input references for controlled form handling
   const firstNameRef = useRef(null);
   const lastNameRef = useRef(null);
   const emailRef = useRef(null);
@@ -14,19 +17,25 @@ const SignUp = () => {
   const passwordRef = useRef(null);
   const cpasswordRef = useRef(null);
   const dateOfBirthRef = useRef(null);
+  
+  // Authentication context and state management
   const { signup, signInWithGoogle, currentUser } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showVerificationMessage, setShowVerificationMessage] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState("");
 
+  // Handle form submission with validation and user creation
+  // Includes password confirmation, age verification, and Firebase signup
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate password confirmation
     if (passwordRef.current.value !== cpasswordRef.current.value) {
       return setError("Passwords do not match");
     }
 
-    // Check age before proceeding
+    // Check age before proceeding (must be 18+)
     const dateOfBirth = dateOfBirthRef.current.value;
     if (dateOfBirth) {
       const birthDate = new Date(dateOfBirth);
@@ -59,6 +68,7 @@ const SignUp = () => {
         dateOfBirthRef.current.value || null
       );
 
+      // Show email verification message if required
       if (result.needsVerification) {
         setVerificationEmail(emailRef.current.value);
         setShowVerificationMessage(true);
@@ -70,6 +80,7 @@ const SignUp = () => {
     }
   };
 
+  // Handle Google OAuth sign-in
   const handleGoogleSignIn = async () => {
     try {
       setError("");
@@ -82,11 +93,13 @@ const SignUp = () => {
     }
   };
 
+  // Apple Sign-In handler (placeholder for future implementation)
   const handleAppleSignIn = async () => {
     try {
       setError("");
       setLoading(true);
-      const user = await signInWithApple();
+      // TODO: Implement Apple Sign-In functionality
+      setError("Apple Sign-In is not yet implemented");
     } catch (error) {
       setError(error.message || "Failed to sign in with Apple");
     } finally {
@@ -96,15 +109,18 @@ const SignUp = () => {
 
   return (
     <div>
+      {/* Header section with gradient background */}
       <div className="text-center bg-gradient-to-r from-indigo-600 to-indigo-600 min-h-[180px] sm:p-6 p-4">
         <h4 className="sm:text-3xl text-2xl text-white font-medium mt-3">
           Create your free account
         </h4>
       </div>
 
+      {/* Email verification success message */}
       {showVerificationMessage ? (
         <div className="mx-4 mb-4 -mt-20">
           <div className="max-w-4xl mx-auto bg-white [box-shadow:0_2px_13px_-6px_rgba(0,0,0,0.4)] sm:p-8 p-4 rounded-md text-center">
+            {/* Success icon */}
             <div className="mb-6">
               <svg
                 className="mx-auto h-12 w-12 text-green-500"
@@ -121,6 +137,8 @@ const SignUp = () => {
                 />
               </svg>
             </div>
+            
+            {/* Verification instructions */}
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               Check your email
             </h3>
@@ -130,11 +148,15 @@ const SignUp = () => {
             <p className="text-sm text-gray-600 mb-6">
               Please click the link in your email to verify your account before you can sign in.
             </p>
+            
+            {/* Important note about email verification */}
             <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
               <p className="text-sm text-blue-800">
                 <strong>Note:</strong> You won't be able to access the site until you verify your email address.
               </p>
             </div>
+            
+            {/* Action buttons */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <NavLink
                 to="/login"
@@ -152,14 +174,15 @@ const SignUp = () => {
           </div>
         </div>
       ) : (
+        /* Registration form */
         <div className="mx-4 mb-4 -mt-20">
           <form
             onSubmit={handleSubmit}
             className="max-w-4xl mx-auto bg-white [box-shadow:0_2px_13px_-6px_rgba(0,0,0,0.4)] sm:p-8 p-4 rounded-md"
           >
-            {/* User type switch */}
-
+            {/* Form fields in responsive grid layout */}
             <div className="grid sm:grid-cols-2 gap-8">
+              {/* First Name field */}
               <div>
                 <label
                   htmlFor="name"
@@ -177,6 +200,8 @@ const SignUp = () => {
                   ref={firstNameRef}
                 />
               </div>
+              
+              {/* Last Name field */}
               <div>
                 <label
                   htmlFor="lname"
@@ -194,6 +219,8 @@ const SignUp = () => {
                   ref={lastNameRef}
                 />
               </div>
+              
+              {/* Email field */}
               <div>
                 <label
                   htmlFor="email"
@@ -211,6 +238,8 @@ const SignUp = () => {
                   ref={emailRef}
                 />
               </div>
+              
+              {/* Mobile number field (optional) */}
               <div>
                 <label
                   htmlFor="number"
@@ -227,6 +256,8 @@ const SignUp = () => {
                   ref={numberRef}
                 />
               </div>
+              
+              {/* Password field */}
               <div>
                 <label
                   htmlFor="password"
@@ -244,6 +275,8 @@ const SignUp = () => {
                   ref={passwordRef}
                 />
               </div>
+              
+              {/* Confirm Password field */}
               <div>
                 <label
                   htmlFor="cpassword"
@@ -261,6 +294,8 @@ const SignUp = () => {
                   ref={cpasswordRef}
                 />
               </div>
+              
+              {/* Date of Birth field */}
               <div>
                 <label
                   htmlFor="dateOfBirth"
@@ -278,6 +313,8 @@ const SignUp = () => {
                 />
               </div>
             </div>
+            
+            {/* Submit button */}
             <div className="mt-8">
               <button
                 type="submit"
@@ -287,10 +324,15 @@ const SignUp = () => {
                 {loading ? "Creating account..." : "Sign up"}
               </button>
             </div>
+            
+            {/* Divider for social sign-in options */}
             <div className="my-6 flex items-center before:mt-0.5 before:flex-1 before:border-t before:border-neutral-300 after:mt-0.5 after:flex-1 after:border-t after:border-neutral-300">
               <p className="mx-4 text-center text-slate-500">Or</p>
             </div>
+            
+            {/* Social sign-in buttons */}
             <div className="grid sm:grid-cols-1 gap-6">
+              {/* Google OAuth button */}
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
@@ -339,6 +381,7 @@ const SignUp = () => {
               </button>
             </div>
 
+            {/* Login link for existing users */}
             <div className="mt-6 text-center">
               <p className="text-sm text-slate-600">
                 Already have an account?{" "}
@@ -350,6 +393,8 @@ const SignUp = () => {
                 </NavLink>
               </p>
             </div>
+            
+            {/* Error message display */}
             {error && <Alert type="danger" message={error} />}
           </form>
         </div>

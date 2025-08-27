@@ -5,9 +5,13 @@ import {
 } from "@heroicons/react/20/solid";
 import { useState, useEffect } from "react";
 
+// UploadAlert component for displaying user feedback messages
+// Features auto-dismiss after 10 seconds, color-coded styling, and accessibility support
 export default function UploadAlert({ message, color, onClose }) {
+  // State to control alert visibility with auto-dismiss functionality
   const [isVisible, setIsVisible] = useState(true);
 
+  // Auto-dismiss timer - hides alert after 10 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(false);
@@ -15,9 +19,11 @@ export default function UploadAlert({ message, color, onClose }) {
     return () => clearTimeout(timer);
   }, []);
 
+  // Early return if alert is not visible
   if (!isVisible) return null;
 
-  // Define proper Tailwind classes for each color
+  // Color system configuration for different alert types
+  // Each color provides consistent styling for background, text, icon, and button states
   const getColorClasses = (color) => {
     switch (color) {
       case "green":
@@ -63,6 +69,7 @@ export default function UploadAlert({ message, color, onClose }) {
   return (
     <div className={`rounded-md ${colorClasses.bg} p-4`}>
       <div className="flex">
+        {/* Icon section - shows check circle for green, exclamation for others */}
         <div className="shrink-0">
           {color === "green" ? (
             <CheckCircleIcon
@@ -76,9 +83,13 @@ export default function UploadAlert({ message, color, onClose }) {
             />
           )}
         </div>
+        
+        {/* Message text with color-coded styling */}
         <div className="ml-3">
           <p className={`text-sm font-medium ${colorClasses.text}`}>{message}</p>
         </div>
+        
+        {/* Close button with accessibility features */}
         <div className="ml-auto pl-3">
           <div className="-mx-1.5 -my-1.5">
             <button

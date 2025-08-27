@@ -2,14 +2,19 @@ import React from "react";
 import { BriefcaseIcon } from "@heroicons/react/20/solid";
 import { useAuth } from "../../../contexts/AuthContext";
 
+// Utility function to conditionally join CSS classes
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
+// TopBar component for user profile displaying background image, avatar, and basic info
+// Features theme-based styling and responsive layout with hire button for other users
 const TopBar = ({ profile, className = "" }) => {
   const { currentUser } = useAuth();
   const theme = profile.theme || "gray";
 
+  // Theme configuration for the top bar background
+  // Each theme provides 2 color values: [bg-dark, text-accent]
   const themeClasses = {
     amber: ["bg-amber-900", "text-amber-500"],
     blue: ["bg-blue-900", "text-blue-500"],
@@ -39,6 +44,7 @@ const TopBar = ({ profile, className = "" }) => {
     <div
       className={`bg-gradient-to-t ${themeClasses[theme][0]} to-gray-700 relative ${className}`}
     >
+      {/* Subtle diagonal pattern overlay for visual texture */}
       <div
         className="absolute inset-0 opacity-5"
         style={{
@@ -51,6 +57,8 @@ const TopBar = ({ profile, className = "" }) => {
           )`,
         }}
       />
+
+      {/* Background image container */}
       <div className={`w-full relative z-10`}>
         <div className="h-32 w-full object-cover lg:h-48">
           <img
@@ -60,8 +68,12 @@ const TopBar = ({ profile, className = "" }) => {
           />
         </div>
       </div>
+
+      {/* Profile content container */}
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 relative z-20">
+        {/* Avatar and basic info section */}
         <div className="-mt-12 sm:-mt-16 sm:flex sm:items-end sm:space-x-5">
+          {/* Profile avatar with ring styling */}
           <div className="flex justify-center sm:justify-start">
             <img
               alt="Profile avatar"
@@ -69,7 +81,10 @@ const TopBar = ({ profile, className = "" }) => {
               className="size-24 rounded-full ring-4 bg-white ring-white sm:size-32 shadow-2xl shadow-black relative z-30"
             />
           </div>
+
+          {/* User info and action buttons */}
           <div className="mt-6 sm:flex sm:min-w-0 sm:flex-1 sm:items-center sm:justify-end sm:space-x-6 sm:pb-1">
+            {/* User name display with initials */}
             <div className="mt-6 min-w-0 flex-1 sm:block md:block flex flex-col items-center sm:items-start">
               <h2
                 className={`truncate text-2xl font-bold text-white text-shadow-md`}
@@ -85,6 +100,8 @@ const TopBar = ({ profile, className = "" }) => {
                 @{profile.username ? profile.username : "No username"}
               </h3>
             </div>
+
+            {/* Hire button - only shown for other users' profiles */}
             {currentUser?.uid !== profile.id ? (
               <div className="mt-6 flex flex-col justify-stretch space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
                 <button
@@ -101,6 +118,8 @@ const TopBar = ({ profile, className = "" }) => {
             ) : null}
           </div>
         </div>
+
+        {/* Occupation display */}
         <div className="mt-10 flex flex-col items-center gap-2">
           <h3 className="text-4xl font-light text-shadow-sm text-white sm:text-4xl sm:tracking-tight text-center mb-4">
             {profile.occupation ? profile.occupation : "No occupation"}

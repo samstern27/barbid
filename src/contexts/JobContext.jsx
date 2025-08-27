@@ -3,8 +3,11 @@ import { useAuth } from "./AuthContext";
 import { getDatabase, ref, onValue, get } from "firebase/database";
 import jobAutoCloseService from "../services/JobAutoCloseService";
 
+// Job management context for handling public job listings and status management
+// Manages job filtering, selection, and automatic closure service
 const JobContext = createContext();
 
+// Custom hook to access job context with error handling
 export const useJob = () => {
   const context = useContext(JobContext);
   if (!context) {
@@ -13,6 +16,7 @@ export const useJob = () => {
   return context;
 };
 
+// Job provider component that manages job state and auto-close service
 export const JobProvider = ({ children }) => {
   const { currentUser } = useAuth();
   const [publicJobs, setPublicJobs] = useState([]);
@@ -21,7 +25,8 @@ export const JobProvider = ({ children }) => {
   const [selectedJob, setSelectedJob] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Subscribe to jobs updates
+  // Subscribe to public jobs updates from Firebase
+  // Filters jobs by status and handles business privacy settings
   useEffect(() => {
     if (!currentUser?.uid) {
       setPublicJobs([]);
@@ -53,6 +58,7 @@ export const JobProvider = ({ children }) => {
           return { ...job, businessPrivacy: "public" };
         });
 
+        // Filter jobs by status for different views
         const openArray = jobsWithPrivacy.filter(
           (job) => job.status === "Open"
         );
@@ -76,7 +82,8 @@ export const JobProvider = ({ children }) => {
     return () => unsubscribe();
   }, [currentUser?.uid]);
 
-  // Set up automatic job closure service
+  // Set up automatic job closure service for the current user
+  // Starts service when user is authenticated, stops on unmount
   useEffect(() => {
     if (!currentUser?.uid) return;
 
@@ -89,7 +96,7 @@ export const JobProvider = ({ children }) => {
     };
   }, [currentUser?.uid]);
 
-  // Select a job by ID
+  // Select a job by ID for detailed view
   const selectJobById = (jobId) => {
     setSelectedJob(jobId);
   };
@@ -99,6 +106,7 @@ export const JobProvider = ({ children }) => {
     setSelectedJob(null);
   };
 
+  // Context value object containing job state and service methods
   const value = {
     publicJobs,
     closedJobs,

@@ -6,6 +6,8 @@ import {
 
 import barDaytime from "../../assets/images/bar-daytime.jpg";
 
+// Feature definitions for the business owner section
+// Each feature highlights benefits for venue owners hiring staff
 const features = [
   {
     name: "Instant shift ads.",
@@ -31,7 +33,9 @@ const Feature2 = () => {
   return (
     <div className="overflow-hidden bg-indigo-600 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        {/* Two-column grid layout: image on left, text content on right */}
         <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
+          {/* Right column: Business-focused content */}
           <div className="lg:ml-auto lg:pt-4 lg:pl-4">
             <div className="lg:max-w-lg">
               <h2 className="text-base/7 font-semibold text-white">
@@ -45,10 +49,13 @@ const Feature2 = () => {
                 staffing. Barbid makes it easy to find reliable bar staff who
                 are ready to jump in — fast.
               </p>
+              
+              {/* Feature list with white text and icons for dark background */}
               <dl className="mt-10 max-w-xl space-y-8 text-base/7 text-white lg:max-w-none">
                 {features.map((feature) => (
                   <div key={feature.name} className="relative pl-9">
                     <dt className="inline font-semibold text-white">
+                      {/* Icon positioned absolutely to the left of text */}
                       <feature.icon
                         aria-hidden="true"
                         className="absolute top-1 left-1 size-5 text-white"
@@ -61,6 +68,8 @@ const Feature2 = () => {
               </dl>
             </div>
           </div>
+          
+          {/* Left column: Hero image (appears first on mobile, second on desktop) */}
           <div className="flex items-start justify-end lg:order-first">
             <img
               alt="Product screenshot"

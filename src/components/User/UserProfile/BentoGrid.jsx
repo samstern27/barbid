@@ -3,7 +3,11 @@ import Skills from "./Skills";
 import Experience from "./Experience";
 import Qualifications from "./Qualifications";
 
+// BentoGrid component that creates a responsive grid layout for user profile sections
+// Uses a 6-column grid system with different component sizes and rounded corners
 export default function BentoGrid({ profile, className = "" }) {
+  // Theme configuration for the bento grid background
+  // Each theme provides 4 color values: [bg-dark, text-dark, bg-light, text-dark]
   const themeClasses = {
     amber: ["bg-amber-900", "text-amber-900", "bg-amber-200", "text-amber-900"],
     blue: ["bg-blue-900", "text-blue-900", "bg-blue-200", "text-blue-900"],
@@ -75,6 +79,7 @@ export default function BentoGrid({ profile, className = "" }) {
         themeClasses[profile.theme][0]
       } to-gray-700 py-24 sm:py-32 relative ${className}`}
     >
+      {/* Subtle pattern overlay for visual texture */}
       <div
         className="absolute inset-0 opacity-5"
         style={{
@@ -87,30 +92,42 @@ export default function BentoGrid({ profile, className = "" }) {
           )`,
         }}
       />
+
+      {/* Main content container */}
       <div className="relative z-10">
         <div className="mx-auto max-w-2xl px-6 lg:max-w-7xl lg:px-8">
+          {/* Profile header with username and one-liner */}
           <h2 className="text-base/7 font-semibold text-white">
             {profile.username}
           </h2>
           <p className="mt-2 max-w-lg text-4xl font-semibold tracking-tight text-pretty text-white sm:text-5xl">
             {profile.oneLine}
           </p>
+
+          {/* Bento grid layout - 6 columns on large screens, 1 column on mobile */}
           <div className="mt-10 grid grid-cols-1 gap-4 sm:mt-16 lg:grid-cols-6 lg:grid-rows-2">
+            {/* About section - spans 4 columns, top-left with rounded corners */}
             <div className="flex p-px lg:col-span-4">
               <div className="w-full overflow-hidden rounded-lg bg-gray-800 outline outline-white/15 max-lg:rounded-t-4xl lg:rounded-tl-4xl">
                 <About profile={profile} />
               </div>
             </div>
+
+            {/* Qualifications section - spans 2 columns, top-right with rounded corners */}
             <div className="flex p-px lg:col-span-2">
               <div className="w-full overflow-hidden rounded-lg bg-gray-800 outline outline-white/15 lg:rounded-tr-4xl">
                 <Qualifications profile={profile} />
               </div>
             </div>
+
+            {/* Skills section - spans 2 columns, bottom-left with rounded corners */}
             <div className="flex p-px lg:col-span-2">
               <div className="w-full overflow-hidden rounded-lg bg-gray-800 outline outline-white/15 lg:rounded-bl-4xl">
                 <Skills profile={profile} />
               </div>
             </div>
+
+            {/* Experience section - spans 4 columns, bottom-right with rounded corners */}
             <div className="flex p-px lg:col-span-4">
               <div className="w-full overflow-hidden rounded-lg bg-gray-800 outline outline-white/15 max-lg:rounded-b-4xl lg:rounded-br-4xl">
                 <Experience profile={profile} />

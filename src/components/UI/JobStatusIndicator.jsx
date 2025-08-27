@@ -4,8 +4,11 @@ import {
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 
+// Job status indicator component that shows current status and time-based warnings
+// Handles multiple job statuses and provides visual feedback for urgent situations
 const JobStatusIndicator = ({ job, showAutoCloseWarning = true }) => {
-  // Calculate time until shift starts
+  // Calculate time remaining until shift starts
+  // Returns null if shift has already started or no start time
   const getTimeUntilShift = () => {
     if (!job?.startOfShift) return null;
 
@@ -21,7 +24,8 @@ const JobStatusIndicator = ({ job, showAutoCloseWarning = true }) => {
     return { hours, minutes, totalMinutes: Math.floor(timeDiff / (1000 * 60)) };
   };
 
-  // Check if job should show auto-close warning
+  // Determine if auto-close warning should be displayed
+  // Shows warning for open jobs that start within 1 hour
   const shouldShowWarning = () => {
     if (!showAutoCloseWarning || job?.status !== "Open") return false;
 
@@ -32,7 +36,8 @@ const JobStatusIndicator = ({ job, showAutoCloseWarning = true }) => {
     return timeUntilShift.totalMinutes <= 60;
   };
 
-  // Get status styling
+  // Get appropriate styling based on job status
+  // Each status has its own color scheme and ring styling
   const getStatusStyling = () => {
     switch (job?.status) {
       case "Open":
@@ -43,12 +48,15 @@ const JobStatusIndicator = ({ job, showAutoCloseWarning = true }) => {
         return "bg-blue-50 text-blue-700 ring-1 ring-blue-600/20 ring-inset";
       case "Accepted":
         return "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20 ring-inset";
+      case "Unattended":
+        return "bg-orange-50 text-orange-700 ring-1 ring-orange-600/20 ring-inset";
       default:
         return "bg-gray-50 text-gray-700 ring-1 ring-gray-600/20 ring-inset";
     }
   };
 
-  // Get warning styling based on urgency
+  // Get warning styling based on urgency level
+  // Red for critical (≤30 min), yellow for warning (≤60 min)
   const getWarningStyling = () => {
     const timeUntilShift = getTimeUntilShift();
     if (!timeUntilShift) return "";
@@ -66,14 +74,14 @@ const JobStatusIndicator = ({ job, showAutoCloseWarning = true }) => {
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Main Status Badge */}
+      {/* Primary status badge with color-coded styling */}
       <span
         className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${getStatusStyling()}`}
       >
         {job?.status || "Unknown"}
       </span>
 
-      {/* Auto-Close Warning */}
+      {/* Auto-close warning with urgency indicator */}
       {showWarning && (
         <div className="flex items-center gap-1">
           <ExclamationTriangleIcon className="w-4 h-4 text-yellow-600" />
@@ -87,7 +95,7 @@ const JobStatusIndicator = ({ job, showAutoCloseWarning = true }) => {
         </div>
       )}
 
-      {/* Time Until Shift (for Open jobs) */}
+      {/* Time remaining display for open jobs */}
       {job?.status === "Open" && timeUntilShift && (
         <div className="flex items-center gap-1 text-xs text-gray-500">
           <ClockIcon className="w-3 h-3" />
@@ -100,7 +108,7 @@ const JobStatusIndicator = ({ job, showAutoCloseWarning = true }) => {
         </div>
       )}
 
-      {/* Auto-closed indicator */}
+      {/* Auto-closed timestamp display */}
       {job?.autoClosedAt && (
         <div className="flex items-center gap-1 text-xs text-gray-500">
           <ClockIcon className="w-3 h-3" />

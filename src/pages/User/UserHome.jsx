@@ -13,6 +13,8 @@ import {
   BuildingStorefrontIcon,
 } from "@heroicons/react/24/outline";
 
+// UserHome component for displaying comprehensive user dashboard
+// Features statistics, upcoming shifts, earnings summary, and business overview
 const UserHome = () => {
   const { currentUser } = useAuth();
   const [stats, setStats] = useState({
@@ -265,6 +267,11 @@ const UserHome = () => {
     <div className="flex flex-col m-10 gap-6 pb-10">
       <Breadcrumb />
 
+      {/* Dashboard Heading */}
+      <div className="border-b border-gray-200 pb-5 animate-[fadeIn_0.6s_ease-in-out]">
+        <h3 className="text-base font-semibold text-gray-900">Dashboard</h3>
+      </div>
+
       {/* Quick Stats Overview */}
       <div
         className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 transition-all duration-700 ease-out ${
@@ -341,12 +348,9 @@ const UserHome = () => {
       >
         {/* Calendar Widget */}
         <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Upcoming Shifts
-            </h3>
-            <CalendarIcon className="h-6 w-6 text-gray-400" />
-          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center sm:text-left">
+            Upcoming Shifts
+          </h3>
 
           {upcomingShifts.length > 0 ? (
             <div className="space-y-3">
@@ -396,7 +400,7 @@ const UserHome = () => {
 
         {/* Performance Metrics */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center sm:text-left">
             Performance Metrics
           </h3>
 
@@ -444,7 +448,7 @@ const UserHome = () => {
           isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         }`}
       >
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center sm:text-left">
           Earnings Summary
         </h3>
 
@@ -530,7 +534,7 @@ const UserHome = () => {
           isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         }`}
       >
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center sm:text-left">
           Job Application Activity
         </h3>
 
@@ -557,7 +561,7 @@ const UserHome = () => {
           isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         }`}
       >
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center sm:text-left">
           Business Overview
         </h3>
 

@@ -30,10 +30,13 @@ import { UserIcon } from "@heroicons/react/24/solid";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import Notification from "../UI/Notification";
 
+// Utility function to conditionally join CSS classes
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
+// Main user layout component providing navigation sidebar and top bar
+// Features responsive design with mobile sidebar and desktop fixed sidebar
 export default function UserLayout() {
   const { currentUser, logout } = useAuth();
   const { toggleNotificationPanel, unreadCount } = useNotification();
@@ -41,10 +44,12 @@ export default function UserLayout() {
   const [userData, setUserData] = useState(null);
   const location = useLocation();
 
+  // Scroll to top when route changes
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
+  // Fetch user data from Firebase on component mount
   useEffect(() => {
     const db = getDatabase();
     const reference = ref(db, "users/" + currentUser?.uid);
@@ -54,17 +59,13 @@ export default function UserLayout() {
     });
   }, [currentUser]);
 
+  // Navigation items with dynamic profile href
+  // Memoized to prevent recreation on every render
   const navigation = useMemo(() => {
-    console.log(
-      "Building navigation with userData:",
-      userData,
-      "currentUser:",
-      currentUser?.uid
-    );
+    // Build navigation with dynamic profile href based on user data
     const profileHref = `profile/${
       userData?.profile?.username || currentUser?.uid
     }`;
-    console.log("Profile href constructed as:", profileHref);
 
     return [
       {
@@ -103,6 +104,7 @@ export default function UserLayout() {
   return (
     <>
       <div>
+        {/* Mobile Sidebar Dialog */}
         <Dialog
           open={sidebarOpen}
           onClose={setSidebarOpen}
@@ -118,6 +120,7 @@ export default function UserLayout() {
               transition
               className="relative mr-16 flex w-full max-w-xs flex-1 transform transition duration-300 ease-in-out data-closed:-translate-x-full"
             >
+              {/* Close button positioned outside sidebar */}
               <TransitionChild>
                 <div className="absolute top-0 left-full flex w-16 justify-center pt-5 duration-300 ease-in-out data-closed:opacity-0">
                   <button
@@ -135,13 +138,16 @@ export default function UserLayout() {
                 </div>
               </TransitionChild>
 
-              {/* Mobile Sidebar */}
+              {/* Mobile Sidebar Content */}
               <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-gray-950 to-gray-900 px-6 pb-4 ring-1 ring-white/10">
+                {/* Brand header */}
                 <div className="flex h-16 shrink-0 items-center">
                   <h1 className="text-2xl font-medium text-indigo-600 tracking-widest">
                     barbid
                   </h1>
                 </div>
+
+                {/* Navigation menu */}
                 <nav className="flex flex-1 flex-col">
                   <ul role="list" className="flex flex-1 flex-col gap-y-7">
                     <li>
@@ -171,8 +177,11 @@ export default function UserLayout() {
                         ))}
                       </ul>
                     </li>
+
+                    {/* Settings and logout section at bottom */}
                     <li className="mt-auto">
                       <div className="space-y-1 bg-gray-800 p-3 -mx-6 -mb-4 relative">
+                        {/* Subtle pattern overlay */}
                         <div
                           className="absolute inset-0 opacity-5"
                           style={{
@@ -238,15 +247,18 @@ export default function UserLayout() {
           </div>
         </Dialog>
 
-        {/* Desktop Sidebar */}
+        {/* Desktop Fixed Sidebar */}
         <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
           <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-gray-950 to-gray-900 px-6 pb-4 shadow-2xl">
+            {/* Brand header */}
             <div className="flex h-16 shrink-0 items-center">
               <span className="sr-only">barbid</span>
               <h1 className="text-2xl font-medium text-indigo-300 tracking-widest">
                 barbid
               </h1>
             </div>
+
+            {/* Navigation menu */}
             <nav className="flex flex-1 flex-col">
               <ul role="list" className="flex flex-1 flex-col gap-y-7">
                 <li>
@@ -275,8 +287,11 @@ export default function UserLayout() {
                     ))}
                   </ul>
                 </li>
+
+                {/* Settings and logout section at bottom */}
                 <li className="mt-auto">
                   <div className="space-y-1 bg-gray-800 p-3 -mx-6 -mb-4 relative">
+                    {/* Subtle pattern overlay */}
                     <div
                       className="absolute inset-0 opacity-5"
                       style={{
@@ -336,8 +351,11 @@ export default function UserLayout() {
           </div>
         </div>
 
+        {/* Main content area with top bar */}
         <div className="lg:pl-72">
-          <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-xs sm:gap-x-6 sm:px-6 lg:px-8 relative">
+          {/* Top navigation bar */}
+          <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-xs sm:gap-x-6 sm:px-6 lg:px-8">
+            {/* Mobile sidebar toggle button */}
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
@@ -347,13 +365,14 @@ export default function UserLayout() {
               <Bars3Icon aria-hidden="true" className="size-6" />
             </button>
 
-            {/* Separator */}
+            {/* Visual separator for mobile */}
             <div
               aria-hidden="true"
               className="h-6 w-px bg-gray-900/10 lg:hidden"
             />
 
             <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+              {/* Search form */}
               <form action="#" method="GET" className="grid flex-1 grid-cols-1">
                 <input
                   name="search"
@@ -367,7 +386,10 @@ export default function UserLayout() {
                   className="pointer-events-none col-start-1 row-start-1 size-5 self-center text-gray-400"
                 />
               </form>
+
+              {/* Right side actions */}
               <div className="flex items-center gap-x-4 lg:gap-x-6">
+                {/* Notification bell with badge */}
                 <div className="relative">
                   <button
                     type="button"
@@ -382,7 +404,7 @@ export default function UserLayout() {
                       }`}
                     />
 
-                    {/* Notification badge */}
+                    {/* Notification count badge */}
                     {unreadCount > 0 && (
                       <span className="absolute top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-red-600 text-[10px] font-medium transition-opacity duration-200 animate-pulse-reverse">
                         {unreadCount > 9 ? "9+" : unreadCount}
@@ -391,10 +413,10 @@ export default function UserLayout() {
                   </button>
                 </div>
 
-                {/* Notification positioned relative to main page container */}
+                {/* Notification dropdown component */}
                 <Notification />
 
-                {/* Separator */}
+                {/* Visual separator for desktop */}
                 <div
                   aria-hidden="true"
                   className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-900/10"
@@ -403,6 +425,7 @@ export default function UserLayout() {
             </div>
           </div>
 
+          {/* Main content area */}
           <main className="py-0">
             <div className="px-0 sm:px-0 lg:px-0 min-h-screen">
               <Outlet />

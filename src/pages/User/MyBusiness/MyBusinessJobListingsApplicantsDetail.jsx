@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import { getDatabase, ref, onValue, get, update, set } from "firebase/database";
 import { ArrowLeftIcon, CheckIcon } from "@heroicons/react/24/outline";
 
-// Generate a random 6-digit verification code
+// Generate a random 6-digit verification code for job acceptance
 const generateVerificationCode = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
+// MyBusinessJobListingsApplicantsDetail component for viewing and managing individual job applications
+// Features application review, acceptance workflow, and verification code generation
 export default function MyBusinessJobListingsApplicantsDetail() {
   const { applicationId, jobId } = useParams();
   const { selectedBusiness, loading: businessLoading } = useBusiness();
@@ -116,7 +118,6 @@ export default function MyBusinessJobListingsApplicantsDetail() {
               // Clear any previous errors when applicant is found
               setError(null);
             } catch (error) {
-              console.error(`Error fetching data for user ${userId}:`, error);
               setApplicant({
                 userId,
                 ...applicationData,
@@ -159,12 +160,7 @@ export default function MyBusinessJobListingsApplicantsDetail() {
       // Generate a unique verification code for this acceptance
       const verificationCode = generateVerificationCode();
 
-      console.log(
-        "Accepting application for job:",
-        jobId,
-        "with verification code:",
-        verificationCode
-      );
+      // Accepting application with verification code
 
       // Only update the public job listing - this is accessible to everyone
       const publicJobRef = ref(db, `public/jobs/${jobId}`);
@@ -178,7 +174,7 @@ export default function MyBusinessJobListingsApplicantsDetail() {
         verificationCode: verificationCode, // Store the verification code
       });
 
-      console.log("Job status updated to Filled");
+      // Job status updated to Filled
 
       // Update the applicant's application status in the public job
       const applicationRef = ref(
@@ -191,7 +187,7 @@ export default function MyBusinessJobListingsApplicantsDetail() {
         verificationCode: verificationCode, // Store the verification code here too
       });
 
-      console.log("Application status updated to Accepted");
+      // Application status updated to Accepted
 
       // Create notification for the applicant
       await set(
@@ -225,7 +221,6 @@ export default function MyBusinessJobListingsApplicantsDetail() {
         `/my-business/${selectedBusiness.id}/job-listings/${jobId}/applicants`
       );
     } catch (error) {
-      console.error("Error accepting application:", error);
       setError("Failed to accept application. Please try again.");
     } finally {
       setAccepting(false);
@@ -264,12 +259,7 @@ export default function MyBusinessJobListingsApplicantsDetail() {
     );
   }
 
-  // Debug: log applicant data
-  console.log("Applicant data for profile button:", {
-    userId: applicant.userId,
-    username: applicant.username,
-    profile: applicant.profile,
-  });
+  // Applicant data loaded for profile display
 
   // Helper function to format date and time
   const formatDateTime = (dateTimeString) => {

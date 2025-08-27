@@ -1,3 +1,5 @@
+// Simple heading component for the Find Work section
+// Includes fade-in animation and responsive border styling
 export default function FindWorkHeading() {
   return (
     <div className="border-b border-gray-200 pb-6.5 sm:flex sm:items-center sm:justify-between animate-[fadeIn_0.6s_ease-in-out]">

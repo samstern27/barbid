@@ -3,6 +3,8 @@ import { Transition } from "@headlessui/react";
 import { useNotification } from "../../contexts/NotificationContext";
 import { useNavigate } from "react-router-dom";
 
+// Notification dropdown component that displays user notifications
+// Handles different notification types with appropriate navigation and actions
 export default function Notification() {
   const notificationRef = useRef(null);
   const navigate = useNavigate();
@@ -14,10 +16,22 @@ export default function Notification() {
     markAsRead,
   } = useNotification();
 
-  // Format timestamp to relative time
+  // Convert timestamp to human-readable relative time
+  // Handles edge cases and provides fallback for invalid timestamps
   const formatTimeAgo = (timestamp) => {
+    // Validate timestamp to prevent errors
+    if (!timestamp || isNaN(timestamp.getTime())) {
+      return "Just now";
+    }
+
     const now = new Date();
     const diff = now - timestamp;
+
+    // Check if time difference is valid
+    if (isNaN(diff) || diff < 0) {
+      return "Just now";
+    }
+
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
@@ -28,13 +42,14 @@ export default function Notification() {
     return `${days} day${days > 1 ? "s" : ""} ago`;
   };
 
-  // Handle notification click
+  // Handle notification click with type-specific navigation
+  // Marks notification as read and navigates to relevant page
   const handleNotificationClick = (notification) => {
     if (!notification.isRead) {
       markAsRead(notification.id);
     }
 
-    // Handle navigation based on notification type
+    // Route to appropriate page based on notification type
     if (
       notification.type === "job_application" &&
       notification.jobId &&
@@ -66,7 +81,7 @@ export default function Notification() {
     }
   };
 
-  // Handle "View all notifications" click
+  // Navigate to full activity page and close notification panel
   const handleViewAllNotifications = () => {
     navigate("/activity");
     closeNotificationPanel();
@@ -74,11 +89,12 @@ export default function Notification() {
 
   return (
     <>
-      {/* Notification dropdown positioned relative to viewport */}
+      {/* Fixed position notification dropdown with high z-index */}
       <div
         ref={notificationRef}
         className="fixed top-20 right-1 z-[9999] w-80 sm:w-96"
       >
+        {/* Smooth enter/exit animations using Headless UI Transition */}
         <Transition
           show={isOpen}
           enter="transition ease-out duration-300"
@@ -89,7 +105,7 @@ export default function Notification() {
           leaveTo="transform opacity-0 scale-95 translate-y-2"
         >
           <div className="bg-white rounded-2xl shadow-2xl ring-1 ring-black/10 border border-gray-200 mx-4">
-            {/* Header */}
+            {/* Header with close button */}
             <div className="px-6 py-4 border-b border-gray-100">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-gray-900">
@@ -116,7 +132,7 @@ export default function Notification() {
               </div>
             </div>
 
-            {/* Notifications list */}
+            {/* Scrollable notifications list with conditional rendering */}
             <div className="max-h-80 overflow-y-auto">
               {notifications.length > 0 ? (
                 notifications.map((notification) => (
@@ -128,6 +144,7 @@ export default function Notification() {
                     onClick={() => handleNotificationClick(notification)}
                   >
                     <div className="flex items-start space-x-4">
+                      {/* Avatar section with fallback icons for different notification types */}
                       <div className="w-12 h-12 rounded-full flex-shrink-0 bg-gray-100 flex items-center justify-center">
                         {notification.avatar ? (
                           <img
@@ -137,6 +154,7 @@ export default function Notification() {
                           />
                         ) : (
                           <div className="w-8 h-8 text-gray-600">
+                            {/* Type-specific icons for better visual context */}
                             {notification.type === "job_accepted" ? (
                               <svg fill="currentColor" viewBox="0 0 20 20">
                                 <path
@@ -182,6 +200,8 @@ export default function Notification() {
                           </div>
                         )}
                       </div>
+
+                      {/* Notification content with title, message, and metadata */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <p className="text-sm font-medium text-gray-900 truncate">
@@ -194,6 +214,7 @@ export default function Notification() {
                         <p className="text-sm text-gray-600 mt-2 leading-relaxed">
                           {notification.message}
                         </p>
+                        {/* Unread indicator with blue dot and "New" label */}
                         {!notification.isRead && (
                           <div className="mt-2 flex items-center space-x-2">
                             <span className="inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
@@ -203,6 +224,8 @@ export default function Notification() {
                           </div>
                         )}
                       </div>
+
+                      {/* Delete button with stopPropagation to prevent navigation */}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -228,6 +251,7 @@ export default function Notification() {
                   </div>
                 ))
               ) : (
+                /* Empty state with icon and helpful message */
                 <div className="px-6 py-8 text-center">
                   <div className="text-gray-400 mb-2">
                     <svg
@@ -252,7 +276,7 @@ export default function Notification() {
               )}
             </div>
 
-            {/* Footer */}
+            {/* Footer with "View all" button - only shown when notifications exist */}
             {notifications.length > 0 && (
               <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
                 <button

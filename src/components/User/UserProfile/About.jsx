@@ -1,8 +1,14 @@
 import React from "react";
 
+// About component for user profile with theme-based styling
+// Supports multiple color themes and renders about text with paragraph breaks
 const About = ({ profile }) => {
+  // Fallback text if user hasn't added an about section
   const aboutText =
     profile.about || `${profile.username} has not added an about section`;
+
+  // Theme configuration with background, text, and accent colors
+  // Each theme provides 4 color values: [bg-dark, bg-light, text-color, accent-hex]
   const theme = profile.theme || "gray";
   const themeClasses = {
     amber: ["bg-amber-800", "bg-amber-100", "text-amber-700", "#d97706"],
@@ -43,14 +49,17 @@ const About = ({ profile }) => {
     yellow: ["bg-yellow-800", "bg-yellow-100", "text-yellow-800", "#eab308"],
     zinc: ["bg-zinc-800", "bg-zinc-100", "text-zinc-800", "#71717a"],
   };
+
   return (
     <div
       className={`rounded-lg m-4 sm:m-6 lg:m-8 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-4 sm:pb-6 lg:pb-8`}
     >
+      {/* Section header with white text */}
       <div className="border-b border-gray-200 pb-4 sm:pb-5">
         <h3 className="text-base font-semibold text-white">About me</h3>
       </div>
 
+      {/* About text content with paragraph breaks */}
       <div className="mt-4 sm:mt-6">
         {aboutText.split("\n").map((para, idx) => (
           <p

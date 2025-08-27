@@ -10,13 +10,17 @@ import { useAuth } from "../../../contexts/AuthContext";
 import Heading from "../../../components/User/MyBusiness/Heading";
 import Loader from "../../../components/UI/Loader";
 
+// Main MyBusiness page component for managing user businesses
+// Features business listing, creation, and empty state handling
 const MyBusiness = () => {
+  // Authentication and business state management
   const { currentUser } = useAuth();
   const [businesses, setBusinesses] = useState(null);
   const [loading, setLoading] = useState(true);
   const [createBusinessOpen, setCreateBusinessOpen] = useState(false);
 
-  // Fetch all businesses from Firebase
+  // Fetch all businesses from Firebase for the current user
+  // Transforms Firebase object structure to array format
   useEffect(() => {
     if (!currentUser?.uid) {
       setLoading(false);
@@ -44,18 +48,23 @@ const MyBusiness = () => {
     });
   }, [currentUser]);
 
-  // Pages for the breadcrumb
+  // Breadcrumb navigation configuration
   const pages = [{ name: "Businesses", href: "#", current: true }];
 
   return (
     <div className="flex flex-col m-10 gap-4">
+      {/* Navigation breadcrumb */}
       <Breadcrumb pages={pages} />
+      
+      {/* Page heading with create business button */}
       <Heading
         createBusinessOpen={createBusinessOpen}
         setCreateBusinessOpen={setCreateBusinessOpen}
       />
 
+      {/* Conditional rendering based on loading and business state */}
       {loading ? (
+        /* Loading state with spinner */
         <div className="flex flex-1 flex-col justify-center items-center min-h-[60vh]">
           <Loader
             size="2xl"
@@ -64,10 +73,12 @@ const MyBusiness = () => {
           />
         </div>
       ) : businesses && businesses.length > 0 ? (
+        /* Business table when businesses exist */
         <div className="flex flex-1 flex-col justify-start items-center gap-4 min-h-[60vh]">
           <BusinessTable businesses={businesses} />
         </div>
       ) : (
+        /* Empty state when no businesses exist */
         <div className="flex flex-1 flex-col justify-center items-center gap-4 min-h-[60vh]">
           <EmptyState
             createBusinessOpen={createBusinessOpen}
@@ -76,6 +87,7 @@ const MyBusiness = () => {
         </div>
       )}
 
+      {/* Create business modal component */}
       <CreateBusiness
         createBusinessOpen={createBusinessOpen}
         setCreateBusinessOpen={setCreateBusinessOpen}

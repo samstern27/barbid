@@ -5,6 +5,7 @@ import { Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { NavLink } from "react-router-dom";
 
+// Navigation items for the landing page
 const navigation = [
   { name: "Home", href: "/" },
   { name: "How It Works", href: "/how-it-works" },
@@ -14,6 +15,7 @@ const navigation = [
 ];
 
 const LandingNavbar = () => {
+  // State to control mobile menu open/close
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -23,6 +25,7 @@ const LandingNavbar = () => {
           aria-label="Global"
           className="flex items-center justify-between p-6 lg:px-8"
         >
+          {/* Logo/Brand section */}
           <div className="flex lg:flex-1">
             <a href="#" className="-m-1.5 p-1.5">
               <span className="sr-only">barbid</span>
@@ -31,6 +34,8 @@ const LandingNavbar = () => {
               </h1>
             </a>
           </div>
+
+          {/* Mobile menu button - only visible on small screens */}
           <div className="flex lg:hidden">
             <button
               type="button"
@@ -41,6 +46,8 @@ const LandingNavbar = () => {
               <Bars3Icon aria-hidden="true" className="size-6" />
             </button>
           </div>
+
+          {/* Desktop navigation - hidden on mobile */}
           <div className="hidden lg:flex lg:gap-x-12">
             {navigation.map((item) => (
               <NavLink
@@ -52,6 +59,8 @@ const LandingNavbar = () => {
               </NavLink>
             ))}
           </div>
+
+          {/* Login button - desktop version */}
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
             <NavLink
               to="/login"
@@ -62,6 +71,8 @@ const LandingNavbar = () => {
             </NavLink>
           </div>
         </nav>
+
+        {/* Mobile menu dialog using Headless UI */}
         <Dialog
           open={mobileMenuOpen}
           onClose={setMobileMenuOpen}
@@ -69,6 +80,7 @@ const LandingNavbar = () => {
         >
           <div className="fixed inset-0 z-50" />
           <DialogPanel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+            {/* Mobile menu header with close button */}
             <div className="flex items-center justify-between">
               <a href="#" className="-m-1.5 p-1.5">
                 <span className="sr-only">BarBid</span>
@@ -85,6 +97,8 @@ const LandingNavbar = () => {
                 <XMarkIcon aria-hidden="true" className="size-6" />
               </button>
             </div>
+
+            {/* Mobile navigation items */}
             <div className="mt-6 flow-root">
               <div className="-my-6 divide-y divide-gray-500/10">
                 <div className="space-y-2 py-6">
@@ -99,6 +113,8 @@ const LandingNavbar = () => {
                     </NavLink>
                   ))}
                 </div>
+
+                {/* Mobile login button */}
                 <div className="py-6">
                   <NavLink
                     to="/login"

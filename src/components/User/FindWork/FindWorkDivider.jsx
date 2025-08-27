@@ -7,6 +7,8 @@ import Loader from "../../UI/Loader";
 import { useState, useEffect, useContext, useMemo } from "react";
 import getDistance from "../../../utils/getDistance";
 
+// Main job listing component that handles filtering, sorting, and rendering
+// Uses React.memo for performance optimization since props rarely change
 const FindWorkDivider = React.memo(
   ({ sortMethod = "newest", filters = {} }) => {
     const [isLoading, setIsLoading] = useState(true);
@@ -18,7 +20,7 @@ const FindWorkDivider = React.memo(
     // Local loading state for location-dependent features
     const [locationReady, setLocationReady] = useState(false);
 
-    // Handle location loading state
+    // Handle location loading state - set ready when coordinates are available
     useEffect(() => {
       if (coords.lat && coords.lng) {
         setLocationReady(true);
@@ -26,24 +28,16 @@ const FindWorkDivider = React.memo(
     }, [coords.lat, coords.lng]);
 
     // Memoize the expensive sorting and filtering calculations
+    // This prevents recalculating on every render, improving performance
     const sortedJobs = useMemo(() => {
       if (!publicJobs || publicJobs.length === 0) {
-        console.log("FindWorkDivider: No public jobs to process");
         return [];
       }
 
-      console.log(
-        `FindWorkDivider: Processing ${publicJobs.length} public jobs`
-      );
-
       // Filter for only open jobs
       let jobs = publicJobs.filter((job) => job.status === "Open");
-      console.log(
-        `FindWorkDivider: After status filter (Open only): ${jobs.length} jobs`
-      );
 
       if (jobs.length === 0) {
-        console.log("FindWorkDivider: No open jobs found");
         return [];
       }
 
@@ -51,29 +45,20 @@ const FindWorkDivider = React.memo(
       jobs = jobs.filter((job) => {
         // If we can't determine business privacy, assume it's public (show the job)
         if (!job.businessPrivacy) {
-          console.log(
-            `Job ${job.id}: No business privacy info, assuming public`
-          );
           return true;
         }
-        console.log(
-          `Job ${job.id}: Business privacy is ${
-            job.businessPrivacy
-          }, showing: ${job.businessPrivacy === "public"}`
-        );
         return job.businessPrivacy === "public";
       });
 
-      console.log(`FindWorkDivider: After privacy filter: ${jobs.length} jobs`);
-
       if (jobs.length === 0) {
-        console.log("FindWorkDivider: No public business jobs found");
         return [];
       }
 
       // Calculate distances for all jobs if we have user location
       if (coords.lat && coords.lng) {
-        console.log("FindWorkDivider: Calculating distances for jobs");
+        let jobsWithDistance = 0;
+        let jobsWithoutLocation = 0;
+
         jobs.forEach((job) => {
           if (job.location && job.location.lat && job.location.lng) {
             job.distance = getDistance(
@@ -82,55 +67,63 @@ const FindWorkDivider = React.memo(
               job.location.lat,
               job.location.lng
             );
-            console.log(
-              `Job ${job.id}: Distance calculated as ${job.distance} km`
-            );
+            jobsWithDistance++;
           } else {
-            console.log(
-              `Job ${job.id}: No location coordinates, skipping distance calculation`
-            );
+            jobsWithoutLocation++;
           }
         });
+        // Distance calculation completed silently
       } else {
-        console.log(
-          "FindWorkDivider: No user coordinates, skipping distance calculations"
-        );
+        // No user coordinates available, distance calculations skipped
       }
 
-      // Apply filters
-      console.log("FindWorkDivider: Applying filters:", filters);
+      // Apply filters based on user selections
       jobs = jobs.filter((job) => {
-        // Job position filter
+        // Job position filter - check if job title matches selected positions
         if (filters["job-position"] && filters["job-position"].length > 0) {
           const jobPosition = job.jobTitle?.toLowerCase() || "";
           const hasMatchingPosition = filters["job-position"].some((filter) =>
             jobPosition.includes(filter.toLowerCase())
           );
           if (!hasMatchingPosition) {
-            console.log(`Job ${job.id}: Filtered out by job position filter`);
             return false;
           }
         }
 
-        // Distance filter
+        // Distance filter - filter jobs based on calculated distance
         if (filters.distance && filters.distance.length > 0) {
-          const maxDistance = Math.max(...filters.distance);
-          if (job.distance && job.distance > maxDistance) {
-            console.log(
-              `Job ${job.id}: Filtered out by distance filter (${job.distance} km > ${maxDistance} km)`
-            );
-            return false;
+          const selectedDistance = Math.max(...filters.distance);
+
+          // "Any Distance" (value 0) means no distance filtering
+          if (selectedDistance === 0) {
+            return true;
+          }
+
+          if (!job.distance) {
+            return true; // Don't filter out jobs without distance
+          }
+
+          // Special handling for "100km+" (value 101)
+          if (selectedDistance === 101) {
+            // "100km+" means show jobs MORE than 100km away
+            if (job.distance <= 100) {
+              return false;
+            }
+          } else {
+            // Regular distance filters (show jobs LESS than or equal to selected distance)
+            if (job.distance > selectedDistance) {
+              return false;
+            }
           }
         }
 
-        // City filter
+        // City filter - check if job city matches selected cities
         if (filters.city && filters.city.length > 0) {
           const jobCity = job.location?.city?.toLowerCase() || "";
           const hasMatchingCity = filters.city.some((filter) =>
             jobCity.includes(filter.toLowerCase())
           );
           if (!hasMatchingCity) {
-            console.log(`Job ${job.id}: Filtered out by city filter`);
             return false;
           }
         }
@@ -138,12 +131,9 @@ const FindWorkDivider = React.memo(
         return true;
       });
 
-      console.log(
-        `FindWorkDivider: After all filters: ${jobs.length} jobs remaining`
-      );
-
-      // Apply sorting
+      // Apply sorting based on selected method
       if (sortMethod === "closest") {
+        // Sort by distance (closest first), jobs without distance go to end
         jobs.sort((a, b) => {
           if (!a.distance && !b.distance) return 0;
           if (!a.distance) return 1;
@@ -151,12 +141,14 @@ const FindWorkDivider = React.memo(
           return a.distance - b.distance;
         });
       } else if (sortMethod === "newest") {
+        // Sort by creation date (newest first)
         jobs.sort((a, b) => {
           const dateA = new Date(a.createdAt || 0);
           const dateB = new Date(b.createdAt || 0);
           return dateB - dateA;
         });
-      } else if (sortMethod === "highest") {
+      } else if (sortMethod === "highest-paying") {
+        // Sort by pay rate (highest first)
         jobs.sort((a, b) => {
           const payA = parseFloat(a.payRate) || 0;
           const payB = parseFloat(b.payRate) || 0;
@@ -164,12 +156,10 @@ const FindWorkDivider = React.memo(
         });
       }
 
-      console.log(`FindWorkDivider: Final sorted jobs: ${jobs.length} jobs`);
-      console.log("FindWorkDivider: Jobs to render:", jobs);
-
       return jobs;
     }, [publicJobs, coords, filters, sortMethod]);
 
+    // Update loading state when jobs data becomes available
     useEffect(() => {
       // When we get data from Firebase, check immediately
       if (publicJobs && isLoading) {
@@ -213,6 +203,9 @@ const FindWorkDivider = React.memo(
       );
     }
 
+    // Distance filter debug info available in development mode
+    // Removed console logs for production
+
     if (isLoading) {
       return (
         <div className="flex flex-1 flex-col justify-center items-center min-h-[60vh]">
@@ -220,6 +213,7 @@ const FindWorkDivider = React.memo(
         </div>
       );
     } else if (showNoJobs || (publicJobs && publicJobs.length === 0)) {
+      // No jobs available state
       return (
         <div className="flex flex-1 flex-col justify-center items-center min-h-[60vh] animate-[fadeIn_0.6s_ease-in-out]">
           <div className="text-center">
@@ -250,6 +244,7 @@ const FindWorkDivider = React.memo(
     } else if (publicJobs && publicJobs.length > 0) {
       // Check if there are any open jobs after filtering and sorting
       if (sortedJobs.length === 0) {
+        // No jobs match the current filters
         return (
           <div className="flex flex-1 flex-col justify-center items-center min-h-[60vh]">
             <div className="text-center">
@@ -279,6 +274,7 @@ const FindWorkDivider = React.memo(
         );
       }
 
+      // Render the filtered and sorted job list
       return (
         <ul role="list" className="space-y-3 animate-[fadeIn_1.2s_ease-in-out]">
           {sortedJobs.map((job) => (
@@ -295,7 +291,7 @@ const FindWorkDivider = React.memo(
       );
     }
 
-    // Fallback case
+    // Fallback case for unexpected states
     return (
       <div className="flex flex-1 flex-col justify-center items-center min-h-[60vh]">
         <div className="text-center">

@@ -1,11 +1,16 @@
 import React from "react";
 
+// Skills component for user profile displaying user skills as styled badges
+// Supports multiple color themes and fallback text when no skills are added
 const Skills = ({ profile }) => {
+  // Fallback skills array if user hasn't added any skills
   const skills = profile.skills || [
     `${profile.username} has not added any skills`,
   ];
   const theme = profile.theme || "gray";
 
+  // Theme configuration for skills component
+  // Each theme provides 3 color values: [bg-light, text-light, text-dark]
   const themeClasses = {
     amber: ["bg-amber-200", "text-amber-100", "text-amber-800"],
     blue: ["bg-blue-200", "text-blue-100", "text-blue-800"],
@@ -31,6 +36,7 @@ const Skills = ({ profile }) => {
     zinc: ["bg-zinc-200", "text-zinc-100", "text-zinc-800"],
   };
 
+  // Render each skill as a styled badge with theme colors
   const skillList = skills.map((skill, idx) => {
     return (
       <span
@@ -41,15 +47,19 @@ const Skills = ({ profile }) => {
       </span>
     );
   });
+
   return (
     <div
       className={`mt-4 sm:mt-6 lg:mt-8 mx-4 sm:mx-6 lg:mx-8 pb-4 sm:pb-6 lg:pb-8 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 flex-col text-center gap-4 flex-1 items-start`}
     >
+      {/* Section header */}
       <h3
         className={`text-base font-semibold border-b border-gray-200 pb-4 sm:pb-5 text-left text-white`}
       >
         Skills
       </h3>
+
+      {/* Skills grid with responsive spacing */}
       <div className="mt-4 sm:mt-6 flex flex-col gap-2 sm:gap-3">
         {skillList}
       </div>

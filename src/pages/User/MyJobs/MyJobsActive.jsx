@@ -7,12 +7,16 @@ import Loader from "../../../components/UI/Loader";
 import { getDatabase, ref, onValue, get } from "firebase/database";
 import JobStatusIndicator from "../../../components/UI/JobStatusIndicator";
 
+// MyJobsActive component for displaying user's active job applications
+// Features real-time job status updates, data merging, and active job filtering
 export default function MyJobsActive() {
+  // Local state for jobs data and loading
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const { currentUser } = useAuth();
 
   // Listen for real-time updates on job applications with real-time job status
+  // Merges user application data with current job information for comprehensive display
   useEffect(() => {
     if (!currentUser?.uid) return;
 
@@ -109,20 +113,21 @@ export default function MyJobsActive() {
                   const activeFallbackJobs = fallbackJobs.filter(
                     (job) => job.status === "Open"
                   );
-                  
+
                   // Sort by newest first (by appliedAt date)
-                  const sortedActiveFallbackJobs = activeFallbackJobs.sort((a, b) => {
-                    const dateA = new Date(a.appliedAt || 0);
-                    const dateB = new Date(b.appliedAt || 0);
-                    return dateB - dateA; // Newest first
-                  });
-                  
+                  const sortedActiveFallbackJobs = activeFallbackJobs.sort(
+                    (a, b) => {
+                      const dateA = new Date(a.appliedAt || 0);
+                      const dateB = new Date(b.appliedAt || 0);
+                      return dateB - dateA; // Newest first
+                    }
+                  );
+
                   setJobs(sortedActiveFallbackJobs);
                 }
                 setLoading(false);
               })
               .catch((error) => {
-                console.error("Error fetching public jobs:", error);
                 // Fallback to application data
                 const fallbackJobs = Object.values(applications).map(
                   (application) => ({
@@ -136,14 +141,16 @@ export default function MyJobsActive() {
                 const activeFallbackJobs = fallbackJobs.filter(
                   (job) => job.status === "Open"
                 );
-                
+
                 // Sort by newest first (by appliedAt date)
-                const sortedActiveFallbackJobs = activeFallbackJobs.sort((a, b) => {
-                  const dateA = new Date(a.appliedAt || 0);
-                  const dateB = new Date(b.appliedAt || 0);
-                  return dateB - dateA; // Newest first
-                });
-                
+                const sortedActiveFallbackJobs = activeFallbackJobs.sort(
+                  (a, b) => {
+                    const dateA = new Date(a.appliedAt || 0);
+                    const dateB = new Date(b.appliedAt || 0);
+                    return dateB - dateA; // Newest first
+                  }
+                );
+
                 setJobs(sortedActiveFallbackJobs);
                 setLoading(false);
               });
@@ -152,7 +159,6 @@ export default function MyJobsActive() {
             setLoading(false);
           }
         } catch (error) {
-          console.error("Error processing user applications:", error);
           setJobs([]);
           setLoading(false);
         }
@@ -164,10 +170,11 @@ export default function MyJobsActive() {
     };
   }, [currentUser?.uid]);
 
-  console.log(jobs);
+  // Jobs data loaded and processed
 
   return (
     <div className="animate-[fadeIn_0.6s_ease-in-out]">
+      {/* Header section with title and description */}
       <div className="sm:flex sm:items-center bg-indigo-50 p-4 rounded-lg">
         <div className="sm:flex-auto">
           <h1 className="text-base font-semibold text-gray-900">Active Jobs</h1>
@@ -176,104 +183,114 @@ export default function MyJobsActive() {
           </p>
         </div>
       </div>
+      
+      {/* Job listings table section */}
       <div className="-mx-4 mt-8 sm:-mx-0">
         {loading ? (
+          /* Loading state with spinner */
           <div className="flex flex-1 flex-col justify-center items-center min-h-[60vh]">
             <Loader size="2xl" text="Loading job listings..." />
           </div>
         ) : (
           <>
-            <table className="min-w-full divide-y divide-gray-300">
-              <thead>
-                <tr>
-                  <th
-                    scope="col"
-                    className="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-0"
-                  >
-                    Job Title
-                  </th>
-                  <th
-                    scope="col"
-                    className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
-                  >
-                    Date & Time of Shift
-                  </th>
-                  <th
-                    scope="col"
-                    className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
-                  >
-                    Venue
-                  </th>
-                  <th
-                    scope="col"
-                    className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 lg:table-cell"
-                  >
-                    Status
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Pay Rate (£/hr)
-                  </th>
-                  <th scope="col" className="py-3.5 pr-4 pl-3 sm:pr-0">
-                    <span className="sr-only">View</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {jobs && jobs.length > 0 ? (
-                  jobs.map((job) => {
-                    return (
-                      <tr key={job.id}>
-                        <td className="py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-0">
-                          {job.jobTitle}
-                        </td>
-                        <td className="hidden px-3 py-4 text-sm whitespace-nowrap text-gray-500 sm:table-cell">
-                          {job.startOfShift.split("T")[0].replace(/-/g, "/")}{" "}
-                          <strong>{job.startOfShift.split("T")[1]}</strong> -{" "}
-                          {job.endOfShift.split("T")[0].replace(/-/g, "/")}{" "}
-                          <strong>{job.endOfShift.split("T")[1]}</strong>
-                        </td>
-                        <td className="hidden px-3 py-4 text-sm whitespace-nowrap text-gray-500 lg:table-cell">
-                          {job.businessName}
-                        </td>
-                        <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">
-                          <JobStatusIndicator
-                            job={job}
-                            showAutoCloseWarning={true}
-                          />
-                        </td>
-                        <td className="hidden px-3 py-4 text-sm whitespace-nowrap text-gray-500 lg:table-cell">
-                          £{parseFloat(job.payRate).toFixed(2)}
-                        </td>
-                        <td className="py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-0">
-                          <NavLink
-                            to={`/jobs/application/${job.id}`}
-                            className="text-indigo-500 hover:text-indigo-600 flex items-center gap-2"
-                          >
-                            <EyeIcon className="w-4 h-4" />
-                            View
-                            <span className="sr-only">
-                              , {job.startOfShift}
-                            </span>
-                          </NavLink>
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
+            <div className="overflow-x-auto">
+              {/* Active jobs table */}
+              <table className="min-w-full divide-y divide-gray-300">
+                <thead>
                   <tr>
-                    <td
-                      colSpan="6"
-                      className="px-3 py-4 text-sm text-gray-500 text-center"
+                    {/* Job Title column */}
+                    <th
+                      scope="col"
+                      className="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-0"
                     >
-                      No active jobs found.
-                    </td>
+                      Job Title
+                    </th>
+                    {/* Date & Time column (hidden on small screens) */}
+                    <th
+                      scope="col"
+                      className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+                    >
+                      Date & Time of Shift
+                    </th>
+                    {/* Venue column (hidden on small screens) */}
+                    <th
+                      scope="col"
+                      className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+                    >
+                      Venue
+                    </th>
+                    {/* Status column */}
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
+                      Status
+                    </th>
+                    <th
+                      scope="col"
+                      className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+                    >
+                      Pay Rate (£/hr)
+                    </th>
+                    <th scope="col" className="py-3.5 pr-4 pl-3 sm:pr-0">
+                      <span className="sr-only">View</span>
+                    </th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {jobs && jobs.length > 0 ? (
+                    jobs.map((job) => {
+                      return (
+                        <tr key={job.id}>
+                          <td className="py-4 pr-3 pl-4 text-sm font-medium text-gray-900 sm:pl-0">
+                            {job.jobTitle}
+                          </td>
+                          <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                            {job.startOfShift.split("T")[0].replace(/-/g, "/")}{" "}
+                            <strong>{job.startOfShift.split("T")[1]}</strong> -{" "}
+                            {job.endOfShift.split("T")[0].replace(/-/g, "/")}{" "}
+                            <strong>{job.endOfShift.split("T")[1]}</strong>
+                          </td>
+                          <td className="hidden px-3 py-4 text-sm whitespace-nowrap text-gray-500 lg:table-cell">
+                            {job.businessName}
+                          </td>
+                          <td className="px-3 py-4 text-sm text-gray-500">
+                            <JobStatusIndicator
+                              job={job}
+                              showAutoCloseWarning={true}
+                            />
+                          </td>
+                          <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                            £{parseFloat(job.payRate).toFixed(2)}
+                          </td>
+                          <td className="py-4 pr-4 pl-3 text-right text-sm font-medium text-gray-500 sm:pr-0">
+                            <NavLink
+                              to={`/jobs/application/${job.id}`}
+                              className="text-indigo-500 hover:text-indigo-600 flex items-center gap-2"
+                            >
+                              <EyeIcon className="w-4 h-4" />
+                              View
+                              <span className="sr-only">
+                                , {job.startOfShift}
+                              </span>
+                            </NavLink>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="6"
+                        className="px-3 py-4 text-sm text-gray-500 text-center"
+                      >
+                        No active jobs found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </>
         )}
       </div>

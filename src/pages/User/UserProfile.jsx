@@ -1,8 +1,8 @@
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { getDatabase, ref, onValue, get } from "firebase/database";
-import { useState, useEffect } from "react";
 import { writeUserData } from "../../firebase/firebase";
-import { useParams } from "react-router-dom";
 
 import TopBar from "../../components/User/UserProfile/TopBar";
 import Skills from "../../components/User/UserProfile/Skills";
@@ -12,6 +12,8 @@ import Stats from "../../components/User/UserProfile/Stats";
 import Qualifications from "../../components/User/UserProfile/Qualifications";
 import BentoGrid from "../../components/User/UserProfile/BentoGrid";
 
+// UserProfile component for displaying user profile pages
+// Features dynamic theming, profile data fetching, and responsive layout components
 const UserProfile = () => {
   const { currentUser } = useAuth();
   const { username } = useParams();

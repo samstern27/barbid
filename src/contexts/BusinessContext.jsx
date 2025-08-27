@@ -15,8 +15,11 @@ import {
   get,
 } from "firebase/database";
 
+// Business management context for handling user businesses and job operations
+// Manages business selection, job updates, and synchronization with Firebase
 const BusinessContext = createContext();
 
+// Custom hook to access business context with error handling
 export const useBusiness = () => {
   const context = useContext(BusinessContext);
   if (!context) {
@@ -25,13 +28,15 @@ export const useBusiness = () => {
   return context;
 };
 
+// Business provider component that manages business state and operations
 export const BusinessProvider = ({ children }) => {
   const { currentUser } = useAuth();
   const [selectedBusiness, setSelectedBusiness] = useState(null);
   const [businesses, setBusinesses] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch all businesses for the current user
+  // Fetch all businesses for the current user from Firebase
+  // Automatically selects first business if none selected
   useEffect(() => {
     if (!currentUser?.uid) {
       setBusinesses([]);
@@ -75,12 +80,12 @@ export const BusinessProvider = ({ children }) => {
     return () => unsubscribe();
   }, [currentUser?.uid]);
 
-  // Select a business
+  // Select a business by object reference
   const selectBusiness = (business) => {
     setSelectedBusiness(business);
   };
 
-  // Select a business by ID
+  // Select a business by ID using memoized callback
   const selectBusinessById = useCallback(
     (businessId) => {
       const business = businesses.find((b) => b.id === businessId);
@@ -96,7 +101,8 @@ export const BusinessProvider = ({ children }) => {
     setSelectedBusiness(null);
   };
 
-  // Auto-select business based on URL if available
+  // Auto-select business based on URL path if available
+  // Useful for deep linking to specific business pages
   useEffect(() => {
     const pathname = window.location.pathname;
     const businessMatch = pathname.match(/\/my-business\/([^\/]+)/);
@@ -112,7 +118,8 @@ export const BusinessProvider = ({ children }) => {
     }
   }, [businesses, selectedBusiness]);
 
-  // Update a job
+  // Update a job in both private and public Firebase references
+  // Synchronizes local state with database changes
   const updateJob = async (jobId, updatedJobData) => {
     if (!currentUser?.uid || !selectedBusiness?.id) {
       throw new Error("User or business not found");
@@ -142,12 +149,12 @@ export const BusinessProvider = ({ children }) => {
         });
       }
     } catch (error) {
-      console.error("Error updating job:", error);
       throw error;
     }
   };
 
-  // Delete a job
+  // Delete a job from both private and public Firebase references
+  // Updates job listing counts and local state
   const deleteJob = async (jobId) => {
     if (!currentUser?.uid || !selectedBusiness?.id) {
       throw new Error("User or business not found");
@@ -193,7 +200,7 @@ export const BusinessProvider = ({ children }) => {
           jobListings: jobsCount,
         });
       } catch (error) {
-        console.log("Public business reference not found, skipping update");
+        // Public business reference not found, skipping update
       }
 
       // Update local state after successful deletion
@@ -205,11 +212,11 @@ export const BusinessProvider = ({ children }) => {
         });
       }
     } catch (error) {
-      console.error("Error deleting job:", error);
       throw error;
     }
   };
 
+  // Context value object containing business state and operations
   const value = {
     selectedBusiness,
     businesses,

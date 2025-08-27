@@ -1,14 +1,19 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, NavLink } from "react-router-dom";
 import { useBusiness } from "../../../contexts/BusinessContext";
 import { useAuth } from "../../../contexts/AuthContext";
-import { getDatabase, ref, remove, get, update } from "firebase/database";
+import { getDatabase, ref, remove, update } from "firebase/database";
 import {
-  ExclamationTriangleIcon,
+  ArrowLeftIcon,
+  PencilIcon,
   TrashIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
+import Loader from "../../../components/UI/Loader";
 
-const MyBusinessSettings = () => {
+// MyBusinessSettings component for managing business configuration and preferences
+// Features business editing, privacy settings, and business deletion with confirmation
+export default function MyBusinessSettings() {
   const { businessId } = useParams();
   const navigate = useNavigate();
   const { selectedBusiness } = useBusiness();
@@ -385,6 +390,4 @@ const MyBusinessSettings = () => {
       <div className="h-8"></div>
     </div>
   );
-};
-
-export default MyBusinessSettings;
+}

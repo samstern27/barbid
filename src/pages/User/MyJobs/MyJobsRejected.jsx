@@ -5,7 +5,10 @@ import { EyeIcon } from "@heroicons/react/24/outline";
 import { NavLink } from "react-router-dom";
 import Loader from "../../../components/UI/Loader";
 import { getDatabase, ref, onValue, get } from "firebase/database";
+import JobStatusIndicator from "../../../components/UI/JobStatusIndicator";
 
+// MyJobsRejected component for displaying user's rejected and closed job applications
+// Features real-time job status updates and rejected/ended job filtering
 export default function MyJobsRejected() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -128,7 +131,6 @@ export default function MyJobsRejected() {
                 setLoading(false);
               })
               .catch((error) => {
-                console.error("Error fetching public jobs:", error);
                 // Fallback to application data
                 const fallbackJobs = Object.values(applications).map(
                   (application) => ({
@@ -162,7 +164,6 @@ export default function MyJobsRejected() {
             setLoading(false);
           }
         } catch (error) {
-          console.error("Error processing user applications:", error);
           setJobs([]);
           setLoading(false);
         }
@@ -193,104 +194,108 @@ export default function MyJobsRejected() {
           </div>
         ) : (
           <>
-            <table className="min-w-full divide-y divide-gray-300">
-              <thead>
-                <tr>
-                  <th
-                    scope="col"
-                    className="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-0"
-                  >
-                    Job Title
-                  </th>
-                  <th
-                    scope="col"
-                    className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
-                  >
-                    Date & Time of Shift
-                  </th>
-                  <th
-                    scope="col"
-                    className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
-                  >
-                    Venue
-                  </th>
-                  <th
-                    scope="col"
-                    className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 lg:table-cell"
-                  >
-                    Status
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Pay Rate (£/hr)
-                  </th>
-                  <th scope="col" className="py-3.5 pr-4 pl-3 sm:pr-0">
-                    <span className="sr-only">View</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {jobs && jobs.length > 0 ? (
-                  jobs.map((job) => {
-                    return (
-                      <tr key={job.id}>
-                        <td className="py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-0">
-                          {job.jobTitle}
-                        </td>
-                        <td className="hidden px-3 py-4 text-sm whitespace-nowrap text-gray-500 sm:table-cell">
-                          {job.startOfShift.split("T")[0].replace(/-/g, "/")}{" "}
-                          <strong>{job.startOfShift.split("T")[1]}</strong> -{" "}
-                          {job.endOfShift.split("T")[0].replace(/-/g, "/")}{" "}
-                          <strong>{job.endOfShift.split("T")[1]}</strong>
-                        </td>
-                        <td className="hidden px-3 py-4 text-sm whitespace-nowrap text-gray-500 lg:table-cell">
-                          {job.businessName}
-                        </td>
-                        <td className="px-3 py-4 text-sm whitespace-nowrap text-gray-500">
-                          <span
-                            className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
-                              job.status === "Filled"
-                                ? "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20"
-                                : job.status === "Closed"
-                                ? "bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/20"
-                                : "bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-600/20"
-                            }`}
-                          >
-                            {job.status}
-                          </span>
-                        </td>
-                        <td className="hidden px-3 py-4 text-sm whitespace-nowrap text-gray-500 lg:table-cell">
-                          £{parseFloat(job.payRate).toFixed(2)}
-                        </td>
-                        <td className="py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-0">
-                          <NavLink
-                            to={`/jobs/application/${job.id}`}
-                            className="text-indigo-500 hover:text-indigo-600 flex items-center gap-2"
-                          >
-                            <EyeIcon className="w-4 h-4" />
-                            View
-                            <span className="sr-only">
-                              , {job.startOfShift}
-                            </span>
-                          </NavLink>
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-300">
+                <thead>
                   <tr>
-                    <td
-                      colSpan="6"
-                      className="px-3 py-4 text-sm text-gray-500 text-center"
+                    <th
+                      scope="col"
+                      className="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-0"
                     >
-                      No rejected jobs found.
-                    </td>
+                      Job Title
+                    </th>
+                    <th
+                      scope="col"
+                      className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+                    >
+                      Date & Time of Shift
+                    </th>
+                    <th
+                      scope="col"
+                      className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+                    >
+                      Venue
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
+                      Status
+                    </th>
+                    <th
+                      scope="col"
+                      className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 sm:table-cell"
+                    >
+                      Pay Rate (£/hr)
+                    </th>
+
+                    <th scope="col" className="py-3.5 pr-4 pl-3 sm:pr-0">
+                      <span className="sr-only">View</span>
+                    </th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {jobs && jobs.length > 0 ? (
+                    jobs.map((job) => {
+                      return (
+                        <tr key={job.id}>
+                          <td className="py-4 pr-3 pl-4 text-sm font-medium text-gray-900 sm:pl-0">
+                            {job.jobTitle}
+                          </td>
+                          <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                            {job.startOfShift.split("T")[0].replace(/-/g, "/")}{" "}
+                            <strong>{job.startOfShift.split("T")[1]}</strong> -{" "}
+                            {job.endOfShift.split("T")[0].replace(/-/g, "/")}{" "}
+                            <strong>{job.endOfShift.split("T")[1]}</strong>
+                          </td>
+                          <td className="hidden px-3 py-4 text-sm text-gray-500 lg:table-cell">
+                            {job.businessName}
+                          </td>
+                          <td className="px-3 py-4 text-sm text-gray-500">
+                            <span
+                              className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
+                                job.status === "Filled"
+                                  ? "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20"
+                                  : job.status === "Closed"
+                                  ? "bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/20"
+                                  : "bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-600/20"
+                              }`}
+                            >
+                              {job.status}
+                            </span>
+                          </td>
+                          <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                            £{parseFloat(job.payRate).toFixed(2)}
+                          </td>
+
+                          <td className="py-4 pr-4 pl-3 text-right text-sm font-medium text-gray-500 sm:pr-0">
+                            <NavLink
+                              to={`/jobs/application/${job.id}`}
+                              className="text-indigo-500 hover:text-indigo-600 flex items-center gap-2"
+                            >
+                              <EyeIcon className="w-4 h-4" />
+                              View
+                              <span className="sr-only">
+                                , {job.startOfShift}
+                              </span>
+                            </NavLink>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="5"
+                        className="px-3 py-4 text-sm text-gray-500 text-center"
+                      >
+                        No rejected jobs found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </>
         )}
       </div>

@@ -3,12 +3,17 @@ import { NavLink } from "react-router-dom";
 import { sendPasswordResetEmailToUser } from "../../firebase/firebase";
 import Alert from "../../UI components/Alert";
 
+// Forgot password page for users who need to reset their password
+// Features email input, Firebase password reset, and success state management
 const ForgotPassword = () => {
+  // Form input reference and state management
   const emailRef = useRef(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  // Handle form submission to send password reset email
+  // Uses Firebase authentication service for password reset
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -23,10 +28,12 @@ const ForgotPassword = () => {
     }
   };
 
+  // Success state view - shows confirmation and next steps
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
+          {/* Success icon and message */}
           <div className="text-center">
             <div className="mx-auto h-12 w-12 text-green-500">
               <svg
@@ -54,6 +61,8 @@ const ForgotPassword = () => {
               Click the link in your email to reset your password.
             </p>
           </div>
+          
+          {/* Action buttons for success state */}
           <div className="mt-8 space-y-4">
             <NavLink
               to="/login"
@@ -73,9 +82,11 @@ const ForgotPassword = () => {
     );
   }
 
+  // Main form view - password reset request form
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
+        {/* Header section */}
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Reset your password
@@ -85,7 +96,10 @@ const ForgotPassword = () => {
             password.
           </p>
         </div>
+        
+        {/* Password reset form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {/* Email input field */}
           <div>
             <label htmlFor="email" className="sr-only">
               Email address
@@ -102,6 +116,7 @@ const ForgotPassword = () => {
             />
           </div>
 
+          {/* Submit button */}
           <div>
             <button
               type="submit"
@@ -112,6 +127,7 @@ const ForgotPassword = () => {
             </button>
           </div>
 
+          {/* Back to login link */}
           <div className="text-center">
             <NavLink
               to="/login"
@@ -122,6 +138,7 @@ const ForgotPassword = () => {
           </div>
         </form>
 
+        {/* Error message display */}
         {error && <Alert type="danger" message={error} />}
       </div>
     </div>

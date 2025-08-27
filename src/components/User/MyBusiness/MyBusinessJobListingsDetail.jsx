@@ -195,7 +195,6 @@ export default function MyBusinessJobListingsDetail() {
         });
       }
     } catch (error) {
-      console.error("Error verifying code:", error);
       setVerificationResult({
         success: false,
         message: "Error verifying code. Please try again.",
@@ -218,7 +217,7 @@ export default function MyBusinessJobListingsDetail() {
       setEditingField(null);
       setEditValues({});
     } catch (error) {
-      console.error("Error updating job:", error);
+      // Error updating job
     } finally {
       setIsSaving(false);
     }
@@ -239,7 +238,6 @@ export default function MyBusinessJobListingsDetail() {
       // Navigate immediately after successful deletion
       navigate(`/my-business/${selectedBusiness.id}/job-listings`);
     } catch (error) {
-      console.error("Error deleting job:", error);
       setIsDeleting(false);
       setShowDeleteModal(false);
     }

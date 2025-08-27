@@ -19,6 +19,8 @@ import {
 } from "firebase/storage";
 import profilePicture from "../assets/user.png";
 
+// Firebase configuration object using environment variables
+// All sensitive keys are stored in .env file for security
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -29,11 +31,13 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+// Initialize Firebase app and export core services
 const app = initializeApp(firebaseConfig);
 export const storage = getStorage(app);
 export const auth = getAuth(app);
 
-// Write user data to the database
+// Write user data to the database during user registration
+// Creates username mapping, profile, personal info, and notification settings
 export const writeUserData = async (
   userId,
   username,
@@ -45,7 +49,7 @@ export const writeUserData = async (
 ) => {
   const db = getDatabase();
 
-  // Write username mapping first
+  // Write username mapping first for uniqueness checking
   const usernameRef = ref(db, "usernames/" + username);
   await set(usernameRef, userId);
 
@@ -53,7 +57,7 @@ export const writeUserData = async (
   const randomSeed = Math.random().toString(36).substring(2, 15);
   const randomCoverPhoto = `https://picsum.photos/seed/${randomSeed}/1200/300`;
 
-  // Write profile object
+  // Write profile object with user information and preferences
   const userProfileRef = ref(db, "users/" + userId + "/profile");
   await set(userProfileRef, {
     username: username,
@@ -70,7 +74,7 @@ export const writeUserData = async (
     lastLogin: new Date().toISOString(),
   });
 
-  // Write personal object
+  // Write personal object with contact and address information
   const userPersonalRef = ref(db, "users/" + userId + "/personal");
   await set(userPersonalRef, {
     email: email,
@@ -83,7 +87,7 @@ export const writeUserData = async (
     postalCode: "",
   });
 
-  // Write settings object
+  // Write notification settings with default preferences
   const userNotificationsRef = ref(db, "users/" + userId + "/notifications");
   await set(userNotificationsRef, {
     jobAlertsTurnedOn: true,
@@ -91,10 +95,11 @@ export const writeUserData = async (
   });
 };
 
-// Initialize providers
+// Initialize Google OAuth provider for social sign-in
 export const googleProvider = new GoogleAuthProvider();
 
 // Delete all user data from the database
+// Removes profile, personal info, settings, and username mapping
 const deleteUserFromDatabase = async (userId, username) => {
   const db = getDatabase();
   // Remove user data sections
@@ -107,6 +112,8 @@ const deleteUserFromDatabase = async (userId, username) => {
   ]);
 };
 
+// Recursively delete all files in a storage folder
+// Handles nested subfolders and their contents
 const deleteAllFilesInFolder = async (folderRef) => {
   const listResult = await listAll(folderRef);
   // Delete all files in this folder
@@ -115,24 +122,29 @@ const deleteAllFilesInFolder = async (folderRef) => {
   await Promise.all(listResult.prefixes.map(deleteAllFilesInFolder));
 };
 
+// Delete all user files from Firebase Storage
 const deleteUserFromStorage = async (userId) => {
   const storage = getStorage();
   const userFolderRef = storageRef(storage, `users/${userId}`);
   await deleteAllFilesInFolder(userFolderRef);
 };
 
+// Delete user from Firebase Authentication
 const deleteUserFromAuth = async (userId) => {
   const user = auth.currentUser;
   await deleteUser(user);
 };
 
+// Complete user data deletion across all Firebase services
+// Removes data from Database, Storage, and Authentication
 export const deleteAllUserData = async (userId, username) => {
   await deleteUserFromDatabase(userId, username);
   await deleteUserFromStorage(userId);
   await deleteUserFromAuth(userId);
 };
 
-// Authentication utility functions
+// Send email verification to user
+// Used during registration to verify email address
 export const sendVerificationEmail = async (user) => {
   try {
     await sendEmailVerification(user);
@@ -142,6 +154,8 @@ export const sendVerificationEmail = async (user) => {
   }
 };
 
+// Send password reset email to user
+// Allows users to reset forgotten passwords
 export const sendPasswordResetEmailToUser = async (email) => {
   try {
     await sendPasswordResetEmail(auth, email);
@@ -154,20 +168,22 @@ export const sendPasswordResetEmailToUser = async (email) => {
   }
 };
 
+// Update user password with re-authentication
+// Requires current password for security before allowing change
 export const updateUserPassword = async (
   user,
   currentPassword,
   newPassword
 ) => {
   try {
-    // Re-authenticate user before password change
+    // Re-authenticate user before password change for security
     const credential = EmailAuthProvider.credential(
       user.email,
       currentPassword
     );
     await reauthenticateWithCredential(user, credential);
 
-    // Update password
+    // Update password after successful re-authentication
     await updatePassword(user, newPassword);
     return { success: true, message: "Password updated successfully!" };
   } catch (error) {

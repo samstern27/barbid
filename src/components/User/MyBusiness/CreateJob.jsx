@@ -127,23 +127,17 @@ export default function CreateJob({ createJobOpen, setCreateJobOpen }) {
       );
 
       // Only post to public jobs if the business is public
-      console.log("Business privacy setting:", selectedBusiness.privacy);
-      console.log("Business ID:", selectedBusiness.id);
-      console.log(
-        "Will post to public jobs:",
-        selectedBusiness.privacy === "public"
-      );
 
       if (selectedBusiness.privacy === "public") {
         const publicJobRef = ref(db, "public/jobs/" + jobId);
-        console.log("Posting job to public jobs:", jobId);
+        // Posting job to public jobs
         // Set the same data to both paths
         await Promise.all([
           set(userJobRef, jobData),
           set(publicJobRef, jobData),
         ]);
       } else {
-        console.log("Business is private, not posting to public jobs");
+        // Business is private, not posting to public jobs
         // Only set to user's private business if business is private
         await set(userJobRef, jobData);
       }
@@ -177,7 +171,7 @@ export default function CreateJob({ createJobOpen, setCreateJobOpen }) {
         });
       } catch (error) {
         // Public business might not exist yet, that's okay
-        console.log("Public business reference not found, skipping update");
+        // Public business reference not found, skipping update
       }
 
       setCreateJobOpen(false);
@@ -190,7 +184,6 @@ export default function CreateJob({ createJobOpen, setCreateJobOpen }) {
       setDescription("");
       setJobId(uuidv4());
     } catch (error) {
-      console.error("Error creating job:", error);
       setError("Failed to create job. Please try again.");
     } finally {
       setIsSubmitting(false);

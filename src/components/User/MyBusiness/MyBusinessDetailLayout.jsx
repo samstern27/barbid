@@ -8,10 +8,13 @@ import { useState, useEffect } from "react";
 import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import Loader from "../../UI/Loader";
 
+// Utility function to conditionally join CSS classes
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
+// Business detail layout component with navigation tabs
+// Handles business data fetching and provides navigation between business sections
 const MyBusinessDetailLayout = () => {
   const { businessId } = useParams();
   const navigate = useNavigate();
@@ -22,7 +25,8 @@ const MyBusinessDetailLayout = () => {
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch business data using businessId from params
+  // Fetch business data using businessId from URL parameters
+  // Updates BusinessContext and handles navigation if business not found
   useEffect(() => {
     if (!businessId || !currentUser?.uid) {
       setLoading(false);
@@ -51,6 +55,7 @@ const MyBusinessDetailLayout = () => {
     return () => unsubscribe();
   }, [businessId, currentUser?.uid, navigate, selectBusinessById]);
 
+  // Navigation tabs for different business sections
   const tabs = [
     { name: "Job Listings", href: `/my-business/${businessId}/job-listings` },
     {
@@ -60,6 +65,7 @@ const MyBusinessDetailLayout = () => {
     { name: "Settings", href: `/my-business/${businessId}/settings` },
   ];
 
+  // Breadcrumb navigation structure
   const pages = [
     { name: "Businesses", href: "/my-business", current: false },
     {
@@ -71,12 +77,16 @@ const MyBusinessDetailLayout = () => {
 
   return (
     <div className="flex flex-col m-10 gap-6">
+      {/* Breadcrumb navigation */}
       <Breadcrumb pages={pages} />
+      
+      {/* Business header with navigation tabs */}
       <div className="border-b border-gray-200 pb-5 sm:pb-0 animate-[fadeIn_0.6s_ease-in-out]">
         <h3 className="text-base font-semibold text-gray-900">
           {business?.name}
         </h3>
         <div className="mt-3 sm:mt-4">
+          {/* Mobile tab selector - dropdown on small screens */}
           <div className="grid grid-cols-1 sm:hidden">
             <select
               value={
@@ -100,11 +110,14 @@ const MyBusinessDetailLayout = () => {
                 </option>
               ))}
             </select>
+            {/* Custom dropdown arrow icon */}
             <ChevronDownIcon
               aria-hidden="true"
               className="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end fill-gray-500"
             />
           </div>
+          
+          {/* Desktop tab navigation - horizontal tabs on larger screens */}
           <div className="hidden sm:block">
             <nav className="-mb-px flex space-x-8">
               {tabs.map((tab) => (
@@ -127,6 +140,8 @@ const MyBusinessDetailLayout = () => {
           </div>
         </div>
       </div>
+      
+      {/* Content area - shows loading state or renders child routes */}
       {loading ? (
         <div className="flex flex-1 flex-col justify-center items-center min-h-[60vh]">
           <Loader size="2xl" text="Loading business..." />

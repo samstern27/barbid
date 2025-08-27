@@ -50,7 +50,7 @@ export default function CreateBusiness({
 
     try {
       // Get coordinates from address
-      console.log("Making API call to Google Geocoding...");
+      // Making API call to Google Geocoding
 
       const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${address
         .split(" ")
@@ -66,7 +66,7 @@ export default function CreateBusiness({
       }
 
       const geoData = await res.json();
-      console.log(geoData);
+              // Geocoding data received
 
       // Extract coordinates from Google Geocoding API response
       let fetchedCoords = null;
@@ -114,7 +114,6 @@ export default function CreateBusiness({
       setPrivacy("public");
       setBusinessId("");
     } catch (error) {
-      console.error("Error creating business:", error);
       setError("Failed to create business. Please try again.");
     } finally {
       setIsSubmitting(false);

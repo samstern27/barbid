@@ -3,7 +3,10 @@ import { useAuth } from "../../contexts/AuthContext";
 import { NavLink, useNavigate } from "react-router-dom";
 import Alert from "../../UI components/Alert";
 
+// Email verification page for users who need to verify their email address
+// Provides verification status checking, resend functionality, and user guidance
 const EmailVerification = () => {
+  // Authentication context and state management
   const { currentUser, resendVerificationEmail, logout, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -12,12 +15,15 @@ const EmailVerification = () => {
   const navigate = useNavigate();
 
   // Check if user is verified and redirect if so
+  // Prevents verified users from staying on this page
   useEffect(() => {
     if (currentUser?.emailVerified) {
       navigate("/", { replace: true });
     }
   }, [currentUser?.emailVerified, navigate]);
 
+  // Handle resending verification email
+  // Useful if user didn't receive or lost the original email
   const handleResendVerification = async () => {
     try {
       setError("");
@@ -31,6 +37,8 @@ const EmailVerification = () => {
     }
   };
 
+  // Handle manual verification status checking
+  // Refreshes user data and checks if email was verified externally
   const handleCheckVerification = async () => {
     try {
       setCheckingVerification(true);
@@ -56,17 +64,19 @@ const EmailVerification = () => {
     }
   };
 
+  // Handle user logout from verification page
   const handleLogout = async () => {
     try {
       await logout();
     } catch (error) {
-      console.error("Logout error:", error);
+      // Silent error handling for production
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
+        {/* Header section with warning icon */}
         <div className="text-center">
           <div className="mx-auto h-12 w-12 text-yellow-500">
             <svg
@@ -96,6 +106,7 @@ const EmailVerification = () => {
           </p>
         </div>
 
+        {/* Important warning message */}
         <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
           <div className="flex">
             <div className="flex-shrink-0">
@@ -121,7 +132,9 @@ const EmailVerification = () => {
           </div>
         </div>
 
+        {/* Action buttons section */}
         <div className="space-y-4">
+          {/* Check verification status button */}
           <button
             onClick={handleCheckVerification}
             disabled={checkingVerification}
@@ -130,6 +143,7 @@ const EmailVerification = () => {
             {checkingVerification ? "Checking..." : "I've Verified My Email"}
           </button>
 
+          {/* Resend verification email button */}
           <button
             onClick={handleResendVerification}
             disabled={loading}
@@ -138,7 +152,9 @@ const EmailVerification = () => {
             {loading ? "Sending..." : "Resend verification email"}
           </button>
           
+          {/* Secondary action buttons */}
           <div className="flex gap-3">
+            {/* Use different email option */}
             <NavLink
               to="/signup"
               className="flex-1 flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -146,6 +162,7 @@ const EmailVerification = () => {
               Use Different Email
             </NavLink>
             
+            {/* Cancel/logout button */}
             <button
               onClick={handleLogout}
               className="flex-1 flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -155,6 +172,7 @@ const EmailVerification = () => {
           </div>
         </div>
 
+        {/* Support link */}
         <div className="text-center">
           <p className="text-sm text-gray-600">
             Need help?{" "}
@@ -167,7 +185,7 @@ const EmailVerification = () => {
           </p>
         </div>
 
-        {/* Error and success messages */}
+        {/* Error and success message display */}
         {error && <Alert type="danger" message={error} />}
         {success && <Alert type="success" message={success} />}
       </div>

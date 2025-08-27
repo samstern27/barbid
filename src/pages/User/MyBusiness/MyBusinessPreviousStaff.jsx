@@ -5,7 +5,8 @@ import { useState, useEffect } from "react";
 import { getDatabase, ref, onValue, get } from "firebase/database";
 import Loader from "../../../components/UI/Loader";
 
-// Simple function to format relative time
+// Utility function to format relative time for shift completion timestamps
+// Converts dates to human-readable relative time (e.g., "2 hours ago")
 const formatRelativeTime = (dateString) => {
   const date = new Date(dateString);
   const now = new Date();
@@ -21,6 +22,8 @@ const formatRelativeTime = (dateString) => {
   return date.toLocaleDateString();
 };
 
+// MyBusinessPreviousStaff component for viewing completed shifts and staff history
+// Features shift completion tracking, staff data enrichment, and historical reporting
 export default function MyBusinessPreviousStaff() {
   const { businessId } = useParams();
   const { selectedBusiness } = useBusiness();
@@ -42,11 +45,7 @@ export default function MyBusinessPreviousStaff() {
         const jobsData = snapshot.val();
         const businessJobs = [];
 
-        console.log(
-          `Processing ${
-            Object.keys(jobsData).length
-          } total jobs for Previous Staff check`
-        );
+        // Processing jobs for Previous Staff check
 
         // Filter jobs for this business
         Object.keys(jobsData).forEach((jobId) => {
@@ -59,9 +58,7 @@ export default function MyBusinessPreviousStaff() {
           }
         });
 
-        console.log(
-          `Found ${businessJobs.length} jobs for business ${businessId}`
-        );
+        // Found jobs for business
 
         // Now fetch applications for each job and check for completed shifts
         const completedShifts = [];
@@ -106,23 +103,7 @@ export default function MyBusinessPreviousStaff() {
               // even if the status hasn't been updated yet
               const wasAccepted = application.status === "Accepted";
 
-              // Debug logging
-              console.log(`Job ${job.jobId}:`, {
-                jobTitle: job.jobTitle,
-                endTime: job.endOfShift,
-                shiftHasPassed,
-                status: job.status,
-                acceptedUserId: job.acceptedUserId,
-                currentUserId: userId,
-                isAcceptedUser,
-                isAttended,
-                isAttendedOnJob,
-                isAttendedAnywhere,
-                isCompleted,
-                isFilled,
-                wasAccepted,
-                applicationStatus: application.status,
-              });
+              // Job processing completed
 
               if (
                 shiftHasPassedWithTolerance &&
@@ -147,10 +128,7 @@ export default function MyBusinessPreviousStaff() {
           }
         }
 
-        console.log(
-          `Found ${completedShifts.length} completed shifts for business ${businessId}:`,
-          completedShifts
-        );
+        // Found completed shifts for business
         setCompletedShifts(completedShifts);
       } else {
         setCompletedShifts([]);

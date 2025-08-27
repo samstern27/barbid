@@ -1,11 +1,14 @@
 import { PlusIcon } from "@heroicons/react/20/solid";
 
+// Empty state component for when user has no businesses
+// Features a custom briefcase SVG icon and call-to-action button
 export default function EmptyState({
   createBusinessOpen,
   setCreateBusinessOpen,
 }) {
   return (
     <div className="text-center">
+      {/* Custom briefcase SVG icon with plus symbol */}
       <svg
         fill="none"
         stroke="currentColor"
@@ -53,12 +56,16 @@ export default function EmptyState({
           strokeLinecap="round"
         />
       </svg>
+
+      {/* Empty state text */}
       <h3 className="mt-2 text-sm font-semibold text-gray-900">
         No businesses
       </h3>
       <p className="mt-1 text-sm text-gray-500">
         Get started by creating a new business.
       </p>
+
+      {/* Call-to-action button */}
       <div className="mt-6">
         <button
           type="button"

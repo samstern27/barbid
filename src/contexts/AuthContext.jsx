@@ -16,17 +16,24 @@ import { generateUsername } from "../utils/usernameCheck";
 import { usernameCheck } from "../utils/usernameCheck";
 import { getDatabase, ref, get } from "firebase/database";
 
+// Authentication context for managing user authentication state
+// Provides signup, login, logout, and Google OAuth functionality
 const AuthContext = createContext();
 
+// Custom hook to access authentication context
 export const useAuth = () => {
   return useContext(AuthContext);
 };
 
+// Authentication provider component that wraps the app
+// Manages user state, authentication methods, and navigation
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // User registration with email/password
+  // Creates Firebase auth user, generates unique username, and writes to database
   const signup = async (
     email,
     password,
@@ -87,6 +94,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // User login with email/password
+  // Verifies email status and navigates to home on success
   const login = async (email, password) => {
     try {
       const userCredential = await signInWithEmailAndPassword(
@@ -111,6 +120,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // User logout - signs out from Firebase and navigates to landing page
   const logout = async () => {
     try {
       await signOut(auth);
@@ -120,6 +130,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Google OAuth sign-in
+  // Creates new user profile if first time, or signs in existing user
   const signInWithGoogle = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
@@ -142,7 +154,7 @@ export const AuthProvider = ({ children }) => {
               counter++;
             }
           } catch (error) {
-            console.error("Error checking username:", error);
+            // If there's an error checking the username, assume it's available
             isAvailable = true;
           }
         }
@@ -159,7 +171,6 @@ export const AuthProvider = ({ children }) => {
       navigate("/", { replace: true });
       return result.user;
     } catch (error) {
-      console.error("Google sign-in error:", error);
       if (error.message.includes("already exists")) {
         throw new Error(
           "This email is already registered. Please sign in with your original method."
@@ -169,6 +180,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Resend email verification for unverified users
   const resendVerificationEmail = async () => {
     try {
       if (currentUser && !currentUser.emailVerified) {
@@ -185,6 +197,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Listen for Firebase authentication state changes
+  // Updates currentUser state and loading status
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
@@ -201,11 +215,12 @@ export const AuthProvider = ({ children }) => {
         await currentUser.reload();
         // The onAuthStateChanged listener will automatically update the state
       } catch (error) {
-        console.error("Error refreshing user:", error);
+        // Silent error handling for production
       }
     }
   };
 
+  // Context value object containing all authentication methods and state
   const value = {
     currentUser,
     signup,
@@ -217,6 +232,8 @@ export const AuthProvider = ({ children }) => {
     loading,
   };
 
+  // Only render children when authentication state is loaded
+  // Prevents flash of unauthenticated content
   return (
     <AuthContext.Provider value={value}>
       {!loading && children}

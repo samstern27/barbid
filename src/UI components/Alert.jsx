@@ -1,3 +1,5 @@
+// Alert component for displaying contextual messages with type-based styling
+// Supports info, danger, success, and warning types with appropriate color schemes
 export default function Alert({ type, message }) {
   if (type === "info") {
     return (
@@ -91,5 +93,6 @@ export default function Alert({ type, message }) {
     );
   }
 
+  // Return null if no valid type is provided
   return null;
 }

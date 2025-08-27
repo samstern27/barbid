@@ -1,3 +1,5 @@
+// Business section heading component with create business button
+// Handles the toggle state for the create business modal
 export default function Heading({ createBusinessOpen, setCreateBusinessOpen }) {
   return (
     <div className="border-b border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between animate-[fadeIn_0.6s_ease-in-out]">

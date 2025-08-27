@@ -1,5 +1,7 @@
 // Use profile data instead of hardcoded data
 
+// Theme configuration for qualifications component
+// Each theme provides 3 color values: [bg-dark, text-light, text-dark]
 const themeClasses = {
   amber: ["bg-amber-800", "text-amber-100", "text-amber-800"],
   blue: ["bg-blue-800", "text-blue-100", "text-blue-800"],
@@ -25,11 +27,14 @@ const themeClasses = {
   zinc: ["bg-zinc-800", "text-zinc-100", "text-zinc-800"],
 };
 
+// Qualifications component for user profile displaying certifications and qualifications
+// Features responsive layout with left-aligned text on mobile, right-aligned on large screens
 export default function Qualifications({ profile }) {
   return (
     <div
       className={`min-w-1/3 mt-4 sm:mt-6 lg:mt-8 ml-4 sm:ml-6 lg:ml-8 mr-4 sm:mr-6 lg:mr-8 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 mb-4 sm:mb-6 lg:mb-8 flex flex-col gap-4 bg-gray-800`}
     >
+      {/* Section header with responsive text alignment */}
       <div className="flex items-center justify-start lg:justify-end ">
         <h3
           className={`text-base font-semibold text-white w-full text-left lg:text-right border-b border-gray-200 pb-4 sm:pb-5`}
@@ -37,6 +42,8 @@ export default function Qualifications({ profile }) {
           Qualifications & Certificates
         </h3>
       </div>
+
+      {/* Conditional rendering based on qualifications data availability */}
       {profile.qualifications && profile.qualifications.length > 0 ? (
         <ul role="list" className="divide-y divide-gray-100">
           {profile.qualifications.map((qualification, index) => (
@@ -44,6 +51,7 @@ export default function Qualifications({ profile }) {
               key={`${qualification.name}-${index}`}
               className="flex gap-x-3 sm:gap-x-4 py-3 sm:py-4 text-left lg:text-right"
             >
+              {/* Qualification details with responsive alignment */}
               <div className="min-w-0 lg:ml-auto text-left lg:text-right lg:mx-0">
                 <p
                   className={`text-sm/6 font-semibold text-white text-left lg:text-right`}
@@ -60,6 +68,7 @@ export default function Qualifications({ profile }) {
           ))}
         </ul>
       ) : (
+        /* Empty state when no qualifications are available */
         <div className="py-8 text-center">
           <p className="text-sm text-gray-400">No qualifications added yet.</p>
         </div>

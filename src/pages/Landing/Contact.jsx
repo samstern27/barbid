@@ -7,9 +7,14 @@ import {
   PhoneIcon,
 } from "@heroicons/react/24/outline";
 
+// Contact page component with contact form and company information
+// Features EmailJS integration for form submission and responsive two-column layout
 const Contact = () => {
+  // Form reference for EmailJS integration
   const formRef = useRef();
 
+  // Handle form submission using EmailJS service
+  // Sends form data to configured email template
   const handleSubmit = (e) => {
     e.preventDefault();
     emailjs
@@ -32,8 +37,10 @@ const Contact = () => {
   return (
     <div className="relative isolate bg-white">
       <div className="mx-auto grid max-w-7xl grid-cols-1 lg:grid-cols-2">
+        {/* Left column - Company information and contact details */}
         <div className="relative px-6 pt-24 pb-20 sm:pt-32 lg:static lg:px-8 lg:py-48">
           <div className="mx-auto max-w-xl lg:mx-0 lg:max-w-lg">
+            {/* Background decorative pattern */}
             <div className="absolute inset-y-0 left-0 -z-10 w-full overflow-hidden bg-gray-100 ring-1 ring-gray-900/10 lg:w-1/2">
               <svg
                 aria-hidden="true"
@@ -63,6 +70,8 @@ const Contact = () => {
                 />
               </svg>
             </div>
+            
+            {/* Company introduction */}
             <h2 className="text-4xl font-semibold tracking-tight text-pretty text-indigo-600 sm:text-5xl">
               Let's chat
             </h2>
@@ -71,7 +80,10 @@ const Contact = () => {
               from you. Whether you're planning an event, looking for work, or
               just exploring, drop us a message anytime.
             </p>
+            
+            {/* Contact information list */}
             <dl className="mt-10 space-y-4 text-base/7 text-gray-600">
+              {/* Phone number contact */}
               <div className="flex gap-x-4">
                 <dt className="flex-none">
                   <span className="sr-only">Telephone</span>
@@ -86,6 +98,8 @@ const Contact = () => {
                   </a>
                 </dd>
               </div>
+              
+              {/* Email contact */}
               <div className="flex gap-x-4">
                 <dt className="flex-none">
                   <span className="sr-only">Email</span>
@@ -106,6 +120,8 @@ const Contact = () => {
             </dl>
           </div>
         </div>
+        
+        {/* Right column - Contact form */}
         <form
           ref={formRef}
           onSubmit={handleSubmit}
@@ -113,7 +129,9 @@ const Contact = () => {
           className="px-6 pt-20 pb-24 sm:pb-32 lg:px-8 lg:py-48"
         >
           <div className="mx-auto max-w-xl lg:mr-0 lg:max-w-lg">
+            {/* Form fields in responsive grid layout */}
             <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
+              {/* First name field */}
               <div>
                 <label
                   htmlFor="first-name"
@@ -131,6 +149,8 @@ const Contact = () => {
                   />
                 </div>
               </div>
+              
+              {/* Last name field */}
               <div>
                 <label
                   htmlFor="last-name"
@@ -148,6 +168,8 @@ const Contact = () => {
                   />
                 </div>
               </div>
+              
+              {/* Email field (full width) */}
               <div className="sm:col-span-2">
                 <label
                   htmlFor="email"
@@ -166,6 +188,8 @@ const Contact = () => {
                   />
                 </div>
               </div>
+              
+              {/* Phone number field (full width) */}
               <div className="sm:col-span-2">
                 <label
                   htmlFor="phone-number"
@@ -183,6 +207,8 @@ const Contact = () => {
                   />
                 </div>
               </div>
+              
+              {/* Message field (full width) */}
               <div className="sm:col-span-2">
                 <label
                   htmlFor="message"
@@ -201,6 +227,8 @@ const Contact = () => {
                 </div>
               </div>
             </div>
+            
+            {/* Submit button */}
             <div className="mt-8 flex justify-end">
               <button
                 type="submit"

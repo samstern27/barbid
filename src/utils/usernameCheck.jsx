@@ -1,34 +1,33 @@
 import { getDatabase, ref, get } from "firebase/database";
 
 // Username validation regex - allows letters, numbers, underscores, and hyphens (NO DOTS)
+// Ensures usernames are URL-safe and database-friendly
 const USERNAME_REGEX = /^[a-zA-Z0-9_-]+$/;
 
+// Generate a username from a display name
+// Converts display names to URL-safe usernames with fallback generation
 export const generateUsername = (displayName) => {
   if (!displayName) {
-    console.warn("No display name provided for username generation");
+    // Generate fallback username if no display name provided
     return "user" + Math.floor(Math.random() * 1000);
   }
 
-  console.log("Generating username from:", displayName);
-
   // Convert to lowercase and remove spaces
   let baseUsername = displayName.toLowerCase().replace(/\s+/g, "");
-  console.log("After lowercase and space removal:", baseUsername);
 
   // Remove any characters that aren't letters, numbers, underscores, or hyphens
   baseUsername = baseUsername.replace(/[^a-z0-9_-]/g, "");
-  console.log("After removing special characters:", baseUsername);
 
   // If the result is empty or too short, generate a fallback
   if (!baseUsername || baseUsername.length < 3) {
-    console.warn("Generated username too short, using fallback");
     baseUsername = "user" + Math.floor(Math.random() * 1000);
   }
 
-  console.log("Final generated username:", baseUsername);
   return baseUsername;
 };
 
+// Validate username format and length requirements
+// Returns validation result with error message if invalid
 export const validateUsername = (username) => {
   if (!username) return { valid: false, error: "Username is required" };
   if (username.length < 3)
@@ -45,6 +44,8 @@ export const validateUsername = (username) => {
   return { valid: true };
 };
 
+// Check if a username is already taken in the database
+// Validates format first, then queries Firebase for availability
 export const usernameCheck = async (username) => {
   if (!username) return false;
 
@@ -62,7 +63,7 @@ export const usernameCheck = async (username) => {
     // If the path doesn't exist or the value is null, the username is available
     return snapshot.exists() && snapshot.val() !== null;
   } catch (error) {
-    console.error("Error checking username:", error);
+    // Silent error handling for production - return false on database errors
     return false;
   }
 };

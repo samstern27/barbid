@@ -99,14 +99,14 @@ export default function Stats({ profile, className = "" }) {
 
   const fetchShiftStats = async (db, userId) => {
     try {
-      console.log("Fetching shift stats for userId:", userId);
+      // Fetching shift stats for user
 
       // Get shift stats directly from user profile
       const userProfileRef = ref(db, `users/${userId}/profile`);
       const snapshot = await get(userProfileRef);
 
       if (!snapshot.exists()) {
-        console.log("No user profile found");
+        // No user profile found
         return { shiftsCompleted: 0, totalHours: 0 };
       }
 
@@ -116,7 +116,7 @@ export default function Stats({ profile, className = "" }) {
 
       // If profile doesn't have shift stats, migrate from existing data
       if (!profile.shiftCount && !profile.totalHoursWorked) {
-        console.log("Migrating shift stats from existing data...");
+        // Migrating shift stats from existing data
         const migratedStats = await migrateShiftStats(db, userId);
         shiftsCompleted = migratedStats.shiftsCompleted;
         totalHours = migratedStats.totalHours;
@@ -128,16 +128,13 @@ export default function Stats({ profile, className = "" }) {
         });
       }
 
-      console.log(
-        `Profile stats - shiftsCompleted: ${shiftsCompleted}, totalHours: ${totalHours}`
-      );
+      // Profile stats updated
 
       return {
         shiftsCompleted,
         totalHours: Math.round(totalHours * 10) / 10, // Round to 1 decimal place
       };
     } catch (error) {
-      console.error("Error fetching shift stats:", error);
       return { shiftsCompleted: 0, totalHours: 0 };
     }
   };
@@ -183,12 +180,9 @@ export default function Stats({ profile, className = "" }) {
         }
       });
 
-      console.log(
-        `Migration complete - shiftsCompleted: ${shiftsCompleted}, totalHours: ${totalHours}`
-      );
+      // Migration completed
       return { shiftsCompleted, totalHours };
     } catch (error) {
-      console.error("Error migrating shift stats:", error);
       return { shiftsCompleted: 0, totalHours: 0 };
     }
   };
