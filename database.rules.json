@@ -8,11 +8,14 @@
           ".read": "auth != null",
           ".write": "auth != null && auth.uid === $uid"
         },
+        "personal": {
+          ".read": "auth != null",
+          ".write": "auth != null && auth.uid === $uid"
+        },
         "business": {
           "$businessId": {
             ".read": "$uid === auth.uid",
             ".write": "$uid === auth.uid",
-
             "jobs": {
               "$jobId": {
                 ".read": "$uid === auth.uid",
@@ -25,13 +28,11 @@
                 }
               }
             },
-
             "privacy": {
               ".read": "auth != null"
             }
           }
         },
-
         "businessPrivacy": {
           "$businessId": {
             ".read": "auth != null",
@@ -78,6 +79,7 @@
       }
     },
     "usernames": {
+      ".read": "auth != null",
       "$username": {
         ".read": "auth != null",
         ".write": "auth != null && (!data.exists() || data.val() === auth.uid)"

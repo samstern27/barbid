@@ -1,10 +1,21 @@
 import { useState, useEffect } from "react";
 import { useParams, NavLink } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
-import { ArrowLeftIcon, CheckIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowLeftIcon,
+  CheckIcon,
+  ClockIcon,
+  MapPinIcon,
+  BanknotesIcon,
+} from "@heroicons/react/24/outline";
 import { getDatabase, ref, get } from "firebase/database";
 import Loader from "../../../components/UI/Loader";
 import JobStatusIndicator from "../../../components/UI/JobStatusIndicator";
+import {
+  formatDateTime,
+  formatDate,
+  formatTime,
+} from "../../../utils/dateUtils";
 
 // MyJobApplicationDetail component for viewing detailed job application information
 // Features comprehensive data fetching, fallback handling, and timeout management

@@ -21,29 +21,20 @@ const UserProfile = () => {
 
   useEffect(() => {
     const db = getDatabase();
-    console.log(
-      "UserProfile useEffect triggered with username:",
-      username,
-      "currentUser:",
-      currentUser?.uid
-    );
 
     if (username) {
       // First, find the user ID by username
       const usernamesRef = ref(db, "usernames/" + username);
-      console.log("Looking up username:", username);
       get(usernamesRef)
         .then((snapshot) => {
           if (snapshot.exists()) {
             const userId = snapshot.val();
-            console.log("Found userId for username:", userId);
             // Now fetch the user's profile data
             const userRef = ref(db, "users/" + userId + "/profile");
             onValue(
               userRef,
               (profileSnapshot) => {
                 const profileData = profileSnapshot.val();
-                console.log("Profile data received:", profileData);
                 setUserData({ profile: profileData });
               },
               (error) => {
@@ -53,7 +44,7 @@ const UserProfile = () => {
               }
             );
           } else {
-            console.log("Username not found in usernames collection");
+            // Username not found
           }
         })
         .catch((error) => {
@@ -63,13 +54,11 @@ const UserProfile = () => {
         });
     } else {
       // Fallback to current user's profile
-      console.log("No username provided, using current user");
       const userRef = ref(db, "users/" + currentUser?.uid + "/profile");
       onValue(
         userRef,
         (snapshot) => {
           const data = snapshot.val();
-          console.log("Current user profile data:", data);
           setUserData({ profile: data });
         },
         (error) => {
@@ -145,7 +134,6 @@ const UserProfile = () => {
     ],
     zinc: ["bg-zinc-900", "text-zinc-900", "bg-zinc-200", "text-zinc-900"],
   };
-  console.log(currentUser);
   const profile = {
     firstName: userData?.profile?.firstName,
     lastName: userData?.profile?.lastName,
@@ -178,7 +166,10 @@ const UserProfile = () => {
     >
       <TopBar profile={profile} className="animate-[fadeIn_0.4s_ease-in-out]" />
       <Stats profile={profile} className="animate-[fadeIn_0.6s_ease-in-out]" />
-      <BentoGrid profile={profile} className="animate-[fadeIn_0.8s_ease-in-out]" />
+      <BentoGrid
+        profile={profile}
+        className="animate-[fadeIn_0.8s_ease-in-out]"
+      />
     </div>
   );
 };

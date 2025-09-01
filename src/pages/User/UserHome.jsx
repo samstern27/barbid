@@ -43,7 +43,6 @@ const UserHome = () => {
     onValue(userProfileRef, (profileSnapshot) => {
       if (profileSnapshot.exists()) {
         const profileData = profileSnapshot.val();
-        console.log("Fetched profile data:", profileData); // Debug log
 
         // Update stats with profile data
         setStats((prevStats) => ({
@@ -56,7 +55,7 @@ const UserHome = () => {
             : 0, // Assuming £12.50/hour based on your job data
         }));
       } else {
-        console.log("No profile data found"); // Debug log
+        // No profile data found
       }
     });
 
@@ -65,10 +64,9 @@ const UserHome = () => {
     onValue(userJobsRef, (snapshot) => {
       if (snapshot.exists()) {
         const jobsData = snapshot.val();
-        console.log("Fetched jobs data:", jobsData); // Debug log
         getRecentJobs(jobsData);
       } else {
-        console.log("No jobs data found"); // Debug log
+        // No jobs data found
       }
     });
 
@@ -77,24 +75,11 @@ const UserHome = () => {
     onValue(publicJobsRef, (publicSnapshot) => {
       if (publicSnapshot.exists()) {
         const publicJobsData = publicSnapshot.val();
-        console.log("Fetched public jobs data:", publicJobsData); // Debug log
-        console.log(
-          "Number of public jobs:",
-          Object.keys(publicJobsData).length
-        ); // Debug log
-
-        // Log each job to see the structure
-        Object.entries(publicJobsData).forEach(([jobId, job]) => {
-          console.log(`Job ${jobId}:`, job);
-          if (job.acceptedUserId === currentUser?.uid) {
-            console.log(`Found job accepted by current user:`, job);
-          }
-        });
 
         calculateStats(publicJobsData);
         getUpcomingShifts(publicJobsData); // Get upcoming shifts from accepted jobs
       } else {
-        console.log("No public jobs data found"); // Debug log
+        // No public jobs data found
       }
     });
 
@@ -150,9 +135,6 @@ const UserHome = () => {
             const durationHours = (endTime - startTime) / (1000 * 60 * 60);
             const earnings = parseFloat(job.acceptedPayRate) * durationHours;
             totalEarnings += earnings;
-            console.log(
-              `Job earnings: £${earnings} (${durationHours}h × £${job.acceptedPayRate}/h)`
-            ); // Debug log
           }
         }
 
@@ -183,9 +165,6 @@ const UserHome = () => {
         totalBusinessApplications += Object.keys(job.jobApplications).length;
       }
     });
-
-    console.log("Total earnings calculated:", totalEarnings); // Debug log
-    console.log("Profile hours:", stats.totalHours); // Debug log
 
     setStats((prevStats) => ({
       ...prevStats, // Keep profile data (totalHours, jobsCompleted, totalEarnings)
@@ -218,16 +197,9 @@ const UserHome = () => {
 
   const getUpcomingShifts = (jobsData) => {
     const now = new Date();
-    console.log("getUpcomingShifts called with data:", jobsData); // Debug log
-    console.log("Current user ID:", currentUser?.uid); // Debug log
 
     const upcoming = Object.values(jobsData)
       .filter((job) => {
-        console.log("Checking job:", job); // Debug log for each job
-        console.log("Job acceptedUserId:", job.acceptedUserId); // Debug log
-        console.log("Job status:", job.status); // Debug log
-        console.log("Job acceptedStartTime:", job.acceptedStartTime); // Debug log
-
         return (
           job.acceptedUserId === currentUser?.uid && // Only jobs where this user was accepted
           (job.status === "accepted" ||
@@ -245,7 +217,6 @@ const UserHome = () => {
       )
       .slice(0, 5);
 
-    console.log("Filtered upcoming shifts:", upcoming); // Debug log
     setUpcomingShifts(upcoming);
   };
 

@@ -2,9 +2,9 @@
 
 import { useAuth } from "../../contexts/AuthContext";
 import { useNotification } from "../../contexts/NotificationContext";
-import { Outlet, NavLink, useLocation } from "react-router-dom";
-import { useState, useEffect, useMemo } from "react";
-import { getDatabase, ref, onValue } from "firebase/database";
+import { Outlet, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { getDatabase, ref, onValue, get } from "firebase/database";
 import {
   Dialog,
   DialogBackdrop,
@@ -42,6 +42,12 @@ export default function UserLayout() {
   const { toggleNotificationPanel, unreadCount } = useNotification();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef(null);
+  const navigate = useNavigate();
   const location = useLocation();
 
   // Scroll to top when route changes
@@ -58,6 +64,121 @@ export default function UserLayout() {
       setUserData(data);
     });
   }, [currentUser]);
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Search for users as user types
+  useEffect(() => {
+    const searchUsers = async () => {
+      if (!searchQuery.trim()) {
+        setSearchResults([]);
+        setShowResults(false);
+        return;
+      }
+
+      setIsSearching(true);
+      setShowResults(true);
+
+      try {
+        const db = getDatabase();
+
+        // Get all usernames and filter for partial matches
+        const usernamesRef = ref(db, "usernames");
+        const snapshot = await get(usernamesRef);
+
+        if (snapshot.exists()) {
+          const usernames = snapshot.val();
+          const matchingUsernames = Object.keys(usernames).filter((username) =>
+            username.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+
+          // Limit results to first 10 matches
+          const limitedResults = matchingUsernames.slice(0, 10);
+
+          // Fetch profile data for matching users
+          const results = await Promise.all(
+            limitedResults.map(async (username) => {
+              const userId = usernames[username];
+              const profileRef = ref(db, `users/${userId}/profile`);
+              const personalRef = ref(db, `users/${userId}/personal`);
+
+              try {
+                // Get profile data
+                const profileSnapshot = await get(profileRef);
+                const profile = profileSnapshot.val() || {};
+
+                // Try to get personal data for city info
+                let personal = {};
+                try {
+                  const personalSnapshot = await get(personalRef);
+                  personal = personalSnapshot.val() || {};
+                } catch (personalError) {
+                  // If we can't access personal data, just continue without city info
+                }
+
+                return {
+                  userId,
+                  username,
+                  firstName: profile.firstName || "",
+                  lastName: profile.lastName || "",
+                  avatar: profile.avatar || "",
+                  city: personal.city || "",
+                };
+              } catch (error) {
+                // If we can't access profile data, just return basic info
+                return {
+                  userId,
+                  username,
+                  firstName: "",
+                  lastName: "",
+                  avatar: "",
+                  city: "",
+                };
+              }
+            })
+          );
+
+          // Filter out null results and set search results
+          setSearchResults(results.filter((result) => result !== null));
+        } else {
+          setSearchResults([]);
+        }
+      } catch (error) {
+        // If we can't access usernames, just return empty results
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    // Debounce search to avoid too many requests
+    const timeoutId = setTimeout(searchUsers, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  // Generate initials from first and last name
+  const getInitials = (firstName, lastName) => {
+    const first = firstName?.charAt(0)?.toUpperCase() || "";
+    const last = lastName?.charAt(0)?.toUpperCase() || "";
+    return first + last;
+  };
+
+  // Handle result click - navigate to user profile
+  const handleResultClick = (username) => {
+    setSearchQuery("");
+    setShowResults(false);
+    navigate(`/profile/${username}`);
+  };
 
   // Navigation items with dynamic profile href
   // Memoized to prevent recreation on every render
@@ -373,10 +494,12 @@ export default function UserLayout() {
 
             <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
               {/* Search form */}
-              <form action="#" method="GET" className="grid flex-1 grid-cols-1">
+              <div ref={searchRef} className="relative grid flex-1 grid-cols-1">
                 <input
                   name="search"
                   type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search for a profile"
                   aria-label="Search"
                   className="col-start-1 row-start-1 block size-full bg-white pl-8 text-base text-gray-900 outline-hidden placeholder:text-gray-400 sm:text-sm/6"
@@ -385,7 +508,81 @@ export default function UserLayout() {
                   aria-hidden="true"
                   className="pointer-events-none col-start-1 row-start-1 size-5 self-center text-gray-400"
                 />
-              </form>
+
+                {/* Search results dropdown */}
+                {showResults &&
+                  (isSearching ||
+                    searchResults.length > 0 ||
+                    (searchQuery.length >= 1 && !isSearching)) && (
+                    <div className="fixed top-16 left-4 right-4 mt-4 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-80 overflow-y-auto lg:absolute lg:w-1/2 lg:left-1/4 lg:-translate-x-1/2 lg:mt-8">
+                      {isSearching ? (
+                        <div className="p-4 text-center text-gray-500">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600 mx-auto"></div>
+                          <p className="mt-2 text-sm">Searching...</p>
+                        </div>
+                      ) : searchResults.length > 0 ? (
+                        <div className="py-1">
+                          {searchResults.map((user) => (
+                            <button
+                              key={user.userId}
+                              onClick={() => handleResultClick(user.username)}
+                              className="w-full px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none transition-colors duration-150"
+                            >
+                              <div className="flex items-center space-x-3">
+                                {/* Avatar/Initials */}
+                                <div className="flex-shrink-0">
+                                  {user.avatar ? (
+                                    <img
+                                      src={user.avatar}
+                                      alt={`${user.firstName} ${user.lastName}`}
+                                      className="h-8 w-8 rounded-full"
+                                    />
+                                  ) : (
+                                    <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-medium">
+                                      {getInitials(
+                                        user.firstName,
+                                        user.lastName
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* User info */}
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                      @{user.username}
+                                    </p>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <p className="text-xs text-gray-500 truncate">
+                                      {getInitials(
+                                        user.firstName,
+                                        user.lastName
+                                      )}
+                                    </p>
+                                    {user.city && (
+                                      <>
+                                        <span className="text-gray-300">•</span>
+                                        <p className="text-xs text-gray-500 truncate">
+                                          {user.city}
+                                        </p>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      ) : searchQuery.length >= 1 ? (
+                        <div className="p-4 text-center text-gray-500">
+                          <p className="text-sm">No users found</p>
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
+              </div>
 
               {/* Right side actions */}
               <div className="flex items-center gap-x-4 lg:gap-x-6">

@@ -79,7 +79,6 @@ export default function MyBusinessJobListingsApplicantsDetail() {
         setError(null);
         // Also clear errors if job is filled (successful acceptance)
         if (jobData.status === "Filled") {
-          s;
           setError(null);
         }
         jobLoaded = true;
