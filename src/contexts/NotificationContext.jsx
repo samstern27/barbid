@@ -4,6 +4,7 @@ import React, {
   useState,
   useCallback,
   useEffect,
+  useMemo,
 } from "react";
 import { useAuth } from "./AuthContext";
 import {
@@ -235,7 +236,8 @@ export const NotificationProvider = ({ children }) => {
   }, [currentUser?.uid]);
 
   // Context value object containing notification state and operations
-  const value = {
+  // Memoized to prevent unnecessary re-renders of consuming components
+  const value = useMemo(() => ({
     notifications,
     unreadCount,
     isOpen,
@@ -246,7 +248,7 @@ export const NotificationProvider = ({ children }) => {
     clearAllNotifications,
     toggleNotificationPanel,
     closeNotificationPanel,
-  };
+  }), [notifications, unreadCount, isOpen, addNotification, markAsRead, markAllAsRead, removeNotification, clearAllNotifications, toggleNotificationPanel, closeNotificationPanel]);
 
   return (
     <NotificationContext.Provider value={value}>

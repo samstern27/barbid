@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { memo } from "react";
 
 // Utility function to conditionally join CSS classes
 function classNames(...classes) {
@@ -7,7 +8,7 @@ function classNames(...classes) {
 
 // Business table component displaying user's businesses in a responsive table
 // Handles different screen sizes with hidden columns and mobile-friendly layouts
-export default function BusinessTable({ businesses }) {
+const BusinessTable = memo(({ businesses }) => {
   return (
     <div className="w-full animate-[fadeIn_1.2s_ease-in-out]">
       <div className="mt-10 ring-1 ring-gray-300 sm:rounded-lg overflow-x-auto">
@@ -52,7 +53,7 @@ export default function BusinessTable({ businesses }) {
               </th>
             </tr>
           </thead>
-          
+
           {/* Table body with business data */}
           <tbody>
             {businesses.map((business, businessIdx) => (
@@ -73,7 +74,7 @@ export default function BusinessTable({ businesses }) {
                       </span>
                     ) : null}
                   </div>
-                  
+
                   {/* Mobile-friendly business info display */}
                   <div className="mt-1 flex flex-col text-gray-500 sm:block lg:hidden">
                     <span>
@@ -81,13 +82,13 @@ export default function BusinessTable({ businesses }) {
                     </span>
                     <span className="hidden sm:inline"> · </span>
                   </div>
-                  
+
                   {/* Border separator for rows after the first */}
                   {businessIdx !== 0 ? (
                     <div className="absolute -top-px right-0 left-6 h-px bg-gray-200" />
                   ) : null}
                 </td>
-                
+
                 {/* Phone number - hidden on small screens */}
                 <td
                   className={classNames(
@@ -97,7 +98,7 @@ export default function BusinessTable({ businesses }) {
                 >
                   {business.phone}
                 </td>
-                
+
                 {/* Business type - hidden on small screens */}
                 <td
                   className={classNames(
@@ -107,7 +108,7 @@ export default function BusinessTable({ businesses }) {
                 >
                   {business.type}
                 </td>
-                
+
                 {/* Job listings count - hidden on small screens */}
                 <td
                   className={classNames(
@@ -117,7 +118,7 @@ export default function BusinessTable({ businesses }) {
                 >
                   {business.jobListings}
                 </td>
-                
+
                 {/* Privacy status with color coding */}
                 <td
                   className={classNames(
@@ -135,7 +136,7 @@ export default function BusinessTable({ businesses }) {
                   >
                     {business.privacy}
                   </div>
-                  
+
                   {/* Desktop privacy display */}
                   <div
                     className={`hidden sm:block ${
@@ -147,7 +148,7 @@ export default function BusinessTable({ businesses }) {
                     {business.privacy}
                   </div>
                 </td>
-                
+
                 {/* Action column with view button */}
                 <td
                   className={classNames(
@@ -167,7 +168,7 @@ export default function BusinessTable({ businesses }) {
                   >
                     View<span className="sr-only">, {business.name}</span>
                   </NavLink>
-                  
+
                   {/* Border separator for rows after the first */}
                   {businessIdx !== 0 ? (
                     <div className="absolute -top-px right-6 left-0 h-px bg-gray-200" />
@@ -180,4 +181,6 @@ export default function BusinessTable({ businesses }) {
       </div>
     </div>
   );
-}
+});
+
+export default BusinessTable;

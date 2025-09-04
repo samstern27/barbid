@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useMemo } from "react";
 
 // Location context for managing user geolocation and coordinates
 // Provides fallback coordinates and error handling for location services
@@ -92,10 +92,15 @@ export const LocationProvider = ({ children }) => {
     };
   }, []);
 
+  // Memoized context value to prevent unnecessary re-renders
+  const value = useMemo(() => ({
+    coords,
+    locationError,
+    isLocationLoading,
+  }), [coords, locationError, isLocationLoading]);
+
   return (
-    <LocationContext.Provider
-      value={{ coords, locationError, isLocationLoading }}
-    >
+    <LocationContext.Provider value={value}>
       {children}
     </LocationContext.Provider>
   );

@@ -179,11 +179,13 @@ export default function MyJobsActive() {
         <div className="sm:flex-auto">
           <h1 className="text-base font-semibold text-gray-900">Active Jobs</h1>
           <p className="mt-2 text-sm text-gray-700">
-            View and manage your active jobs.
+            View your job applications that are still open and accepting
+            applications. These are jobs you've applied to that haven't been
+            filled or closed yet.
           </p>
         </div>
       </div>
-      
+
       {/* Job listings table section */}
       <div className="-mx-4 mt-8 sm:-mx-0">
         {loading ? (

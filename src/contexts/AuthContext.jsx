@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useMemo } from "react";
 import { auth, googleProvider } from "../firebase/firebase";
 import { useNavigate } from "react-router-dom";
 import { writeUserData, sendVerificationEmail } from "../firebase/firebase";
@@ -221,16 +221,20 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Context value object containing all authentication methods and state
-  const value = {
-    currentUser,
-    signup,
-    login,
-    logout,
-    signInWithGoogle,
-    resendVerificationEmail,
-    refreshUser,
-    loading,
-  };
+  // Memoized to prevent unnecessary re-renders of consuming components
+  const value = useMemo(
+    () => ({
+      currentUser,
+      signup,
+      login,
+      logout,
+      signInWithGoogle,
+      resendVerificationEmail,
+      refreshUser,
+      loading,
+    }),
+    [currentUser, loading]
+  );
 
   // Only render children when authentication state is loaded
   // Prevents flash of unauthenticated content

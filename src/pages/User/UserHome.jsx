@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { getDatabase, ref, onValue, get } from "firebase/database";
 import Breadcrumb from "../../components/UI/Breadcrumb";
@@ -220,19 +220,19 @@ const UserHome = () => {
     setUpcomingShifts(upcoming);
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = useCallback((dateString) => {
     return new Date(dateString).toLocaleDateString("en-GB", {
       day: "numeric",
       month: "short",
     });
-  };
+  }, []);
 
-  const formatTime = (dateString) => {
+  const formatTime = useCallback((dateString) => {
     return new Date(dateString).toLocaleTimeString("en-GB", {
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
+  }, []);
 
   return (
     <div className="flex flex-col m-10 gap-6 pb-10">

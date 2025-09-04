@@ -3,7 +3,7 @@
 import { useAuth } from "../../contexts/AuthContext";
 import { useNotification } from "../../contexts/NotificationContext";
 import { Outlet, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { getDatabase, ref, onValue, get } from "firebase/database";
 import {
   Dialog,
@@ -167,18 +167,18 @@ export default function UserLayout() {
   }, [searchQuery]);
 
   // Generate initials from first and last name
-  const getInitials = (firstName, lastName) => {
+  const getInitials = useCallback((firstName, lastName) => {
     const first = firstName?.charAt(0)?.toUpperCase() || "";
     const last = lastName?.charAt(0)?.toUpperCase() || "";
     return first + last;
-  };
+  }, []);
 
   // Handle result click - navigate to user profile
-  const handleResultClick = (username) => {
+  const handleResultClick = useCallback((username) => {
     setSearchQuery("");
     setShowResults(false);
     navigate(`/profile/${username}`);
-  };
+  }, [navigate]);
 
   // Navigation items with dynamic profile href
   // Memoized to prevent recreation on every render
@@ -514,73 +514,78 @@ export default function UserLayout() {
                   (isSearching ||
                     searchResults.length > 0 ||
                     (searchQuery.length >= 1 && !isSearching)) && (
-                    <div className="fixed top-16 left-4 right-4 mt-4 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-80 overflow-y-auto lg:absolute lg:w-1/2 lg:left-1/4 lg:-translate-x-1/2 lg:mt-8">
-                      {isSearching ? (
-                        <div className="p-4 text-center text-gray-500">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600 mx-auto"></div>
-                          <p className="mt-2 text-sm">Searching...</p>
-                        </div>
-                      ) : searchResults.length > 0 ? (
-                        <div className="py-1">
-                          {searchResults.map((user) => (
-                            <button
-                              key={user.userId}
-                              onClick={() => handleResultClick(user.username)}
-                              className="w-full px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none transition-colors duration-150"
-                            >
-                              <div className="flex items-center space-x-3">
-                                {/* Avatar/Initials */}
-                                <div className="flex-shrink-0">
-                                  {user.avatar ? (
-                                    <img
-                                      src={user.avatar}
-                                      alt={`${user.firstName} ${user.lastName}`}
-                                      className="h-8 w-8 rounded-full"
-                                    />
-                                  ) : (
-                                    <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-medium">
-                                      {getInitials(
-                                        user.firstName,
-                                        user.lastName
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-
-                                {/* User info */}
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center justify-between">
-                                    <p className="text-sm font-medium text-gray-900 truncate">
-                                      @{user.username}
-                                    </p>
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    <p className="text-xs text-gray-500 truncate">
-                                      {getInitials(
-                                        user.firstName,
-                                        user.lastName
-                                      )}
-                                    </p>
-                                    {user.city && (
-                                      <>
-                                        <span className="text-gray-300">•</span>
-                                        <p className="text-xs text-gray-500 truncate">
-                                          {user.city}
-                                        </p>
-                                      </>
+                    <>
+                      {/* Search results */}
+                      <div className="fixed top-16 left-4 right-4 mt-4 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-80 overflow-y-auto lg:absolute lg:w-1/2 lg:left-1/4 lg:-translate-x-1/2 lg:mt-8 ring-2 ring-white ring-opacity-20 backdrop-blur-sm">
+                        {isSearching ? (
+                          <div className="p-4 text-center text-gray-500">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600 mx-auto"></div>
+                            <p className="mt-2 text-sm">Searching...</p>
+                          </div>
+                        ) : searchResults.length > 0 ? (
+                          <div className="py-1">
+                            {searchResults.map((user) => (
+                              <button
+                                key={user.userId}
+                                onClick={() => handleResultClick(user.username)}
+                                className="w-full px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none transition-colors duration-150"
+                              >
+                                <div className="flex items-center space-x-3">
+                                  {/* Avatar/Initials */}
+                                  <div className="flex-shrink-0">
+                                    {user.avatar ? (
+                                      <img
+                                        src={user.avatar}
+                                        alt={`${user.firstName} ${user.lastName}`}
+                                        className="h-8 w-8 rounded-full"
+                                      />
+                                    ) : (
+                                      <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-medium">
+                                        {getInitials(
+                                          user.firstName,
+                                          user.lastName
+                                        )}
+                                      </div>
                                     )}
                                   </div>
+
+                                  {/* User info */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between">
+                                      <p className="text-sm font-medium text-gray-900 truncate">
+                                        @{user.username}
+                                      </p>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <p className="text-xs text-gray-500 truncate">
+                                        {getInitials(
+                                          user.firstName,
+                                          user.lastName
+                                        )}
+                                      </p>
+                                      {user.city && (
+                                        <>
+                                          <span className="text-gray-300">
+                                            •
+                                          </span>
+                                          <p className="text-xs text-gray-500 truncate">
+                                            {user.city}
+                                          </p>
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      ) : searchQuery.length >= 1 ? (
-                        <div className="p-4 text-center text-gray-500">
-                          <p className="text-sm">No users found</p>
-                        </div>
-                      ) : null}
-                    </div>
+                              </button>
+                            ))}
+                          </div>
+                        ) : searchQuery.length >= 1 ? (
+                          <div className="p-4 text-center text-gray-500">
+                            <p className="text-sm">No users found</p>
+                          </div>
+                        ) : null}
+                      </div>
+                    </>
                   )}
               </div>
 

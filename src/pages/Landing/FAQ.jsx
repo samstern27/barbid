@@ -14,14 +14,9 @@ const faqs = [
       "Barbid is a platform that connects bars, pubs, and venues with freelance hospitality workers to fill last-minute or short-term shifts quickly and easily.",
   },
   {
-    question: "How do I sign up as a worker?",
-    answer:
-      "Click 'Sign Up' and choose the worker option. You'll create a profile with your experience, availability, and preferred hourly rate. Once you're set up, you can apply to available shifts right away.",
-  },
-  {
     question: "How do I create a shift as an employer?",
     answer:
-      "After signing up for a bar/employer account, you can post a shift ad in minutes. Just include the role, time, date, pay rate (if applicable), and any extra info. Workers can then apply directly.",
+      "After signing up an account, you can create a new business and post a shift. Just include the role, time, date, pay rate and any extra info. Workers can then apply directly.",
   },
   {
     question: "Do I need previous bar experience to join as a worker?",
@@ -31,7 +26,7 @@ const faqs = [
   {
     question: "Is Barbid free to use?",
     answer:
-      "Yes! It's free for both workers and bars to sign up and post/apply for shifts. We may introduce optional premium features later, but the core platform is totally free.",
+      "Yes! It's free for both workers and bars to sign up and post/apply for shifts. We may introduce optional premium features for businesses later, but the core platform is totally free.",
   },
   {
     question: "Can I cancel a shift after applying or posting?",
@@ -44,7 +39,7 @@ const faqs = [
       "We'll notify you if your shift hasn't had any applicants, and you can increase the hourly rate or share the ad again to attract more workers.",
   },
   {
-    question: "Is Barbid just for pubs?",
+    question: "Is Barbid just for bars?",
     answer:
       "Nope — while it's designed with pubs and bars in mind, any venue that needs short-term hospitality staff (like coffee shops, restaurants, clubs, or events) can use it too.",
   },
@@ -61,7 +56,7 @@ const FAQ = () => {
           <h2 className="text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
             Your questions, <span className="text-indigo-600">answered</span>
           </h2>
-          
+
           {/* FAQ accordion list using Headless UI Disclosure components */}
           <dl className="mt-16 divide-y divide-gray-400">
             {faqs.map((faq) => (
@@ -89,7 +84,7 @@ const FAQ = () => {
                     </span>
                   </DisclosureButton>
                 </dt>
-                
+
                 {/* Answer content that expands/collapses */}
                 <DisclosurePanel as="dd" className="mt-2 pr-12">
                   <p className="text-base/7 text-gray-600">{faq.answer}</p>

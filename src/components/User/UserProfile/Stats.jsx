@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { getDatabase, ref, get } from "firebase/database";
 
 const themeClasses = {
@@ -68,7 +68,7 @@ export default function Stats({ profile, className = "" }) {
     calculateStats();
   }, [profile.id, profile.createdAt, profile.lastActive]);
 
-  const calculateAccountAge = (createdAt) => {
+  const calculateAccountAge = useCallback((createdAt) => {
     if (!createdAt) return 0;
 
     const createdDate = new Date(createdAt);
@@ -84,9 +84,9 @@ export default function Stats({ profile, className = "" }) {
     // If more than 30 days, show in months
     const diffMonths = Math.ceil(diffDays / 30.44);
     return `${diffMonths} month${diffMonths !== 1 ? "s" : ""}`;
-  };
+  }, []);
 
-  const calculateLastActive = (lastActive) => {
+  const calculateLastActive = useCallback((lastActive) => {
     if (!lastActive) return 0;
 
     const lastActiveDate = new Date(lastActive);
@@ -95,7 +95,7 @@ export default function Stats({ profile, className = "" }) {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     return diffDays;
-  };
+  }, []);
 
   const fetchShiftStats = async (db, userId) => {
     try {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 
 import { useAuth } from "../../../contexts/AuthContext";
 import { EyeIcon } from "@heroicons/react/24/outline";
@@ -113,6 +113,14 @@ export default function MyJobsAccepted() {
                       return true;
                     }
 
+                    // Also check if the job status is "Unattended" and this user is the accepted user
+                    if (
+                      job.status === "Unattended" &&
+                      job.acceptedUserId === currentUser.uid
+                    ) {
+                      return true;
+                    }
+
                     return false;
                   });
 
@@ -136,7 +144,8 @@ export default function MyJobsAccepted() {
                   );
                   // Filter to only show accepted applications
                   const acceptedFallbackJobs = fallbackJobs.filter(
-                    (job) => job.status === "Accepted"
+                    (job) =>
+                      job.status === "Accepted" || job.status === "Unattended"
                   );
 
                   // Sort by newest first (by appliedAt date)
@@ -164,7 +173,8 @@ export default function MyJobsAccepted() {
                 );
                 // Filter to only show accepted applications
                 const acceptedFallbackJobs = fallbackJobs.filter(
-                  (job) => job.status === "Accepted"
+                  (job) =>
+                    job.status === "Accepted" || job.status === "Unattended"
                 );
 
                 // Sort by newest first (by appliedAt date)
@@ -205,7 +215,8 @@ export default function MyJobsAccepted() {
             Accepted Jobs
           </h1>
           <p className="mt-2 text-sm text-gray-700">
-            View your accepted job applications.
+            View your accepted job applications including upcoming shifts,
+            completed shifts, and shifts that were accepted but unattended.
           </p>
         </div>
       </div>

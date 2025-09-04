@@ -4,6 +4,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useMemo,
 } from "react";
 import { useAuth } from "./AuthContext";
 import {
@@ -217,7 +218,8 @@ export const BusinessProvider = ({ children }) => {
   };
 
   // Context value object containing business state and operations
-  const value = {
+  // Memoized to prevent unnecessary re-renders of consuming components
+  const value = useMemo(() => ({
     selectedBusiness,
     businesses,
     loading,
@@ -226,7 +228,7 @@ export const BusinessProvider = ({ children }) => {
     clearSelectedBusiness,
     updateJob,
     deleteJob,
-  };
+  }), [selectedBusiness, businesses, loading, selectBusinessById]);
 
   return (
     <BusinessContext.Provider value={value}>

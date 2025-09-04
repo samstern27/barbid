@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, NavLink } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
 import {
@@ -223,7 +223,7 @@ export default function MyJobApplicationDetail() {
             {error || "Application not found"}
           </div>
           <NavLink
-            to="/jobs/overview"
+            to="/jobs/accepted"
             className="text-indigo-600 hover:text-indigo-500"
           >
             ← Back to My Jobs
@@ -234,7 +234,7 @@ export default function MyJobApplicationDetail() {
   }
 
   // Determine the current section based on application status
-  const getCurrentSection = () => {
+  const getCurrentSection = useCallback(() => {
     if (application.status === "Accepted") return "accepted";
 
     // Check if job is filled and current user is the accepted user
@@ -245,6 +245,14 @@ export default function MyJobApplicationDetail() {
     // Check if job is completed and current user is the accepted user
     if (
       job?.status === "Completed" &&
+      job?.acceptedUserId === currentUser?.uid
+    ) {
+      return "accepted";
+    }
+
+    // Check if job is unattended and current user is the accepted user
+    if (
+      job?.status === "Unattended" &&
       job?.acceptedUserId === currentUser?.uid
     ) {
       return "accepted";
@@ -261,12 +269,17 @@ export default function MyJobApplicationDetail() {
         return "accepted";
       if (job.status === "Completed" && job.acceptedUserId === currentUser?.uid)
         return "accepted";
+      if (
+        job.status === "Unattended" &&
+        job.acceptedUserId === currentUser?.uid
+      )
+        return "accepted";
       if (job.status === "Closed") return "rejected";
       if (job.status === "Filled") return "rejected"; // Only if not the accepted user
     }
 
-    return "overview";
-  };
+    return "accepted"; // Default to accepted instead of overview
+  }, [application, job, currentUser]);
 
   const currentSection = getCurrentSection();
 
@@ -326,11 +339,13 @@ export default function MyJobApplicationDetail() {
             <MapPinIcon className="w-5 h-5 text-gray-400" />
             <div>
               <p className="text-sm font-medium text-gray-900">
-                {business?.city || "Location"}
+                {job?.location?.city || business?.city || "Location"}
               </p>
               <p className="text-xs text-gray-500">
-                {business?.address &&
-                  `${business.address}, ${business.postcode}`}
+                {(job?.location?.address || business?.address) &&
+                  `${job?.location?.address || business?.address}, ${
+                    job?.location?.postcode || business?.postcode
+                  }`}
               </p>
             </div>
           </div>

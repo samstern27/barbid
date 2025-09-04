@@ -1,11 +1,11 @@
-import { useRef } from "react";
+import { useRef, memo, useCallback } from "react";
 import { Transition } from "@headlessui/react";
 import { useNotification } from "../../contexts/NotificationContext";
 import { useNavigate } from "react-router-dom";
 
 // Notification dropdown component that displays user notifications
 // Handles different notification types with appropriate navigation and actions
-export default function Notification() {
+const Notification = memo(() => {
   const notificationRef = useRef(null);
   const navigate = useNavigate();
   const {
@@ -18,7 +18,7 @@ export default function Notification() {
 
   // Convert timestamp to human-readable relative time
   // Handles edge cases and provides fallback for invalid timestamps
-  const formatTimeAgo = (timestamp) => {
+  const formatTimeAgo = useCallback((timestamp) => {
     // Validate timestamp to prevent errors
     if (!timestamp || isNaN(timestamp.getTime())) {
       return "Just now";
@@ -40,52 +40,55 @@ export default function Notification() {
     if (minutes < 60) return `${minutes} min ago`;
     if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
     return `${days} day${days > 1 ? "s" : ""} ago`;
-  };
+  }, []);
 
   // Handle notification click with type-specific navigation
   // Marks notification as read and navigates to relevant page
-  const handleNotificationClick = (notification) => {
-    if (!notification.isRead) {
-      markAsRead(notification.id);
-    }
+  const handleNotificationClick = useCallback(
+    (notification) => {
+      if (!notification.isRead) {
+        markAsRead(notification.id);
+      }
 
-    // Route to appropriate page based on notification type
-    if (
-      notification.type === "job_application" &&
-      notification.jobId &&
-      notification.businessId
-    ) {
-      // Navigate to the job applicants list for business owners
-      navigate(
-        `/my-business/${notification.businessId}/job-listings/${notification.jobId}/applicants`
-      );
-      closeNotificationPanel();
-    } else if (notification.type === "job_accepted" && notification.jobId) {
-      // Navigate to the job application detail for accepted jobs
-      navigate(`/jobs/application/${notification.jobId}`);
-      closeNotificationPanel();
-    } else if (notification.type === "job_completed" && notification.jobId) {
-      // Navigate to the job application detail for completed jobs
-      navigate(`/jobs/application/${notification.jobId}`);
-      closeNotificationPanel();
-    } else if (
-      notification.type === "job_auto_closed" &&
-      notification.jobId &&
-      notification.businessId
-    ) {
-      // Navigate to the job details page for auto-closed jobs
-      navigate(
-        `/my-business/${notification.businessId}/job-listings/${notification.jobId}`
-      );
-      closeNotificationPanel();
-    }
-  };
+      // Route to appropriate page based on notification type
+      if (
+        notification.type === "job_application" &&
+        notification.jobId &&
+        notification.businessId
+      ) {
+        // Navigate to the job applicants list for business owners
+        navigate(
+          `/my-business/${notification.businessId}/job-listings/${notification.jobId}/applicants`
+        );
+        closeNotificationPanel();
+      } else if (notification.type === "job_accepted" && notification.jobId) {
+        // Navigate to the job application detail for accepted jobs
+        navigate(`/jobs/application/${notification.jobId}`);
+        closeNotificationPanel();
+      } else if (notification.type === "job_completed" && notification.jobId) {
+        // Navigate to the job application detail for completed jobs
+        navigate(`/jobs/application/${notification.jobId}`);
+        closeNotificationPanel();
+      } else if (
+        notification.type === "job_auto_closed" &&
+        notification.jobId &&
+        notification.businessId
+      ) {
+        // Navigate to the job details page for auto-closed jobs
+        navigate(
+          `/my-business/${notification.businessId}/job-listings/${notification.jobId}`
+        );
+        closeNotificationPanel();
+      }
+    },
+    [markAsRead, navigate, closeNotificationPanel]
+  );
 
   // Navigate to full activity page and close notification panel
-  const handleViewAllNotifications = () => {
+  const handleViewAllNotifications = useCallback(() => {
     navigate("/activity");
     closeNotificationPanel();
-  };
+  }, [navigate, closeNotificationPanel]);
 
   return (
     <>
@@ -292,4 +295,6 @@ export default function Notification() {
       </div>
     </>
   );
-}
+});
+
+export default Notification;

@@ -183,7 +183,9 @@ export default function MyJobsRejected() {
             Rejected Jobs
           </h1>
           <p className="mt-2 text-sm text-gray-700">
-            View your jobs that have been rejected.
+            View your job applications that have been closed or filled by
+            someone else. These are jobs that are no longer available for
+            applications.
           </p>
         </div>
       </div>

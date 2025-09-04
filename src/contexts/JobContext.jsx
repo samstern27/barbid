@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
 import { useAuth } from "./AuthContext";
 import { getDatabase, ref, onValue, get } from "firebase/database";
 import jobAutoCloseService from "../services/JobAutoCloseService";
@@ -107,7 +107,8 @@ export const JobProvider = ({ children }) => {
   };
 
   // Context value object containing job state and service methods
-  const value = {
+  // Memoized to prevent unnecessary re-renders of consuming components
+  const value = useMemo(() => ({
     publicJobs,
     closedJobs,
     filledJobs,
@@ -122,7 +123,7 @@ export const JobProvider = ({ children }) => {
       start: () => jobAutoCloseService.start(),
       stop: () => jobAutoCloseService.stop(),
     },
-  };
+  }), [publicJobs, closedJobs, filledJobs, selectedJob, loading]);
 
   return <JobContext.Provider value={value}>{children}</JobContext.Provider>;
 };
