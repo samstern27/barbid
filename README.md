@@ -1,4 +1,4 @@
-# BarBid
+# Barbid
 
 A modern web application connecting hospitality staff with job opportunities and helping businesses find qualified employees.
 
