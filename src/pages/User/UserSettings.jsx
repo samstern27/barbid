@@ -603,10 +603,10 @@ export default function UserSettings() {
 
         <form
           onSubmit={handleProfileSubmit}
-          className="bg-white shadow-xs ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2"
+          className="bg-white shadow-xs ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2 overflow-visible"
         >
-          <div className="px-4 py-6 sm:p-8">
-            <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+          <div className="px-4 py-6 sm:p-8 overflow-visible">
+            <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6 overflow-visible">
               {/* Username field with uniqueness check */}
               <div className="sm:col-span-4">
                 <label
@@ -1104,7 +1104,7 @@ export default function UserSettings() {
 
                     <ListboxOptions
                       transition
-                      className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-hidden data-leave:transition data-leave:duration-100 data-leave:ease-in data-closed:data-leave:opacity-0 sm:text-sm"
+                      className="absolute z-[9999] mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-hidden data-leave:transition data-leave:duration-100 data-leave:ease-in data-closed:data-leave:opacity-0 sm:text-sm"
                     >
                       {themes.map((theme) => (
                         <ListboxOption
@@ -1150,7 +1150,7 @@ export default function UserSettings() {
 
       {/* Personal Information Section */}
       <div
-        className={`grid grid-cols-1 gap-x-8 gap-y-8 py-10 md:grid-cols-3 transition-all duration-700 ease-out delay-200 ${
+        className={`grid grid-cols-1 gap-x-8 gap-y-8 py-10 md:grid-cols-3 transition-all duration-700 ease-out delay-200 mt-24 ${
           isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         }`}
       >
