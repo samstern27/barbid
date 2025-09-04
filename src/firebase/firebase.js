@@ -79,8 +79,8 @@ export const writeUserData = async (
     const userPersonalRef = ref(db, "users/" + userId + "/personal");
     await set(userPersonalRef, {
       email: email,
-      mobile: mobileNumber,
-      dateOfBirth: dateOfBirth,
+      mobile: mobileNumber || "",
+      dateOfBirth: dateOfBirth || "",
       country: "United Kingdom",
       streetAddress: "",
       city: "",

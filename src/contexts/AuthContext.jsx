@@ -164,7 +164,8 @@ export const AuthProvider = ({ children }) => {
           result.user.displayName?.split(" ")[0] || "",
           result.user.displayName?.split(" ")[1] || "",
           result.user.email,
-          null
+          null, // mobileNumber
+          null // dateOfBirth
         );
       }
       setCurrentUser(result.user);
