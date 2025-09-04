@@ -1,10 +1,10 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import Alert from "../../UI components/Alert";
 import "../../index.css";
 import { auth } from "../../firebase/firebase";
 import { writeUserData } from "../../firebase/firebase";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 // SignUp page component for user registration
 // Features form validation, age verification, email verification, and social sign-in options
@@ -17,19 +17,27 @@ const SignUp = () => {
   const passwordRef = useRef(null);
   const cpasswordRef = useRef(null);
   const dateOfBirthRef = useRef(null);
-  
+
   // Authentication context and state management
   const { signup, signInWithGoogle, currentUser } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showVerificationMessage, setShowVerificationMessage] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState("");
+  const navigate = useNavigate();
+
+  // Redirect authenticated users to home page
+  useEffect(() => {
+    if (currentUser) {
+      navigate("/", { replace: true });
+    }
+  }, [currentUser, navigate]);
 
   // Handle form submission with validation and user creation
   // Includes password confirmation, age verification, and Firebase signup
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate password confirmation
     if (passwordRef.current.value !== cpasswordRef.current.value) {
       return setError("Passwords do not match");
@@ -137,25 +145,28 @@ const SignUp = () => {
                 />
               </svg>
             </div>
-            
+
             {/* Verification instructions */}
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               Check your email
             </h3>
             <p className="text-sm text-gray-600 mb-4">
-              We've sent a verification link to <strong>{verificationEmail}</strong>
+              We've sent a verification link to{" "}
+              <strong>{verificationEmail}</strong>
             </p>
             <p className="text-sm text-gray-600 mb-6">
-              Please click the link in your email to verify your account before you can sign in.
+              Please click the link in your email to verify your account before
+              you can sign in.
             </p>
-            
+
             {/* Important note about email verification */}
             <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
               <p className="text-sm text-blue-800">
-                <strong>Note:</strong> You won't be able to access the site until you verify your email address.
+                <strong>Note:</strong> You won't be able to access the site
+                until you verify your email address.
               </p>
             </div>
-            
+
             {/* Action buttons */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <NavLink
@@ -200,7 +211,7 @@ const SignUp = () => {
                   ref={firstNameRef}
                 />
               </div>
-              
+
               {/* Last Name field */}
               <div>
                 <label
@@ -219,7 +230,7 @@ const SignUp = () => {
                   ref={lastNameRef}
                 />
               </div>
-              
+
               {/* Email field */}
               <div>
                 <label
@@ -238,7 +249,7 @@ const SignUp = () => {
                   ref={emailRef}
                 />
               </div>
-              
+
               {/* Mobile number field (optional) */}
               <div>
                 <label
@@ -256,7 +267,7 @@ const SignUp = () => {
                   ref={numberRef}
                 />
               </div>
-              
+
               {/* Password field */}
               <div>
                 <label
@@ -275,7 +286,7 @@ const SignUp = () => {
                   ref={passwordRef}
                 />
               </div>
-              
+
               {/* Confirm Password field */}
               <div>
                 <label
@@ -294,7 +305,7 @@ const SignUp = () => {
                   ref={cpasswordRef}
                 />
               </div>
-              
+
               {/* Date of Birth field */}
               <div>
                 <label
@@ -313,7 +324,7 @@ const SignUp = () => {
                 />
               </div>
             </div>
-            
+
             {/* Submit button */}
             <div className="mt-8">
               <button
@@ -324,12 +335,12 @@ const SignUp = () => {
                 {loading ? "Creating account..." : "Sign up"}
               </button>
             </div>
-            
+
             {/* Divider for social sign-in options */}
             <div className="my-6 flex items-center before:mt-0.5 before:flex-1 before:border-t before:border-neutral-300 after:mt-0.5 after:flex-1 after:border-t after:border-neutral-300">
               <p className="mx-4 text-center text-slate-500">Or</p>
             </div>
-            
+
             {/* Social sign-in buttons */}
             <div className="grid sm:grid-cols-1 gap-6">
               {/* Google OAuth button */}
@@ -393,7 +404,7 @@ const SignUp = () => {
                 </NavLink>
               </p>
             </div>
-            
+
             {/* Error message display */}
             {error && <Alert type="danger" message={error} />}
           </form>

@@ -47,52 +47,59 @@ export const writeUserData = async (
   mobileNumber = null,
   dateOfBirth
 ) => {
-  const db = getDatabase();
+  try {
+    const db = getDatabase();
 
-  // Write username mapping first for uniqueness checking
-  const usernameRef = ref(db, "usernames/" + username);
-  await set(usernameRef, userId);
+    // Write username mapping first for uniqueness checking
+    const usernameRef = ref(db, "usernames/" + username);
+    await set(usernameRef, userId);
 
-  // Generate a random seed for a unique but consistent cover photo
-  const randomSeed = Math.random().toString(36).substring(2, 15);
-  const randomCoverPhoto = `https://picsum.photos/seed/${randomSeed}/1200/300`;
+    // Generate a random seed for a unique but consistent cover photo
+    const randomSeed = Math.random().toString(36).substring(2, 15);
+    const randomCoverPhoto = `https://picsum.photos/seed/${randomSeed}/1200/300`;
 
-  // Write profile object with user information and preferences
-  const userProfileRef = ref(db, "users/" + userId + "/profile");
-  await set(userProfileRef, {
-    username: username,
-    firstName: firstName,
-    lastName: lastName,
-    about: "",
-    oneLine: "",
-    occupation: "",
-    skills: [],
-    theme: "blue",
-    avatar: `https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${randomSeed}`,
-    profilePicture: profilePicture,
-    coverPhoto: randomCoverPhoto,
-    lastLogin: new Date().toISOString(),
-  });
+    // Write profile object with user information and preferences
+    const userProfileRef = ref(db, "users/" + userId + "/profile");
+    await set(userProfileRef, {
+      username: username,
+      firstName: firstName,
+      lastName: lastName,
+      about: "",
+      oneLine: "",
+      occupation: "",
+      skills: [],
+      theme: "blue",
+      avatar: `https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${randomSeed}`,
+      profilePicture: profilePicture,
+      coverPhoto: randomCoverPhoto,
+      lastLogin: new Date().toISOString(),
+    });
 
-  // Write personal object with contact and address information
-  const userPersonalRef = ref(db, "users/" + userId + "/personal");
-  await set(userPersonalRef, {
-    email: email,
-    mobile: mobileNumber,
-    dateOfBirth: dateOfBirth,
-    country: "United Kingdom",
-    streetAddress: "",
-    city: "",
-    county: "",
-    postalCode: "",
-  });
+    // Write personal object with contact and address information
+    const userPersonalRef = ref(db, "users/" + userId + "/personal");
+    await set(userPersonalRef, {
+      email: email,
+      mobile: mobileNumber,
+      dateOfBirth: dateOfBirth,
+      country: "United Kingdom",
+      streetAddress: "",
+      city: "",
+      county: "",
+      postalCode: "",
+    });
 
-  // Write notification settings with default preferences
-  const userNotificationsRef = ref(db, "users/" + userId + "/notifications");
-  await set(userNotificationsRef, {
-    jobAlertsTurnedOn: true,
-    applicationAlertsTurnedOn: true,
-  });
+    // Write notification settings with default preferences
+    const userNotificationsRef = ref(db, "users/" + userId + "/notifications");
+    await set(userNotificationsRef, {
+      jobAlertsTurnedOn: true,
+      applicationAlertsTurnedOn: true,
+    });
+
+    console.log("User data written successfully:", { userId, username });
+  } catch (error) {
+    console.error("Error writing user data to database:", error);
+    throw new Error(`Failed to write user data: ${error.message}`);
+  }
 };
 
 // Initialize Google OAuth provider for social sign-in

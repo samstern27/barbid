@@ -82,7 +82,7 @@
       ".read": "auth != null",
       "$username": {
         ".read": "auth != null",
-        ".write": "auth != null && (!data.exists() || data.val() === auth.uid)"
+        ".write": "auth != null"
       }
     },
     "events": {
